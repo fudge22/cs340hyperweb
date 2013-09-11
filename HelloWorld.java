@@ -7,6 +7,7 @@ public class HelloWorld {
 		// TODO Auto-generated method stub
 		String hw = "Hello world player!";
 		String hw2 = " Start a new game!";
+		
 		System.out.println(hw + hw2);
 	}
 
