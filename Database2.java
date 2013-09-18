@@ -13,11 +13,20 @@ public class Database2 {
 	private static final String Database_File = "HyPeerWeb.sqlite";
 	private final String Database_URL = "jdbc:sqlite:" + Database_File;
 	
+	private static Database2 database = null;
+	
 	private File createStatements;
 	private Connection connection;
 	
-	Database2() {
+	private Database2() {
 		initialize();
+	}
+	
+	public static Database2 getSingleton() {
+		if(database == null) {
+			database = new Database2();
+		}
+		return database;
 	}
 	
 	public void getDatabaseConnection() {
@@ -68,6 +77,7 @@ public class Database2 {
 			stmt.setQueryTimeout(30);
 			
 			while(myScanner.hasNextLine()) {
+				
 				stmt.executeUpdate(myScanner.nextLine());
 			}
 			connection.close();

@@ -5,14 +5,12 @@ import java.sql.Connection;
 import node.Node;
 
 public class DBAccess {
-	private static Database2 database2 = null;
+	private static Database2 database = null;
 	
 	
-	public Database2 getSingleton() {
-		if(database2 == null) {
-			database2 = new Database2();
-		}
-		return database2;
+	public void getSingleton() {
+		database = Database2.getSingleton();
+		
 	}
 	
 	private Connection getConnection () {
