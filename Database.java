@@ -10,6 +10,7 @@ import java.util.Scanner;
 import node.Node;
 
 public class Database {
+//add comment
 
 	// The singleton statement required by the class
 	private static final Database database = new Database();
