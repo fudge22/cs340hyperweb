@@ -7,59 +7,62 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Scanner;
 
-import node.Node;
+//import node.Node;
 
 public class Database {
-//add comment
-
-	// The singleton statement required by the class
-	private static final Database database = new Database();
-	private static final String DatabaseFile = null;
-	private static final String Database_URL = "jdbc:sqlite://localhost/";
+	private static final String Database_File = "HyPeerWeb.sqlite";
+	private final String Database_URL = "jdbc:sqlite:" + Database_File;
+	
+	private static Database database = null;
+	
 	private File createStatements;
+	private Connection connection;
 	
-	public Database() {
-		
-	}
-	
-	
-	/*
-	 * Add a node to the database
-	 * It shouldn't have a return value as we should have done the logic
-	 * of where to place the node
-	 * @param node: the node to be placed into the database, containing its info of
-	 * neighbor nodes and surrogate neighbors
-	 */
-	
-	public void addNode(Node node) {
+	private Database() {
 		initialize();
 	}
 	
-	public void initialize() {
-		this.createStatements = new File("createStatements.txt").getAbsoluteFile();
-		Connection conn = null;
+	public static Database getSingleton() {
+		if(database == null) {
+			database = new Database();
+		}
+		return database;
+	}
+	
+	public void getDatabaseConnection() {
 		
-		try {
+	}
+	
+	private void initialize() {
+		
+		this.createStatements = new File("createStatmentes.txt").getAbsoluteFile();
+		
+		try 
+		{
 			Class.forName("org.sqlite.JDBC");
 		}
 		
-		catch (ClassNotFoundException e1) {
+		catch (ClassNotFoundException e1) 
+		{
 			e1.printStackTrace();
 		}
 		
-		System.out.println("Connecting to the database");
+		try 
+		{
+			this.connection = DriverManager.getConnection(this.Database_URL);
+		} 
 		
-		try {
-			conn = DriverManager.getConnection(Database_URL);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+		catch (SQLException e) 
+		{
+			System.out.println("Cannot connect to the Database");
 			e.printStackTrace();
 			return;
 		}
-		createDatabase(conn);
+		createDatabase();
+		return;
 	}
 	
-	private void createDatabase(Connection conn) {
+	private void createDatabase() {
 		Statement stmt = null;
 		Scanner myScanner = null;
 		
@@ -70,21 +73,22 @@ public class Database {
 		}
 		
 		try {
-			stmt = conn.createStatement();
+			stmt = connection.createStatement();
 			stmt.setQueryTimeout(30);
 			
 			while(myScanner.hasNextLine()) {
+				
 				stmt.executeUpdate(myScanner.nextLine());
 			}
-			conn.close();
+			connection.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
 			try
 			{
-				if(conn != null)
+				if(connection != null)
 				{
-					conn.close();
+					connection.close();
 				}
 			}
 			catch(SQLException e)
