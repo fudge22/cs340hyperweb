@@ -1,3 +1,11 @@
+import node.Node;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 
 public class DatabaseTests {
 
@@ -7,7 +15,6 @@ public class DatabaseTests {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		try {
-			db = Database.getInstance();
 			Database.initialize();		
 		}
 		catch (ServerException e) {
@@ -30,6 +37,22 @@ public class DatabaseTests {
 		// import test info if needed
 		String[] args = {"./test/server/testInfo.xml"};
 		DataImporter.main(args);
+		
+		/*
+		try {
+			Node node = new Node(1);
+			int neighbor = 2;
+			int sNeighbor = 3;
+			db.startTransaction();
+			db.getNodes().addNode(node);
+			db.getNodes().addNeighbor(node, neighbor);
+			db.getNodes().addSurrgNeighbor(node, sNeighbor);
+			db.endTransaction(true);
+		} catch (SQLException e) {
+			db.endTransaction(false);
+			System.out.println("Server Exception when creating a new node for testing");
+		}
+		*/
 	}
 
 	@AfterClass
@@ -78,7 +101,7 @@ public class DatabaseTests {
 	public void testAddNeighbor() {
 		try {
 			Node node = new Node();
-			Node neighbor = new Node();
+			int neighbor = 2;
 			db.startTransaction();
 			Boolean result = db.getNodes().addNeighbor(node, neighbor);
 			db.endTransaction(true);
@@ -105,12 +128,11 @@ public class DatabaseTests {
 		}
 	}
 	
-	
 	@Test
 	public void testAddSurrgNeighbor() {
 		try {
 			Node node = new Node();
-			Node sNeighbor = new Node();
+			int sNeighbor = 3;
 			db.startTransaction();
 			Boolean result = db.getNodes().addSurrgNeighbor(node, sNeighbor);
 			db.endTransaction(true);
@@ -133,6 +155,46 @@ public class DatabaseTests {
 		} catch (Exception e) {
 			db.endTransaction(false);
 			fail("An error occurred. The node's surrogate neighbors were not retrieved.");
+			e.printStackTrace();
+		}
+	}
+	
+	@Test
+	public void testDeleteNode() {
+		try {
+			db.startTransaction();
+			Boolean result = db.getNodes().deleteNode(node);
+			db.endTransaction(true);
+			assertTrue("deleteNode returned false.", result);
+		} catch (Exception e) {
+			db.endTransaction(false);
+			fail("An error occurred. The node was not deleted.");
+			e.printStackTrace();
+		}
+	}
+
+	public void testDeleteNeighbor() {
+		try {
+			db.startTransaction();
+			Boolean result = db.getNodes().deleteNeighbor(int test);
+			db.endTransaction(true);
+			assertTrue("deleteNeighbor returned false.", result);
+		} catch (Exception e) {
+			db.endTransaction(false);
+			fail("An error occured. The neighbor was not deleted");
+			e.printStackTrace();
+		}
+	}
+	
+	public void testDeleteSurNeighbor() {
+		try{
+			db.startTransaction();
+			Boolean result = db.getNodes().deleteSurNeighbor(int test);
+			db.endTransaction(true);
+			assertTrue("deleteSurNeighbor returned false.", result);
+		} catch (Exception e) {
+			db.endTransaction(false);
+			fail("An error occured. The SurNeighbor was not deleted");
 			e.printStackTrace();
 		}
 	}
@@ -200,4 +262,6 @@ public class DatabaseTests {
 //			e.printStackTrace();
 //		}
 //	}
+ * 
+ */
 }
