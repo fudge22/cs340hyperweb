@@ -1,3 +1,5 @@
+package node;
+
 import java.util.List;
 
 
@@ -5,13 +7,13 @@ public class Node {
 	
 	private int webID;
 	private int height;
-	private Node fold;
-	private Node surrogateFold;
-	private Node invSurrogateFold;
-	private List<Node> neighbors;
-	private List<Node> surNeighbors;
+	private int fold;
+	private int surrogateFold;
+	private int invSurrogateFold;
+	private List<Integer> neighbors;
+	private List<Integer> surNeighbors;
 	
-	public Node(int webID, int height, Node fold, Node surrogateFold, Node invSurrogateFold, List<Node> neighbors, List<Node> surNeighbors) {
+	public Node(int webID, int height, int fold, int surrogateFold, int invSurrogateFold, List<Integer> neighbors, List<Integer> surNeighbors) {
 		this.webID = webID;
 		this.height = height;
 		this.fold = fold;
@@ -25,9 +27,9 @@ public class Node {
 	public Node(int webID) {
 		this.webID = webID;
 		this.height = -1;
-		this.fold = null;
-		this.surrogateFold = null;
-		this.invSurrogateFold = null;
+		this.fold = -1;
+		this.surrogateFold = -1;
+		this.invSurrogateFold = -1;
 	}
 
 	public int getWebID() {
@@ -46,43 +48,43 @@ public class Node {
 		this.height = height;
 	}
 
-	public Node getFold() {
+	public int getFold() {
 		return fold;
 	}
 
-	public void setFold(Node fold) {
+	public void setFold(int fold) {
 		this.fold = fold;
 	}
 
-	public Node getSurrogateFold() {
+	public int getSurrogateFold() {
 		return surrogateFold;
 	}
 
-	public void setSurrogateFold(Node surrogateFold) {
+	public void setSurrogateFold(int surrogateFold) {
 		this.surrogateFold = surrogateFold;
 	}
 
-	public Node getInvSurrogateFold() {
+	public int getInvSurrogateFold() {
 		return invSurrogateFold;
 	}
 
-	public void setInvSurrogateFold(Node invSurrogateFold) {
+	public void setInvSurrogateFold(int invSurrogateFold) {
 		this.invSurrogateFold = invSurrogateFold;
 	}
 
-	public List<Node> getNeighbors() {
+	public List<Integer> getNeighbors() {
 		return neighbors;
 	}
 
-	public void setNeighbors(List<Node> neighbors) {
+	public void setNeighbors(List<Integer> neighbors) {
 		this.neighbors = neighbors;
 	}
 
-	public List<Node> getSurNeighbors() {
+	public List<Integer> getSurNeighbors() {
 		return surNeighbors;
 	}
 
-	public void setSurNeighbors(List<Node> surNeighbors) {
+	public void setSurNeighbors(List<Integer> surNeighbors) {
 		this.surNeighbors = surNeighbors;
 	}
 	
