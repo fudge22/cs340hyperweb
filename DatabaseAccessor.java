@@ -145,4 +145,44 @@ public class DatabaseAccessor {
 		return allNodes;
 	}
 
+	
+	public void addNeighbors(int webid, List<int> neighbors){
+		String query = "INSERT INTO Neighbors (webID, height, neighborID) VALUES (?,?)";
+		PreparedStatement stat = null;
+		
+		Iterator<String> iterator = neighbors.iterator();
+		while (iterator.hasNext()) {
+		stat =  db.getConnection().prepareStatement(query);
+		// set the variables in the query
+        stat.setInt(1, webid);
+        stat.setInt(2, neighbors.next());
+        
+		
+		
+		
+        stat.executeUpdate();
+        stat.close();  
+        }
+		return true;
+	
+	
+	}
+	public void deleteNode(Node node) {
+	
+		String [] queries = new String[3];
+		query[0] = "delete from Node where webID = ?";
+		query[1] = "delete from Neighbors where webID = ?";
+		query[2] = "delete from SurNeighbors where webID = ?";
+		for (int x= 0; x<= 2; x++) {
+		PreparedStatement stat = null;
+		ResultSet rs = null;
+		node = null;
+		
+		stat = db.getConnection().prepareStatement(query[x]);
+		// set the variables in the query
+		stat.setInt(1, webID);
+
+		rs = stat.executeUpdate();
+		}
+}
 }
