@@ -162,6 +162,7 @@ public class DatabaseTests {
 	@Test
 	public void testDeleteNode() {
 		try {
+			Node node = new Node(1);// dummy node with webID of 1
 			db.startTransaction();
 			Boolean result = db.getNodes().deleteNode(node);
 			db.endTransaction(true);
@@ -176,7 +177,7 @@ public class DatabaseTests {
 	public void testDeleteNeighbor() {
 		try {
 			db.startTransaction();
-			Boolean result = db.getNodes().deleteNeighbor(int test);
+			Boolean result = db.getNodes().deleteNeighbor(2); // dummy neighbor with webid 2
 			db.endTransaction(true);
 			assertTrue("deleteNeighbor returned false.", result);
 		} catch (Exception e) {
@@ -189,7 +190,7 @@ public class DatabaseTests {
 	public void testDeleteSurNeighbor() {
 		try{
 			db.startTransaction();
-			Boolean result = db.getNodes().deleteSurNeighbor(int test);
+			Boolean result = db.getNodes().deleteSurNeighbor(3); // dummy sur neighbor with webid 3
 			db.endTransaction(true);
 			assertTrue("deleteSurNeighbor returned false.", result);
 		} catch (Exception e) {
