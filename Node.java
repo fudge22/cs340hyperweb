@@ -7,18 +7,18 @@ public class Node {
 	
 	private int webID;
 	private int height;
-	private int fold;
-	private int surrogateFold;
-	private int invSurrogateFold;
+	private int foldID;
+	private int surrogateFoldID;
+	private int invSurrogateFoldID;
 	private List<Integer> neighbors;
 	private List<Integer> surNeighbors;
 	
-	public Node(int webID, int height, int fold, int surrogateFold, int invSurrogateFold, List<Integer> neighbors, List<Integer> surNeighbors) {
+	public Node(int webID, int height, int foldID, int surrogateFoldID, int invSurrogateFoldID, List<Integer> neighbors, List<Integer> surNeighbors) {
 		this.webID = webID;
 		this.height = height;
-		this.fold = fold;
-		this.surrogateFold = surrogateFold;
-		this.invSurrogateFold = invSurrogateFold;
+		this.foldID = foldID;
+		this.surrogateFoldID = surrogateFoldID;
+		this.invSurrogateFoldID = invSurrogateFoldID;
 		this.neighbors = neighbors;
 		this.surNeighbors = surNeighbors;
 				
@@ -27,9 +27,9 @@ public class Node {
 	public Node(int webID) {
 		this.webID = webID;
 		this.height = -1;
-		this.fold = -1;
-		this.surrogateFold = -1;
-		this.invSurrogateFold = -1;
+		this.foldID = -1;
+		this.surrogateFoldID = -1;
+		this.invSurrogateFoldID = -1;
 	}
 
 	public int getWebID() {
@@ -48,28 +48,28 @@ public class Node {
 		this.height = height;
 	}
 
-	public int getFold() {
-		return fold;
+	public int getFoldID() {
+		return foldID;
 	}
 
-	public void setFold(int fold) {
-		this.fold = fold;
+	public void setFoldID(int foldID) {
+		this.foldID = foldID;
 	}
 
-	public int getSurrogateFold() {
-		return surrogateFold;
+	public int getSurrogateFoldID() {
+		return surrogateFoldID;
 	}
 
-	public void setSurrogateFold(int surrogateFold) {
-		this.surrogateFold = surrogateFold;
+	public void setSurrogateFoldID(int surrogateFoldID) {
+		this.surrogateFoldID = surrogateFoldID;
 	}
 
-	public int getInvSurrogateFold() {
-		return invSurrogateFold;
+	public int getInvSurrogateFoldID() {
+		return invSurrogateFoldID;
 	}
 
-	public void setInvSurrogateFold(int invSurrogateFold) {
-		this.invSurrogateFold = invSurrogateFold;
+	public void setInvSurrogateFoldID(int invSurrogateFoldID) {
+		this.invSurrogateFoldID = invSurrogateFoldID;
 	}
 
 	public List<Integer> getNeighbors() {
