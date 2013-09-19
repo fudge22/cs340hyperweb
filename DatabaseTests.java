@@ -7,6 +7,7 @@ public class DatabaseTests {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		try {
+			db = Database.getInstance();
 			Database.initialize();		
 		}
 		catch (ServerException e) {
