@@ -1,3 +1,5 @@
+import java.util.List;
+
 
 public class Node {
 	
@@ -6,13 +8,18 @@ public class Node {
 	private Node fold;
 	private Node surrogateFold;
 	private Node invSurrogateFold;
+	private List<Node> neighbors;
+	private List<Node> surNeighbors;
 	
-	public Node(int webID, int height, Node fold, Node surrogateFold, Node invSurrogateFold) {
+	public Node(int webID, int height, Node fold, Node surrogateFold, Node invSurrogateFold, List<Node> neighbors, List<Node> surNeighbors) {
 		this.webID = webID;
 		this.height = height;
 		this.fold = fold;
 		this.surrogateFold = surrogateFold;
 		this.invSurrogateFold = invSurrogateFold;
+		this.neighbors = neighbors;
+		this.surNeighbors = surNeighbors;
+				
 	}
 	
 	public Node(int webID) {
@@ -62,6 +69,24 @@ public class Node {
 	public void setInvSurrogateFold(Node invSurrogateFold) {
 		this.invSurrogateFold = invSurrogateFold;
 	}
+
+	public List<Node> getNeighbors() {
+		return neighbors;
+	}
+
+	public void setNeighbors(List<Node> neighbors) {
+		this.neighbors = neighbors;
+	}
+
+	public List<Node> getSurNeighbors() {
+		return surNeighbors;
+	}
+
+	public void setSurNeighbors(List<Node> surNeighbors) {
+		this.surNeighbors = surNeighbors;
+	}
+	
+	
 	
 	
 
