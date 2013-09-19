@@ -71,9 +71,11 @@ public class DatabaseAccessor {
 		// set the variables in the query
         stat.setInt(1, node.getWebID());
         stat.setInt(2, node.getHeight());
-        stat.setInt(2, node.getFold().getWebID());
-        stat.setInt(2, node.getSurrogateFold().getWebID());
-        stat.setInt(2, node.getInvSurrogateFold().getWebID());
+        stat.setInt(3, node.getFold().getWebID());
+        stat.setInt(4, node.getSurrogateFold().getWebID());
+        stat.setInt(5, node.getInvSurrogateFold().getWebID());
+        
+        stat.executeUpdate();
         
         stat.close();  
         
@@ -88,7 +90,23 @@ public class DatabaseAccessor {
 	 * @throws DatabaseException
 	 */
 	public boolean updateNode(Node node) throws DatabaseException, SQLException  {
+		// instantiate local variables
+		String query = "UPDATE Nodes SET height = ?, foldID = ?, surFoldID = ?, invSurFoldID = ? WHERE webID = ?";
+		PreparedStatement stat = null;
 		
+		stat =  db.getConnection().prepareStatement(query);
+		// set the variables in the query
+        stat.setInt(1, node.getHeight());
+        stat.setInt(2, node.getFoldID());
+        stat.setInt(3, node.getSurFoldID());
+        stat.setInt(4, node.getInvSurFoldID());
+        
+        stat.executeUpdate();
+        
+    	// clean up and close
+        stat.close();  
+        
+		return true;
 	}
 	
 	/**
@@ -98,12 +116,10 @@ public class DatabaseAccessor {
 	 * @return list of Record objects
 	 * @throws ServerException
 	 */
-	public List<Node> getNeighbors(Node node) throws DatabaseException, SQLException  {	
+	public List<Integer> getNeighbors(int webID) throws DatabaseException, SQLException  {	
 		// instantiate local variables
 		int neighborWebID;
-		int webID = node.getWebID();
-		Node neighborNode = null;
-		List<Node> allNodes = new ArrayList<Node>();
+		List<Integer> allNodes = new ArrayList<Integer>();
 		String query = "SELECT * FROM Neighbors WHERE webID = ?";
 		PreparedStatement stat = null;
 		ResultSet rs = null;
@@ -115,8 +131,7 @@ public class DatabaseAccessor {
 		// iterate through the results and create a list of Node objects
 		while (rs.next()) {
 			neighborWebID = rs.getInt("neighborID");
-			neighborNode = new Node(neighborWebID);
-			allNodes.add(neighborNode);
+			allNodes.add(neighborWebID);
 		}
 
 		// clean up and close
