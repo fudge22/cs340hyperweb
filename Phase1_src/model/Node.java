@@ -12,6 +12,8 @@ public class Node {
 	private List<Integer> neighbors;
 	private List<Integer> surNeighbors;
 	
+	private FoldState myFoldState = null;
+	
 	public Node(int webID, int height, int foldID, int surrogateFoldID, int invSurrogateFoldID, List<Integer> neighbors, List<Integer> surNeighbors) {
 		this.webID = webID;
 		this.height = height;
@@ -29,6 +31,10 @@ public class Node {
 		this.foldID = -1;
 		this.surrogateFoldID = -1;
 		this.invSurrogateFoldID = -1;
+	}
+	
+	public void updateFold() {
+		myFoldState.updateFold(this);
 	}
 
 	public int getWebID() {
