@@ -1,18 +1,23 @@
 package model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+
+
 
 import simulation.NodeInterface;
 
 public class Node implements NodeInterface {
 	private static HashMap<Integer, Node> nodes;
 	private int webID;
-	private int parentID;
+	
 	private int height;
 	private int foldID;
 	private int surrogateFoldID;
 	private int invSurrogateFoldID;
+	int parent;
 	private List<Integer> neighbors;
 	private List<Integer> surNeighbors;
 
@@ -64,6 +69,9 @@ public class Node implements NodeInterface {
 	public void setHeight(int height) {
 		this.height = height;
 	}
+	public void setParent(int webId){
+		parent = webId;
+	}
 
 	public int getFoldID() {
 		return foldID;
@@ -114,7 +122,15 @@ public class Node implements NodeInterface {
 	@Override
 	public NodeInterface[] getSurrogateNeighbors() {
 		// TODO Auto-generated method stub
-		return null;
+		NodeInterface[] surNeighborArray = new Node[surNeighbors.size()];
+		int counter = 0;
+		for (int x : surNeighbors)
+		    {
+			surNeighborArray[counter] = getNode(x);
+			counter++;
+		    }
+		
+		return surNeighborArray ;
 	}
 
 	@Override
@@ -133,9 +149,9 @@ public class Node implements NodeInterface {
 
 	@Override
 	public NodeInterface getSurrogateFold() {
-		// TODO Auto-generated method stub
+		
 		return getNode(surrogateFoldID);
-		// return null;
+		
 	}
 
 	@Override
@@ -146,15 +162,17 @@ public class Node implements NodeInterface {
 	}
 
 	@Override
-	public NodeInterface getParent() {
-		// TODO Auto-generated method stub
-		return getNode(parentID);
-		// return null;
+	public NodeInterface getParent() {	//originally brian and I thought that you couldn't store the parent
+										//after though I have realized that the parent can be stored, a node doesn't know it's child
+										// after all 1 01 001 0001 all are represented by 1 and their parent is 0
+	
+		
+		 return getNode(parent);
 	}
 
 	@Override
 	public int compareTo(NodeInterface node) {
-		// TODO Auto-generated method stub
+		// jamie - i am not sure if this completely works not, but I am assuming so
 
 		// compare both webid
 
@@ -169,19 +187,69 @@ public class Node implements NodeInterface {
 	@Override
 	public NodeInterface[] getNeighbors() {
 		// TODO Auto-generated method stub
-		return null;
+		NodeInterface[] neighborArray = new Node[neighbors.size()];
+		int counter = 0;
+		for (int x : neighbors)
+		    {
+			neighborArray[counter] = getNode(x);
+			counter++;
+		    }
+		
+		return neighborArray ;
 	}
-	public static Node[] allNodes(){
+	public static NodeInterface[] allNodes(){
 		
-		
-		return (Node[]) nodes.values().toArray();
+		Node[] nodeArray = new Node[nodes.size()];
+		 nodes.values().toArray(nodeArray); // the toArray() function fills in the array nodeArray
+		return nodeArray ;
 		
 		
 	}
 
-	public static void addNode(int webId) {
+	public static void addNode() {
+		if (nodes.size() == 0){
+			addToEmptyHyperWeb();//base case with no nodes in the hyperweb
+			
+		}
+		else if(nodes.size() == 1) {
+			addSecondNode();//base case with only one node in the hyperweb
+			
+		}
 		
 		
+	}
+	public  void addNeighbor( int neighborId){
+		
+		this.neighbors.add(neighborId);
+	}
+	
+	public static void addToEmptyHyperWeb()
+	{
+		ArrayList<Integer> neighbors = new ArrayList<Integer>();
+		ArrayList<Integer> surNeighbors = new ArrayList<Integer>();
+		
+		//right now we have been using negative ids(well -1) to represent null integers. This works well as long as we don't actually insert
+		//them into the hashmap. The hashmap will always return a null for a key it does not have.
+		
+		nodes.put(0, new Node(0, 0, -1, -1,-1, neighbors, surNeighbors));//we inserted an empty list into surNeighbors so it always exists in the future
+		nodes.get(0).setParent(-1); // it has no parent
+	}
+	public static void addSecondNode(){
+		ArrayList<Integer> neighbors = new ArrayList<Integer>();
+		ArrayList<Integer> surNeighbors = new ArrayList<Integer>();
+
+		neighbors.add(0);
+		
+		nodes.put(1, new Node(1, 1, 0, -1, -1, neighbors , surNeighbors));
+		nodes.get(0).setHeight(1);
+		nodes.get(1).setHeight(1);
+		nodes.get(0).addNeighbor(1);
+		nodes.get(0).setFoldID(1);
+		nodes.get(1).setParent(0);
+		
+		
+		
+	
 	}
 
 }
