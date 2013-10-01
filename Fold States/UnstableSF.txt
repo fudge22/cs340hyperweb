@@ -1,4 +1,4 @@
-package node;
+package model;
 
 public class UnstableSF extends FoldState {
 	
@@ -17,30 +17,30 @@ public class UnstableSF extends FoldState {
 	 * The purpose here now is to add a fold to node instead of a surrogate fold
 	 */
 	public void updateFold(Node node) {
-		/*
-		 * get the child of the surrogate fold of node
-		 * childID = node.getSurrogateFoldID().getChildNode() <- get child would be a bitwise 
-		 * 	function	that would append the 1 to the front of the binary representation of 
-		 * 	the surrogate fold
-		 * 
-		 * set the fold of node to the child
-		 * node.setFoldID(child)
-		 * 
-		 * set the fold of the child to this node
-		 * child.setFoldID(node)
-		 * 
-		 * tell the surrogate fold of node to forget the inverse surrogate fold
-		 * node.getSurrogateFold.setInverseSurrogateFold(null)
-		 * 
-		 * change the state of node's surrogate fold
-		 * node.getSurrogateFold.setFoldState(new StableFold);
-		 * 
-		 * have node forget its surrogate fold
-		 * node.setSurrogateFold(null)
-		 * 
-		 * update node's status
-		 * node.setFoldState(new StableFold)
-		 */
+		
+		 //get the child of the surrogate fold of node
+		 int childID = Node.getNode(node.getSurrogateFoldID()).getChildNodeID(); /*<- get child would be a bitwise 
+		 function	that would append the 1 to the front of the binary representation of 
+		 the surrogate fold*/
+		  
+		 //set the fold of node to the child
+		 node.setFoldID(childID);
+		  
+		 //set the fold of the child to this node
+		 Node.getNode(childID).setFoldID(node.getWebId());
+		  
+		 //tell the surrogate fold of node to forget the inverse surrogate fold
+		 Node.getNode(node.getSurrogateFoldID()).setInverseSurrogateFold(-1);
+		 
+		 //change the state of node's surrogate fold
+		 Node.getNode(node.getSurrogateFoldID()).setFoldStatus(new StableFold());
+		  
+		 //have node forget its surrogate fold
+		 node.setSurrogateFoldID(-1);
+		 
+		 //update node's status
+		 node.setFoldStatus(new StableFold());
+		 
 		return;
 	}
 

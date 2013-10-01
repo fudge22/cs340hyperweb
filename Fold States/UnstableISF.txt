@@ -1,4 +1,4 @@
-package node;
+package model;
 
 //Unstable Inverse Surrogate Fold
 //this naming convention beacuse the node would have a fold and an inverse surrogate fold
@@ -13,24 +13,25 @@ public class UnstableISF extends FoldState {
 	 * 	node has both a fold and an inverse surrogate fold
 	 */
 	public void UpdateFold(Node node) {
-		/*
-		 * make the fold of the child the inverse surrogate fold of node
-		 * child.setFoldID(node.getInverseSurrogateFold())
-		 * 
-		 * tell node's inverse surrogate fold that it has a new fold
-		 * node.getInverseSurrogateFold().setFoldID(child);
-		 * 
-		 * tell node's inverse surrogate fold to remove its surrogate fold
-		 * node.getInverseSurrogateFold().setSurroagetFold(null);
-		 * 
-		 * tell node's inverse surrogate fold to update its foldState
-		 * node.getInverseSurrogateFold().setFoldState(new StableFold()) 
-		 * 
-		 * make node forget it's inverse surrogate fold
-		 * node.setInverseSurrogateFold(null)
-		 * 
-		 * update node's state to stable
-		 * node.setFoldState(new StableFold());
-		 */
+		Node child = Node.getNode(node.getChildNodeID());
+		
+		//make the fold of the child the inverse surrogate fold of node
+		child.setFoldID(node.getInvSurrogateFoldID());
+		
+		//tell node's inverse surrogate fold that it has a new fold
+		Node.getNode(node.getInvSurrogateFoldID()).setFoldID(child.getWebId());
+		
+		//tell node's inverse surrogate fold to remove its surrogate fold
+		Node.getNode(node.getInvSurrogateFoldID()).setSurroagetFold(-1);
+		
+		//tell node's inverse surrogate fold to update its foldState
+		Node.getNode(node.getInvSurrogateFoldID()).setFoldStatus(new StableFold()); 
+		
+		//make node forget it's inverse surrogate fold
+		node.setInverseSurrogateFold(-1);
+		
+		//update node's state to stable
+		node.setFoldStatus(new StableFold());
+		
 	}
 }
