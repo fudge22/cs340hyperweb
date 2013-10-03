@@ -342,15 +342,21 @@ public class Node implements NodeInterface{
 		this.neighbors.add(neighborId);
 	}
 
+	
+
 	public static Node addToHyperWeb() throws WebIDException {
 		Random generator =  new Random();
-		int randomStart = generator.nextInt(nodes.size());
+		int randomInsertionPoint = generator.nextInt(nodes.size());
+		//possibly will have to change logic later
+		
+	
+		
 		//function to find closest node
 		
-		Node insertPoint = getNode(new WebID(randomStart));
+		Node insertPoint = getNode(new WebID(randomInsertionPoint));
 		
 		insertPoint.getNodeState().addToNode(insertPoint);
-		
+		/*
 		ArrayList<WebID> neighbors = new ArrayList<WebID>();
 		ArrayList<WebID> surNeighbors = new ArrayList<WebID>();
 		ArrayList<WebID> invSurNeighbors = new ArrayList<WebID>();
@@ -358,7 +364,7 @@ public class Node implements NodeInterface{
 		
 		
 
-		//getNode(0).getFoldState().addNode(); Is this what we are going for
+		//getNode(0).getFoldState().addNode(); Is this what we are going for?
 		
 		nodes.put(new WebID(0), new Node(new WebID(0), 0, null, null, null, neighbors, surNeighbors,
 				invSurNeighbors, 0, 0));// we inserted an empty list
@@ -366,6 +372,7 @@ public class Node implements NodeInterface{
 													// always exists in the
 													// future
 		nodes.get(0).setParent(null); // it has no parent
+		*/
 		return nodes.get(0);
 	}
 	
@@ -481,6 +488,28 @@ public class Node implements NodeInterface{
 	 *  ability to become a parent to a child node. Based on
 	 *  its state, the addNode() function will behave differently
 	 */
+	
+	private Node findHole(Node checkNode){
+		
+		Node parent = checkNode;
+		if (surNeighbors.size() > 0){
+			
+			parent = getNode(surNeighbors.get(0));
+			
+			//then remove from the list?
+		}
+		else if (surrogateFoldID != null){
+			parent = getNode(surrogateFoldID);
+			
+		}
+		else if (checkLowerNeighbors().size() > 0){
+			
+			parent = getNode(checkLowerNeighbors().get(0));
+		}
+		return parent;
+	}
+	
+	
 	private abstract class NodeState {
 		
 		public abstract void addToNode(Node insertPointNode) throws WebIDException;
@@ -511,6 +540,25 @@ public class Node implements NodeInterface{
 			 * N
 			 * NN
 			 */
+			ArrayList<WebID> neighborOfNeighbors = new ArrayList<WebID>();
+			Node parent = findHole(insertPointNode);
+			if (parent == null){
+				for (WebID w: neighbors){
+					parent = findHole(getNode(w));
+					if (parent == null){
+						
+						for (WebID won: getNode(w).getNeighborList()){
+							neighborOfNeighbors.add(arg0)
+						}
+						
+					}
+					
+				}
+				
+			}
+			
+			
+			
 			
 		}
 
