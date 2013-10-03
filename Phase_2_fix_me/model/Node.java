@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 import exceptions.WebIDException;
 import exceptions.DatabaseException;
@@ -59,6 +60,11 @@ public class Node implements NodeInterface{
 				
 	}
 	
+	public Node(WebID WebID, int height) {
+		this.webID = WebID;
+		this.height = height;
+	}
+
 	public static void initialize() {
 
 		nodes = new HashMap<WebID, Node>();
@@ -136,10 +142,45 @@ public class Node implements NodeInterface{
 		this.nodeState = nodeState;
 	}
 	
-	private Node insertChildNode() {
-		return null;
+	public FoldState getFoldState(){
+		return foldState;	
 	}
 	
+	public int getFoldStateInt() {
+		return foldState.getFoldStateInt();
+	}
+	
+	public NodeState getNodeState() {
+		return nodeState;
+	}
+	
+	public int getNodeStateInt() {
+		return nodeState.getNodeStateInt();
+	}
+	
+	public void setParent(WebID id) {
+		
+	}
+	
+	
+	private Node insertChildNode() throws WebIDException {
+		
+		this.increaseHeight();
+		
+		WebID childID = this.getChildNodeID();
+		
+		
+		Node child = new Node(childID, this.height);
+		child.updateAllNeighborTypes();
+		this.foldState.updateFold(this);
+		//WebID childID = new WebID();
+		return child;
+	}
+	
+	private void increaseHeight() {
+		this.height++;
+	}
+
 	private void broadcastNodeStateChange() {
 		
 	}
@@ -201,17 +242,28 @@ public class Node implements NodeInterface{
 
 	}
 
+	// originally brian and I thought that
+	// you couldn't store the parent
+	// after though I have realized that the
+	// parent can be stored, a node doesn't
+	// know it's child
+	// after all 1 01 001 0001 all are
+	// represented by 1 and their parent is
+	// 0
 	@Override
-	public NodeInterface getParent() { // originally brian and I thought that
-										// you couldn't store the parent
-										// after though I have realized that the
-										// parent can be stored, a node doesn't
-										// know it's child
-										// after all 1 01 001 0001 all are
-										// represented by 1 and their parent is
-										// 0
-
-		return getNode(parent);
+	public NodeInterface getParent() {
+		
+		WebID parentNode = null;
+		
+		try {
+			parentNode = new WebID(this.webID.getValue() ^ ((int)Math.pow(2, this.height)));
+		} catch (WebIDException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		return getNode(parentNode);
 	}
 
 	@Override
@@ -251,7 +303,7 @@ public class Node implements NodeInterface{
 
 	}
 
-	public static void addNode() {
+	public static void addNode() throws WebIDException {
 		Node addedNode = null;
 		if (nodes.size() == 0) {
 
@@ -263,11 +315,11 @@ public class Node implements NodeInterface{
 										// hyperweb
 
 		} else {
-
-			//do logic 
-			
+				
+			addToHyperWeb(); 
 			
 		}
+		
 		if (addedNode != null) {
 			try {
 				Database.getInstance().getDatabaseAccessor().addNode(addedNode);
@@ -285,65 +337,75 @@ public class Node implements NodeInterface{
 	}
 
 	
-	public void addNeighbor(int neighborId) {
+	public void addNeighbor(WebID neighborId) {
 
 		this.neighbors.add(neighborId);
 	}
 
-	public static Node addToHyperWeb() {
-		ArrayList<Integer> neighbors = new ArrayList<Integer>();
-		ArrayList<Integer> surNeighbors = new ArrayList<Integer>();
-		ArrayList<Integer> invSurNeighbors = new ArrayList<Integer>();
+	public static Node addToHyperWeb() throws WebIDException {
+		Random generator =  new Random();
+		int randomStart = generator.nextInt(nodes.size());
+		//function to find closest node
+		
+		Node insertPoint = getNode(new WebID(randomStart));
+		
+		insertPoint.getNodeState().addToNode(insertPoint);
+		
+		ArrayList<WebID> neighbors = new ArrayList<WebID>();
+		ArrayList<WebID> surNeighbors = new ArrayList<WebID>();
+		ArrayList<WebID> invSurNeighbors = new ArrayList<WebID>();
 		//get parent id and check the state
+		
+		
 
 		//getNode(0).getFoldState().addNode(); Is this what we are going for
 		
-		nodes.put(0, new Node(0, 0, -1, -1, -1, neighbors, surNeighbors,
-				invSurNeighbors, 0, 0, 0, 0, 0));// we inserted an empty list
+		nodes.put(new WebID(0), new Node(new WebID(0), 0, null, null, null, neighbors, surNeighbors,
+				invSurNeighbors, 0, 0));// we inserted an empty list
 													// into surNeighbors so it
 													// always exists in the
 													// future
-		nodes.get(0).setParent(-1); // it has no parent
+		nodes.get(0).setParent(null); // it has no parent
 		return nodes.get(0);
 	}
 	
-	public static Node addToEmptyHyperWeb() {
-		ArrayList<Integer> neighbors = new ArrayList<Integer>();
-		ArrayList<Integer> surNeighbors = new ArrayList<Integer>();
-		ArrayList<Integer> invSurNeighbors = new ArrayList<Integer>();
+	public static Node addToEmptyHyperWeb() throws WebIDException {
+		ArrayList<WebID> neighbors = new ArrayList<WebID>();
+		ArrayList<WebID> surNeighbors = new ArrayList<WebID>();
+		ArrayList<WebID> invSurNeighbors = new ArrayList<WebID>();
 		// right now we have been using negative ids(well -1) to represent null
 		// integers. This works well as long as we don't actually insert
 		// them into the hashmap. The hashmap will always return a null for a
 		// key it does not have.
 
-		nodes.put(0, new Node(0, 0, -1, -1, -1, neighbors, surNeighbors,
-				invSurNeighbors, 0, 0, 0, 0, 0));// we inserted an empty list
+		nodes.put(new WebID(0), new Node(new WebID(0), 0, null, null, null, neighbors, surNeighbors,
+				invSurNeighbors, 0, 0));// we inserted an empty list
 													// into surNeighbors so it
 													// always exists in the
 													// future
-		nodes.get(0).setParent(-1); // it has no parent
+		nodes.get(0).setParent(null); // it has no parent
 		return nodes.get(0);
 	}
 
-	public static Node addSecondNode() {
-		ArrayList<Integer> neighbors = new ArrayList<Integer>();
-		ArrayList<Integer> surNeighbors = new ArrayList<Integer>();
-		ArrayList<Integer> invSurNeighbors = new ArrayList<Integer>();
-		neighbors.add(0);
+	public static Node addSecondNode() throws WebIDException {
+		ArrayList<WebID> neighbors = new ArrayList<WebID>();
+		ArrayList<WebID> surNeighbors = new ArrayList<WebID>();
+		ArrayList<WebID> invSurNeighbors = new ArrayList<WebID>();
+		neighbors.add(new WebID(0));
 
-		nodes.put(1, new Node(1, 1, 0, -1, -1, neighbors, surNeighbors,
-				invSurNeighbors, 0, 0, 0, 0, 0));
+		nodes.put(new WebID(0), new Node(new WebID(0), 0, null, null, null, neighbors, surNeighbors,
+				invSurNeighbors, 0, 0));
 		nodes.get(0).setHeight(1);
 		nodes.get(1).setHeight(1);
-		nodes.get(0).addNeighbor(1);
-		nodes.get(0).setFoldID(1);
-		nodes.get(1).setParent(0);
+		nodes.get(0).addNeighbor(new WebID(1));
+		nodes.get(0).setFoldID(new WebID(1));
+		nodes.get(1).setParent(new WebID(0));
 
 		return nodes.get(1);
 
 	}
 
-	public static void loadHyperWeb(HashMap<Integer, Node> loadHyperWeb) {
+	public static void loadHyperWeb(HashMap<Integer, Node> loadHyperWeb) throws WebIDException {
 		nodes = Database.getInstance().getDatabaseAccessor().loadHyperWeb();
 
 	}
@@ -353,19 +415,15 @@ public class Node implements NodeInterface{
 		foldState = fstate;
 	}
 
-	public int getChildNodeID() {
+	public WebID getChildNodeID() throws WebIDException {
 
-		return (1 << height) | webID;
+		return new WebID((1 << height) | webID.getValue());
 	}
-	public FoldState getFoldState(){
-		return foldState;
-	
-	}
-	
 	
 	
 	/* "State Checker" Methods 
 	   --------------------------------------------------------------*/
+	@SuppressWarnings("unused")
 	private void updateAllNeighborTypes() {
 		
 		ArrayList<WebID> surNeighborsList = new ArrayList<WebID>();
@@ -425,7 +483,8 @@ public class Node implements NodeInterface{
 	 */
 	private abstract class NodeState {
 		
-		public abstract Node addNode();
+		public abstract void addToNode(Node insertPointNode) throws WebIDException;
+		public abstract int getNodeStateInt();
 	}
 	
 	/* 
@@ -441,7 +500,7 @@ public class Node implements NodeInterface{
 	private class SlipperySlope extends NodeState {
 
 		@Override
-		public Node addNode() {
+		public void addToNode(Node insertPointNode) {
 			/*
 			 * if SN
 			 * 		insert at SN
@@ -452,6 +511,13 @@ public class Node implements NodeInterface{
 			 * N
 			 * NN
 			 */
+			
+		}
+
+		@Override
+		public int getNodeStateInt() {
+			// TODO Auto-generated method stub
+			return 1;
 		}
 		
 	}
@@ -469,7 +535,7 @@ public class Node implements NodeInterface{
 	private class Insertable extends NodeState {
 		
 		@Override
-		public Node addNode() {
+		public void addToNode(Node insertPointNode) throws WebIDException {
 			/*
 			 * insert
 			 * if LN
@@ -477,22 +543,30 @@ public class Node implements NodeInterface{
 			 * else
 			 * 		broadcast stateChange(Insertable)
 			 */
-			Node child = Node.this.insertChildNode();
+			insertPointNode.insertChildNode();
 			if (Node.this.checkLowerNeighbors().size() > 0) {
 				Node.this.setNodeState(new SlipperySlope());
+				
 			}
 			else {
 				Node.this.broadcastNodeStateChange();
 			}
-			return child;
+			
+		}
+
+		@Override
+		public int getNodeStateInt() {
+			// TODO Auto-generated method stub
+			return 0;
 		}
 	}
 	
 	private abstract class FoldState {
 		
 		//Code to update the folds of a node when a child is added to this node
-		public abstract void updateFold (Node node);
-		
+		public abstract void updateFold (Node node) throws WebIDException;
+	
+		public abstract int getFoldStateInt();
 		/*
 		 * Questions to ask:
 		 * 
@@ -505,19 +579,19 @@ public class Node implements NodeInterface{
 		
 		public void updateFold(Node node) {
 			//Start by getting the child node
-			Node child = Node.getNode(node.getWebId());// + some bitwise operations)
+			Node child = Node.getNode(node.getWebID());// + some bitwise operations)
 			
 			//give the child the fold of the parent node
 			child.setFoldID(node.getFoldID());
 			
 			//Change the fold of node's old fold to the child
-			Node.getNode(node.getFoldID()).setFoldID(child.getWebId());
+			Node.getNode(node.getFoldID()).setFoldID(child.getWebID());
 			
 			//next set node's surrogate Fold to its old fold
 			node.setSurrogateFoldID(node.getFoldID());
 			
 			//Change the Surrogatefold of node's old fold to node
-			Node.getNode(node.getFoldID()).setInvSurrogateFoldID(node.getWebId());
+			Node.getNode(node.getFoldID()).setInvSurrogateFoldID(node.getWebID());
 			//setInverseSurrogateFold(node);
 			
 			//change the status of the old fold
@@ -527,9 +601,14 @@ public class Node implements NodeInterface{
 			node.setFoldStatus(new UnstableSF());
 			
 			//Set my fold to null
-			node.setFoldID(-1);
+			node.setFoldID(null);
 			
 			return;
+		}
+
+		@Override
+		public int getFoldStateInt() {
+			return 0;
 		}
 	}
 	
@@ -541,27 +620,32 @@ public class Node implements NodeInterface{
 		 * In this function, we assume that the node being updated has had a child added and that the 
 		 * 	node has both a fold and an inverse surrogate fold
 		 */
-		public void updateFold(Node node) {
+		public void updateFold(Node node) throws WebIDException {
 			Node child = Node.getNode(node.getChildNodeID());
 			
 			//make the fold of the child the inverse surrogate fold of node
 			child.setFoldID(node.getInvSurrogateFoldID());
 			
 			//tell node's inverse surrogate fold that it has a new fold
-			Node.getNode(node.getInvSurrogateFoldID()).setFoldID(child.getWebId());
+			Node.getNode(node.getInvSurrogateFoldID()).setFoldID(child.getWebID());
 			
 			//tell node's inverse surrogate fold to remove its surrogate fold
-			Node.getNode(node.getInvSurrogateFoldID()).setSurroagetFold(-1);
+			Node.getNode(node.getInvSurrogateFoldID()).setSurrogateFoldID(null);
 			
 			//tell node's inverse surrogate fold to update its foldState
 			Node.getNode(node.getInvSurrogateFoldID()).setFoldStatus(new StableFold()); 
 			
 			//make node forget it's inverse surrogate fold
-			node.setInverseSurrogateFold(-1);
+			node.setInvSurrogateFoldID(null);
 			
 			//update node's state to stable
 			node.setFoldStatus(new StableFold());
 			
+		}
+
+		@Override
+		public int getFoldStateInt() {
+			return 2;
 		}
 	}
 	
@@ -576,10 +660,10 @@ public class Node implements NodeInterface{
 		 * 
 		 * The purpose here now is to add a fold to node instead of a surrogate fold
 		 */
-		public void updateFold(Node node) {
+		public void updateFold(Node node) throws WebIDException {
 			
 			 //get the child of the surrogate fold of node
-			 int childID = Node.getNode(node.getSurrogateFoldID()).getChildNodeID(); /*<- get child would be a bitwise 
+			 WebID childID = Node.getNode(node.getSurrogateFoldID()).getChildNodeID(); /*<- get child would be a bitwise 
 			 function	that would append the 1 to the front of the binary representation of 
 			 the surrogate fold*/
 			  
@@ -587,21 +671,26 @@ public class Node implements NodeInterface{
 			 node.setFoldID(childID);
 			  
 			 //set the fold of the child to this node
-			 Node.getNode(childID).setFoldID(node.getWebId());
+			 Node.getNode(childID).setFoldID(node.getWebID());
 			  
 			 //tell the surrogate fold of node to forget the inverse surrogate fold
-			 Node.getNode(node.getSurrogateFoldID()).setInverseSurrogateFold(-1);
+			 Node.getNode(node.getSurrogateFoldID()).setInvSurrogateFoldID(null);
 			 
 			 //change the state of node's surrogate fold
 			 Node.getNode(node.getSurrogateFoldID()).setFoldStatus(new StableFold());
 			  
 			 //have node forget its surrogate fold
-			 node.setSurrogateFoldID(-1);
+			 node.setSurrogateFoldID(null);
 			 
 			 //update node's status
 			 node.setFoldStatus(new StableFold());
 			 
 			return;
+		}
+
+		@Override
+		public int getFoldStateInt() {
+			return 1;
 		}
 
 	}

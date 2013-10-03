@@ -150,18 +150,17 @@ public class DatabaseAccessor {
 		String query = "INSERT INTO Nodes (webID, height, foldID, surFoldID, invSurFoldID, foldState, insertableState, selfFlat, neighborsFlat, nofneighborsFlat) VALUES (?,?,?,?,?,?,?,?,?,?)";
 		PreparedStatement stat = null;
 		
+		
+		
 		stat =  db.getConnection().prepareStatement(query);
 		// set the variables in the query
-        stat.setInt(1, node.getWebID());
+        stat.setInt(1, node.getWebID().getValue());
         stat.setInt(2, node.getHeight());
-        stat.setInt(3, node.getFoldID());
-        stat.setInt(4, node.getSurrogateFoldID());
-        stat.setInt(5, node.getInvSurrogateFoldID());
-        stat.setInt(6, 1);//foldstate
-        stat.setInt(7, 1);//insertableState
-        stat.setInt(8, 1);//selfFlat
-        stat.setInt(9, 1);//neighborsFlat
-        stat.setInt(10, 1);//nofneighborsFlat
+        stat.setInt(3, node.getFoldID().getValue());
+        stat.setInt(4, node.getSurrogateFoldID().getValue());
+        stat.setInt(5, node.getInvSurrogateFoldID().getValue());
+        stat.setInt(6, node.getFoldStateInt());//foldstate
+        stat.setInt(7, node.getNodeStateInt());//insertableState
         stat.executeUpdate();
         
         stat.close();  
@@ -193,10 +192,10 @@ public class DatabaseAccessor {
 		
 	}
 	
-	public HashMap<Integer, Node> loadHyperWeb(){ //return hashmap of integers to nodes
+	public HashMap<WebID, Node> loadHyperWeb() throws WebIDException { //return hashmap of integers to nodes
 		//query for all webids in hyperweb
 		//select webID from Nodes;
-		HashMap<Integer, Node> nodes = new HashMap<Integer, Node>();
+		HashMap<WebID, Node> nodes = new HashMap<WebID, Node>();
 	
 		try {
 			String query = "select webID from Nodes";
@@ -208,7 +207,7 @@ public class DatabaseAccessor {
 			rs = stat.executeQuery();
 			
 				while (rs.next()){
-					nodes.put(rs.getInt("webID"), null);
+					nodes.put(new WebID(rs.getInt("webID")), null);
 				}
 			
 				rs.close();
@@ -216,7 +215,7 @@ public class DatabaseAccessor {
 			
 				//Map<String, Object> map = ...;
 
-				for (Integer i : nodes.keySet()) {
+				for (WebID i : nodes.keySet()) {
 				    nodes.put(i, getNode(i));
 				}
 			
@@ -254,14 +253,11 @@ public class DatabaseAccessor {
 		stat =  db.getConnection().prepareStatement(query);
 		// set the variables in the query
         stat.setInt(1, node.getHeight());
-        stat.setInt(2, node.getFoldID());
-        stat.setInt(3, node.getSurrogateFoldID());
-        stat.setInt(4, node.getInvSurrogateFoldID());
-        stat.setInt(5, 1);//foldstate
-        stat.setInt(6, 1);//insertableState
-        stat.setInt(7, 1);//selfFlat
-        stat.setInt(8, 1);//neighborsFlat
-        stat.setInt(9, 1);//nofneighborsFlat
+        stat.setInt(2, node.getFoldID().getValue());
+        stat.setInt(3, node.getSurrogateFoldID().getValue());
+        stat.setInt(4, node.getInvSurrogateFoldID().getValue());
+        stat.setInt(5, node.getFoldStateInt());//foldstate
+        stat.setInt(6, node.getNodeStateInt());//insertableState
         stat.executeUpdate();
         
     	// clean up and close
@@ -350,7 +346,7 @@ public class DatabaseAccessor {
 			
 			stat = db.getConnection().prepareStatement(queries[x]);
 			// set the variables in the query
-			stat.setInt(1, node.getWebID());
+			stat.setInt(1, node.getWebID().getValue());
 	
 			stat.executeUpdate();
 		}
