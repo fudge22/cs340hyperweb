@@ -38,5 +38,8 @@ public class WebID {
 		this.id = id;
 	}
 	
+	public int hashCode() {
+        return id;
+    }
 	
 }
