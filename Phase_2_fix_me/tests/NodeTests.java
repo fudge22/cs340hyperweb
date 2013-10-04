@@ -1,18 +1,34 @@
 package tests;
 import static org.junit.Assert.*;
 
+import java.util.HashMap;
+
+import javax.xml.crypto.NodeSetData;
+
+import model.HyperWeb;
+import model.Node;
+import model.WebID;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import simulation.Validator;
+
+import exceptions.WebIDException;
+
 
 public class NodeTests {
 
+	HyperWeb hw;
+	Validator v;
+	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		
+		HyperWeb hw = new HyperWeb();	
+		Validator v = new Validator(hw);
 	}
 
 	@AfterClass
@@ -45,6 +61,49 @@ public class NodeTests {
 		assertEquals(Integer.SIZE - Integer.numberOfLeadingZeros(num5), 2);
 		assertEquals(Integer.SIZE - Integer.numberOfLeadingZeros(num6), 3);
 		assertEquals(Integer.SIZE - Integer.numberOfLeadingZeros(num7), 3);
+	}
+	
+	@Test
+	public void addFirstNode() {
+		hw.addNode();
+		v.validate();
+	}
+	
+	@Test
+	public void addSecondNode() {
+		hw.addNode();
+		v.validate();
+	}
+	
+	@Test
+	public void addThirdNode() {
+		hw.addNode();
+		v.validate();
+	}
+	
+	@Test
+	public void addFourthNode() {
+		hw.addNode();
+		v.validate();
+	}
+	
+	@Test
+	public void addFifthNode() {
+		hw.addNode();
+		v.validate();
+	}
+	
+	public void addSixthNode() {
+		hw.addNode();
+		v.validate();
+	}
+	
+	@Test
+	public void addMoreNodes() {
+		for (int i = 0; i < 10; i++) {
+			hw.addNode();
+			v.validate();
+		}
 	}
 
 }

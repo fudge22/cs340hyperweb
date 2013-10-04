@@ -1,7 +1,7 @@
 package model;
 
-import node.Node;
 import database.Database;
+import exceptions.WebIDException;
 import simulation.HyPeerWebInterface;
 import simulation.NodeInterface;
 
@@ -11,7 +11,12 @@ public class HyperWeb implements HyPeerWebInterface {
 	public HyperWeb(){
 		Node.initialize();
 		db = Database.getInstance();
-		Node.loadHyperWeb(db.getDatabaseAccessor().loadHyperWeb());
+		try {
+			Node.loadHyperWeb(db.getDatabaseAccessor().loadHyperWeb());
+		} catch (WebIDException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	
 	}
 	
@@ -24,11 +29,23 @@ public class HyperWeb implements HyPeerWebInterface {
 	@Override
 	public NodeInterface getNode(int webId) {
 		// TODO Auto-generated method stub
-		return Node.getNode(webId);
+		WebID myID = null;
+		try {
+			myID = new WebID(webId);
+		} catch (WebIDException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return Node.getNode(myID);
 	}
 	public void addNode()
 	{
-		Node.addNode();
+		try {
+			Node.addNode();
+		} catch (WebIDException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 
