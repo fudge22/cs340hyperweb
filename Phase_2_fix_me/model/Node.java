@@ -509,7 +509,30 @@ public class Node implements NodeInterface{
 		return parent;
 	}
 	
-	
+	private Node checkAllNeighborTypes(){
+		Node parent = null;
+		for (WebID w: neighbors){
+			parent = findHole(getNode(w));
+			
+			if (parent == null){
+				
+				for (WebID won: getNode(w).getNeighborList()){
+					parent = findHole(getNode(won));
+					
+					if (parent != null){
+						return parent;
+					}
+				}
+				
+			}
+			else{
+				return parent;
+			}
+			
+			
+		}
+		return parent;
+	}
 	private abstract class NodeState {
 		
 		public abstract void addToNode(Node insertPointNode) throws WebIDException;
@@ -529,7 +552,7 @@ public class Node implements NodeInterface{
 	private class SlipperySlope extends NodeState {
 
 		@Override
-		public void addToNode(Node insertPointNode) {
+		public void addToNode(Node insertPointNode) throws WebIDException {
 			/*
 			 * if SN
 			 * 		insert at SN
@@ -540,28 +563,22 @@ public class Node implements NodeInterface{
 			 * N
 			 * NN
 			 */
-			ArrayList<WebID> neighborOfNeighbors = new ArrayList<WebID>();
+			
 			Node parent = findHole(insertPointNode);
-			if (parent == null){
-				for (WebID w: neighbors){
-					parent = findHole(getNode(w));
-					if (parent == null){
-						
-						for (WebID won: getNode(w).getNeighborList()){
-							neighborOfNeighbors.add(arg0)
-						}
-						
-					}
-					
-				}
-				
+			
+			if (parent == null) {
+				parent = checkAllNeighborTypes();
 			}
 			
-			
-			
+		if (parent == null){
+			System.err.println("you need a valid parent for a slipperySlope");
 			
 		}
-
+		else{
+			parent.insertChildNode();
+		}
+		
+		}
 		@Override
 		public int getNodeStateInt() {
 			// TODO Auto-generated method stub
