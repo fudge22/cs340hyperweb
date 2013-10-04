@@ -1,6 +1,7 @@
 package model;
 
 import database.Database;
+import exceptions.DatabaseException;
 import exceptions.WebIDException;
 import simulation.HyPeerWebInterface;
 import simulation.NodeInterface;
@@ -10,6 +11,12 @@ public class HyperWeb implements HyPeerWebInterface {
 	private Database db;
 	public HyperWeb(){
 		Node.initialize();
+		try {
+			Database.initialize();
+		} catch (DatabaseException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		db = Database.getInstance();
 		try {
 			Node.loadHyperWeb(db.getDatabaseAccessor().loadHyperWeb());

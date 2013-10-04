@@ -55,8 +55,9 @@ public class Database {
 			// register the driver 
 			String driverName = "org.sqlite.JDBC";
 			Class.forName(driverName);
-			File currentDir = new File("./");
-			String dbName = currentDir.getAbsolutePath() + "/database/indexer_server.sqlite";
+			File currentDir = new File("");
+			String dbName = currentDir.getAbsolutePath() + "\\database\\indexer_server.sqlite";
+			System.out.println(dbName);
 			String jdbcDef = "jdbc:sqlite";
 			dbUrl = jdbcDef + ":" + dbName;
 			// which will produce a legitimate Url for SqlLite JDBC :
@@ -73,7 +74,7 @@ public class Database {
 	
 	public Connection getConnection() {
 		try {
-			if (connection.isClosed()) {
+			if (connection == null || connection.isClosed()) {
 				this.connection = DriverManager.getConnection(dbUrl);
 			} 
 		} catch (SQLException e) {

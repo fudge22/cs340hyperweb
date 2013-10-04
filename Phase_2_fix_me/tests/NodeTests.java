@@ -22,13 +22,13 @@ import exceptions.WebIDException;
 
 public class NodeTests {
 
-	HyperWeb hw;
-	Validator v;
+	private static HyperWeb hw;
+	private static Validator v;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		HyperWeb hw = new HyperWeb();	
-		Validator v = new Validator(hw);
+		hw = new HyperWeb();	
+		v = new Validator(hw);
 	}
 
 	@AfterClass

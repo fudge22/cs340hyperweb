@@ -430,7 +430,7 @@ public class Node implements NodeInterface{
 													// into surNeighbors so it
 													// always exists in the
 													// future
-		nodes.get(0).setParent(null); // it has no parent
+		nodes.get(0); // it has no parent
 		return nodes.get(0);
 	}
 
@@ -452,7 +452,7 @@ public class Node implements NodeInterface{
 
 	}
 
-	public static void loadHyperWeb(HashMap<Integer, Node> loadHyperWeb) throws WebIDException {
+	public static void loadHyperWeb(HashMap<WebID, Node> loadHyperWeb) throws WebIDException {
 		nodes = Database.getInstance().getDatabaseAccessor().loadHyperWeb();
 
 	}
