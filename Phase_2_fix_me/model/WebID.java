@@ -42,4 +42,9 @@ public class WebID {
         return id;
     }
 	
+	public boolean equals(Object o) {
+		WebID other = (WebID) o;
+		return this.id == other.id;
+	}
+	
 }
