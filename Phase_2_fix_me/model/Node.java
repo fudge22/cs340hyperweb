@@ -382,10 +382,18 @@ public class Node implements NodeInterface{
 		//possibly will have to change logic later
 		
 	
-		
+		int count = 0;
+		WebID insertPointID = new WebID(0);
+		for (WebID id : nodes.keySet()) {
+			if (count == randomInsertionPoint) {
+				insertPointID = id;
+				break;
+			}
+			count++;
+		}
 		//function to find closest node
 		
-		Node insertPoint = getNode(new WebID(randomInsertionPoint));
+		Node insertPoint = getNode(insertPointID);
 		
 		insertPoint.getNodeState().addNode();
 		/*
