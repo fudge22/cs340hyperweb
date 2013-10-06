@@ -56,7 +56,7 @@ public class Database {
 			String driverName = "org.sqlite.JDBC";
 			Class.forName(driverName);
 			File currentDir = new File("");
-			String dbName = currentDir.getAbsolutePath() + "\\database\\indexer_server.sqlite";
+			String dbName = currentDir.getAbsolutePath() + "\\src\\database\\indexer_server.sqlite";// this needs to be standardized
 			System.out.println(dbName);
 			String jdbcDef = "jdbc:sqlite";
 			dbUrl = jdbcDef + ":" + dbName;

@@ -18,12 +18,12 @@ public class HyperWeb implements HyPeerWebInterface {
 			e1.printStackTrace();
 		}
 		db = Database.getInstance();
-		try {
-			Node.loadHyperWeb(db.getDatabaseAccessor().loadHyperWeb());
-		} catch (WebIDException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//			Node.loadHyperWeb(db.getDatabaseAccessor().loadHyperWeb());
+//		} catch (WebIDException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	
 	}
 	

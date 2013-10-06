@@ -64,6 +64,11 @@ public class Node implements NodeInterface{
 	public Node(WebID WebID, int height) {
 		this.webID = WebID;
 		this.height = height;
+		
+		
+		
+		
+		this.invSurNeighbors = new ArrayList<WebID>();
 	}
 
 	public static void initialize() {
@@ -169,6 +174,30 @@ public class Node implements NodeInterface{
 		
 	}
 	
+	private void informNeighbors(){
+		//loop through neighbors and let them know that you are their neighbor
+		
+		for (WebID w : neighbors){
+			
+			getNode(w).addNeighbor(this.getWebID());
+		}
+		
+	}
+	private void informSurNeighbors(){
+		for (WebID w : surNeighbors){
+			
+			getNode(w).addInvSurNeighbor(this.getWebID());
+		}
+		
+	}
+	private void addInvSurNeighbor(WebID surNeighbor) {
+		// TODO Auto-generated method stub
+		this.invSurNeighbors.add(surNeighbor);
+	}
+
+
+
+		
 	
 	private Node insertChildNode() throws WebIDException {
 		
@@ -178,14 +207,33 @@ public class Node implements NodeInterface{
 		
 		
 		Node child = new Node(childID, this.height);
+		nodes.put(childID, child);
+		
 		child.updateAllNeighborTypes();
+		
 		this.foldState.updateFold();
-		Node parent = (Node) getParent();
+		Node parent = (Node) child.getParent();
 		this.nodeState = parent.nodeState;
 		//WebID childID = new WebID();
+		
+		//we need to inform the neighbors of their new neighbor
+		//and inform surrogate neighbors of their new inverse surrogate neighbor
+		child.informNeighbors();
+		child.informSurNeighbors();
+		parent.informInvSurNeighbors();
+		
+		
 		return child;
 	}
 	
+	private void informInvSurNeighbors() {
+		// TODO Auto-generated method stub
+		for (WebID w : invSurNeighbors){
+			
+			surNeighbors.remove(getNode(w));
+		}
+	}
+
 	private void increaseHeight() {
 		this.height++;
 	}
@@ -290,7 +338,7 @@ public class Node implements NodeInterface{
 		WebID parentNode = null;
 		
 		try {
-			parentNode = new WebID(this.webID.getValue() ^ ((int)Math.pow(2, this.height)));
+			parentNode = new WebID(this.webID.getValue() ^ ((int)Math.pow(2,this.webID.numberOfBits()-1)));
 		} catch (WebIDException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -355,18 +403,80 @@ public class Node implements NodeInterface{
 		}
 		
 		if (addedNode != null) {
-			try {
-				Database.getInstance().getDatabaseAccessor().addNode(addedNode);
-			} catch (DatabaseException e) {
-
-				e.printStackTrace();
-			} catch (SQLException e) {
-
-				e.printStackTrace();
-			}
+//			try {
+//				Database.getInstance().getDatabaseAccessor().addNode(addedNode);
+//			} catch (DatabaseException e) {
+//
+//				e.printStackTrace();
+//			} catch (SQLException e) {
+//
+//				e.printStackTrace();
+//			}
 
 		}
 
+		String n = "";
+		for (WebID w : nodes.keySet()){
+			Node n1 = getNode(w);
+			n += "WebID: " + w.getValue() + "\n";
+			n += "Height: " + getNode(w).getHeight() + "\n";
+			if (n1.getFold() != null){
+				n += "FoldID: " + getNode(w).getFoldID().getValue() + "\n";
+			}
+			else{
+				n += "FoldID: null \n";
+
+			}
+			
+			if (n1.getSurrogateFoldID() != null){
+			n += "SurrogateFoldID: " + getNode(w).getSurrogateFoldID().getValue() + "\n";
+			}
+			else{
+				n += "SurrogateFoldID: null\n";
+			}
+			
+			if (n1.getInvSurrogateFoldID() != null){
+			n += "InverseSurrogateFold: " + getNode(w).getInvSurrogateFoldID().getValue() + "\n";
+			}
+			else{
+				n += "InverseSurrogateFold: null \n";
+			}
+			n += "Neighbors:\n";
+			for (WebID neighbor : getNode(w).getNeighborList()){
+				n += "Neighbor: " + neighbor.getValue() + "\n";
+				
+			}
+			n += "Inverse Surrogate Neighbors:\n";
+			for (WebID invNeighbor : getNode(w).getInvSurNeighborList()){
+				n += "Inverse Neighbor: " + invNeighbor.getValue() + "\n";
+				
+			}
+			n += "Surrogate Neighbors:\n";
+			for (WebID surNeighbor : getNode(w).getSurNeighborList()){
+				n += "Surrogate Neighbor: " + surNeighbor.getValue() + "\n";
+				
+			}
+			n += "\n";
+			
+			
+		/*
+		nodes;
+		webID;
+		height;
+		foldID;
+		surrogateFoldID;
+		invSurrogateFoldID;
+		neighbors;
+		surNeighbors;
+		invSurNeighbors;
+		
+		private NodeState nodeState;
+		private FoldState foldState;*/
+			
+		}
+		n += "\n----------------------------------------------------------------------------------------------------\n";
+		System.out.println(n);
+		//print out all of the nodes
 		// foldState.updateNode();
 	}
 
@@ -378,7 +488,7 @@ public class Node implements NodeInterface{
 
 	public static Node addToHyperWeb() throws WebIDException {
 		Random generator =  new Random();
-		int randomInsertionPoint = generator.nextInt(nodes.size());
+		int randomInsertionPoint = generator.nextInt(nodes.size()-1);
 		//possibly will have to change logic later
 		
 	
@@ -430,25 +540,31 @@ public class Node implements NodeInterface{
 													// into surNeighbors so it
 													// always exists in the
 													// future
-		nodes.get(0); // it has no parent
-		return nodes.get(0);
+		nodes.get(new WebID(0)); // it has no parent
+		return nodes.get(new WebID(0));
 	}
 
 	public static Node addSecondNode() throws WebIDException {
 		ArrayList<WebID> neighbors = new ArrayList<WebID>();
 		ArrayList<WebID> surNeighbors = new ArrayList<WebID>();
 		ArrayList<WebID> invSurNeighbors = new ArrayList<WebID>();
-		neighbors.add(new WebID(0));
+		WebID firstId = new WebID(0);
+		WebID secondId = new WebID(1);
+		
+	
 
-		nodes.put(new WebID(0), new Node(new WebID(0), 0, null, null, null, neighbors, surNeighbors,
+		nodes.put(secondId, new Node(secondId, 0, null, null, null, neighbors, surNeighbors,
 				invSurNeighbors, 0, 0));
-		nodes.get(0).setHeight(1);
-		nodes.get(1).setHeight(1);
-		nodes.get(0).addNeighbor(new WebID(1));
-		nodes.get(0).setFoldID(new WebID(1));
-		nodes.get(1).setParent(new WebID(0));
-
-		return nodes.get(1);
+		nodes.get(secondId).addNeighbor(firstId);
+		nodes.get(firstId).setHeight(1);
+		nodes.get(secondId).setFoldID(firstId);
+		nodes.get(secondId).setHeight(1);
+		nodes.get(firstId).addNeighbor(secondId);
+		nodes.get(firstId).setFoldID(secondId);
+		nodes.get(secondId).setParent(firstId);
+		
+		
+		return nodes.get(secondId);
 
 	}
 
@@ -464,7 +580,8 @@ public class Node implements NodeInterface{
 
 	public WebID getChildNodeID() throws WebIDException {
 
-		return new WebID(((int)Math.pow(2, webID.numberOfBits())) | webID.getValue());
+		return new WebID(((int)Math.pow(2, this.getHeight()-1)) | webID.getValue());
+	
 	}
 	
 	
@@ -680,31 +797,50 @@ public class Node implements NodeInterface{
 	
 	private class StableFold extends FoldState  {
 		
-		public void updateFold() {
+		public void updateFold() throws WebIDException {
 			//Start by getting the child node
-			Node child = Node.getNode(Node.this.getWebID());// + some bitwise operations)
+//			WebID temp = Node.this.getChildNodeID();
+//			WebID w1 = Node.this.getWebID();
+//			Node child = Node.getNode(Node.this.getChildNodeID());// + some bitwise operations)
+			
+			WebID childId = Node.this.getChildNodeID();
+			WebID parentId = Node.this.getWebID();
+			WebID parentsFoldId = getNode(parentId).getFoldID();
+			
+			
+			Node child = getNode(childId);
+			Node parent = getNode(parentId);
+			Node parentsFold = getNode(parentsFoldId);
+			
+			
 			
 			//give the child the fold of the parent node
-			child.setFoldID(Node.this.getFoldID());
+			child.setFoldID(parentsFoldId);
 			
 			//Change the fold of node's old fold to the child
-			Node.getNode(Node.this.getFoldID()).setFoldID(child.getWebID());
+			//Node.getNode(Node.this.getFoldID()).setFoldID(child.getWebID());
+			parentsFold.setFoldID(childId);
 			
 			//next set node's surrogate Fold to its old fold
-			Node.this.setSurrogateFoldID(Node.this.getFoldID());
+			//Node.this.setSurrogateFoldID(Node.this.getFoldID());
+			parent.setSurrogateFoldID(parentsFoldId);
 			
+			parentsFold.setInvSurrogateFoldID(parentId);
 			//Change the Surrogatefold of node's old fold to node
-			Node.getNode(Node.this.getFoldID()).setInvSurrogateFoldID(Node.this.getWebID());
+			//Node.getNode(Node.this.getFoldID()).setInvSurrogateFoldID(Node.this.getWebID());
 			//setInverseSurrogateFold(node);
 			
 			//change the status of the old fold
-			Node.getNode(Node.this.getFoldID()).setFoldStatus(new UnstableISF());
+			//Node.getNode(Node.this.getFoldID()).setFoldStatus(new UnstableISF());
+			parentsFold.setFoldStatus(new UnstableSF());
+			
 			
 			//change the fold status of node
-			Node.this.setFoldStatus(new UnstableSF());
 			
+			//Node.this.setFoldStatus(new UnstableSF());
+			parent.setFoldStatus(new UnstableISF());
 			//Set my fold to null
-			Node.this.setFoldID(null);
+			parent.setFoldID(null);
 			
 			return;
 		}
@@ -724,13 +860,28 @@ public class Node implements NodeInterface{
 		 * 	node has both a fold and an inverse surrogate fold
 		 */
 		public void updateFold() throws WebIDException {
-			Node child = Node.getNode(Node.this.getChildNodeID());
+			
+			WebID childId = Node.this.getChildNodeID();
+			WebID parentId = Node.this.getWebID();
+			WebID parentsFoldId = getNode(parentId).getFoldID();
+			
+			
+			Node child = getNode(childId);
+			Node parent = getNode(parentId);
+			Node parentsFold = getNode(parentsFoldId);
 			
 			//make the fold of the child the inverse surrogate fold of node
+			
+			
 			child.setFoldID(Node.this.getInvSurrogateFoldID());
+			//child.setFoldID(parentsFoldId);
+			//parent.setFoldID(null);
+			
 			
 			//tell node's inverse surrogate fold that it has a new fold
 			Node.getNode(Node.this.getInvSurrogateFoldID()).setFoldID(child.getWebID());
+			
+			
 			
 			//tell node's inverse surrogate fold to remove its surrogate fold
 			Node.getNode(Node.this.getInvSurrogateFoldID()).setSurrogateFoldID(null);
@@ -751,6 +902,8 @@ public class Node implements NodeInterface{
 			return 2;
 		}
 	}
+	
+	
 	
 	private class UnstableSF extends FoldState {
 		/*

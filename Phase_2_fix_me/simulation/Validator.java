@@ -66,6 +66,7 @@ public class Validator {
             }
             System.err.println();
         }
+        System.out.println("succesfully validated");
 
         return valid;
     }
@@ -162,7 +163,7 @@ public class Validator {
         validationFailed = checkInverseSurrogateFoldConstraints(node, validationFailed);
         
         validationFailed = checkNeighborsNeighborsConstraints(node, validationFailed);
-
+        System.out.println("validate");
         return !validationFailed;
     }
 

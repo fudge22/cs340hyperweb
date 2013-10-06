@@ -66,8 +66,11 @@ public class NodeTests {
 	@Test
 	public void addFirstNode() {
 		hw.addNode();
+		hw.addNode();
 		v.validate();
 	}
+	
+	
 	
 	@Test
 	public void addSecondNode() {
