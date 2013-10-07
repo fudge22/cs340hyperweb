@@ -210,8 +210,8 @@ public class Node implements NodeInterface{
 		nodes.put(childID, child);
 		
 		child.updateAllNeighborTypes();
-		
-		this.foldState.updateFold();
+		FoldState f = this.foldState;
+		//this.foldState.updateFold();
 		Node parent = (Node) child.getParent();
 		this.nodeState = parent.nodeState;
 		//WebID childID = new WebID();
@@ -229,9 +229,14 @@ public class Node implements NodeInterface{
 	private void informInvSurNeighbors() {
 		// TODO Auto-generated method stub
 		for (WebID w : invSurNeighbors){
-			
-			surNeighbors.remove(getNode(w));
+			System.out.println("inform inv sur neighbors:");
+			System.out.println(w.getValue());
+			System.out.println("size: " + getNode(w).getSurNeighborList().size());
+			Node current = getNode(w);
+			getNode(w).surNeighbors.remove(this.getWebID());
+			System.out.println();
 		}
+		invSurNeighbors.clear();
 	}
 
 	private void increaseHeight() {
@@ -420,6 +425,22 @@ public class Node implements NodeInterface{
 			Node n1 = getNode(w);
 			n += "WebID: " + w.getValue() + "\n";
 			n += "Height: " + getNode(w).getHeight() + "\n";
+			
+			if (n1.getFoldState() != null){
+				n += "FoldState: " + n1.getFoldState().getClass().getName() + "\n";
+			}
+			else {
+				n += "FoldState: null\n";
+			}
+			
+			if (n1.getNodeState() != null){
+				n += "NodeState: " + n1.getNodeState().getClass().getName() + "\n";
+
+				
+			}else {
+				n += "NodeState: null\n";
+			}
+			
 			if (n1.getFold() != null){
 				n += "FoldID: " + getNode(w).getFoldID().getValue() + "\n";
 			}
@@ -636,7 +657,7 @@ public class Node implements NodeInterface{
 	
 	private Node findHole(Node checkNode){
 		
-		Node parent = checkNode;
+		Node parent = null;
 		if (surNeighbors.size() > 0){
 			
 			parent = getNode(surNeighbors.get(0));
@@ -707,6 +728,7 @@ public class Node implements NodeInterface{
 	 */
 	private class SlipperySlope extends NodeState {
 
+		@SuppressWarnings("unused")
 		@Override
 		public void addNode() throws WebIDException {
 			/*
@@ -720,18 +742,92 @@ public class Node implements NodeInterface{
 			 * NN
 			 */
 			
-			Node parent = findHole(Node.this);
+			Node receivingParent = findHole(Node.this);
+			if (receivingParent == null) {
+				Node.this.broadcastNodeStateChange();
+				//Node.this.setFoldStatus(new StableFold());
+				//Node.this.setNodeState(new Insertable());
+				String n = "";
+				for (WebID w : nodes.keySet()){
+					Node n1 = getNode(w);
+					n += "WebID: " + w.getValue() + "\n";
+					n += "Height: " + getNode(w).getHeight() + "\n";
+					
+					if (n1.getFoldState() != null){
+						n += "FoldState: " + n1.getFoldState().getClass().getName() + "\n";
+					}
+					else {
+						n += "FoldState: null\n";
+					}
+					
+					if (n1.getNodeState() != null){
+						n += "NodeState: " + n1.getNodeState().getClass().getName() + "\n";
+
+						
+					}else {
+						n += "NodeState: null\n";
+					}
+					
+					if (n1.getFold() != null){
+						n += "FoldID: " + getNode(w).getFoldID().getValue() + "\n";
+					}
+					else{
+						n += "FoldID: null \n";
+
+					}
+					
+					if (n1.getSurrogateFoldID() != null){
+					n += "SurrogateFoldID: " + getNode(w).getSurrogateFoldID().getValue() + "\n";
+					}
+					else{
+						n += "SurrogateFoldID: null\n";
+					}
+					
+					if (n1.getInvSurrogateFoldID() != null){
+					n += "InverseSurrogateFold: " + getNode(w).getInvSurrogateFoldID().getValue() + "\n";
+					}
+					else{
+						n += "InverseSurrogateFold: null \n";
+					}
+					n += "Neighbors:\n";
+					for (WebID neighbor : getNode(w).getNeighborList()){
+						n += "Neighbor: " + neighbor.getValue() + "\n";
+						
+					}
+					n += "Inverse Surrogate Neighbors:\n";
+					for (WebID invNeighbor : getNode(w).getInvSurNeighborList()){
+						n += "Inverse Neighbor: " + invNeighbor.getValue() + "\n";
+						
+					}
+					n += "Surrogate Neighbors:\n";
+					for (WebID surNeighbor : getNode(w).getSurNeighborList()){
+						n += "Surrogate Neighbor: " + surNeighbor.getValue() + "\n";
+						
+					}
+					n += "\n";
+					
+					
+				
+					
+				}
+				n += "\n--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!---------------------------------------------------------------------------\n";
+				System.out.println(n);
+				//print out all of the nodes
+				// foldState.updateNode();
+				//Node.this.getFoldState().updateFold();
+			Node.this.getNodeState().addNode();
 			
-			if (parent == null) {
-				parent = checkAllNeighborTypes();
+			return;
 			}
 			
-			if (parent == null){
+			if (receivingParent == null){
 				System.err.println("you need a valid parent for a slipperySlope");
 				
 			}
 			else{
-				parent.insertChildNode();
+				Node child = receivingParent.insertChildNode();
+				child.setNodeState(new SlipperySlope());
+				receivingParent.setNodeState(new SlipperySlope());
 			}
 		
 		}
@@ -764,15 +860,39 @@ public class Node implements NodeInterface{
 			 * else
 			 * 		broadcast stateChange(Insertable)
 			 */
-			Node.this.insertChildNode();
-			if (Node.this.checkLowerNeighbors().size() > 0) {
-				Node.this.setNodeState(new SlipperySlope());
-				
-			}
-			else {
-				Node.this.broadcastNodeStateChange();
-			}
+			Node parent = Node.this;
+			Node child = Node.this.insertChildNode();
+			parent.setNodeState(new SlipperySlope());
+			child.setNodeState(new SlipperySlope());
 			
+				
+				
+				
+		
+			
+//			/*
+//			 * insert
+//			 * if LN
+//			 * 		changeState(SS)
+//			 * else
+//			 * 		broadcast stateChange(Insertable)
+//			 */
+//			Node parent = Node.this;
+//			Node child = Node.this.insertChildNode();
+////			if (Node.this.checkLowerNeighbors().size() > 0) {
+//			
+//			
+//				if (child.checkLowerNeighbors().size() > 0) {
+//			parent.setNodeState(new SlipperySlope());
+//				//I think I need this
+//				child.setNodeState(new SlipperySlope());
+//				
+//			}
+//			else {
+//				
+//				Node.this.broadcastNodeStateChange();
+//			}
+//			
 		}
 
 		@Override
@@ -832,13 +952,13 @@ public class Node implements NodeInterface{
 			
 			//change the status of the old fold
 			//Node.getNode(Node.this.getFoldID()).setFoldStatus(new UnstableISF());
-			parentsFold.setFoldStatus(new UnstableSF());
-			
+			parentsFold.setFoldStatus(new UnstableISF());
+			child.setFoldStatus(new StableFold());
 			
 			//change the fold status of node
 			
 			//Node.this.setFoldStatus(new UnstableSF());
-			parent.setFoldStatus(new UnstableISF());
+			parent.setFoldStatus(new UnstableSF());
 			//Set my fold to null
 			parent.setFoldID(null);
 			
@@ -865,7 +985,7 @@ public class Node implements NodeInterface{
 			WebID parentId = Node.this.getWebID();
 			WebID parentsFoldId = getNode(parentId).getFoldID();
 			
-			
+			Node parent2 = Node.this;
 			Node child = getNode(childId);
 			Node parent = getNode(parentId);
 			Node parentsFold = getNode(parentsFoldId);
@@ -873,27 +993,31 @@ public class Node implements NodeInterface{
 			//make the fold of the child the inverse surrogate fold of node
 			
 			
-			child.setFoldID(Node.this.getInvSurrogateFoldID());
+			child.setFoldID(parent.getInvSurrogateFoldID());
 			//child.setFoldID(parentsFoldId);
 			//parent.setFoldID(null);
-			
+			System.out.println("childid: " + childId.getValue());
+			System.out.println( " parentid: " + parentId.getValue()); 
+			//System.out.println("?: " + Node.this.
+			//System.out.println(" foldid: " + parentsFoldId.getValue());
 			
 			//tell node's inverse surrogate fold that it has a new fold
-			Node.getNode(Node.this.getInvSurrogateFoldID()).setFoldID(child.getWebID());
+			Node.getNode(parent.getInvSurrogateFoldID()).setFoldID(child.getWebID());
 			
 			
 			
 			//tell node's inverse surrogate fold to remove its surrogate fold
-			Node.getNode(Node.this.getInvSurrogateFoldID()).setSurrogateFoldID(null);
+			Node.getNode(parent.getInvSurrogateFoldID()).setSurrogateFoldID(null);
 			
 			//tell node's inverse surrogate fold to update its foldState
-			Node.getNode(Node.this.getInvSurrogateFoldID()).setFoldStatus(new StableFold()); 
+			Node.getNode(parent.getInvSurrogateFoldID()).setFoldStatus(new StableFold()); 
 			
 			//make node forget it's inverse surrogate fold
-			Node.this.setInvSurrogateFoldID(null);
+			parent.setInvSurrogateFoldID(null);
 			
 			//update node's state to stable
-			Node.this.setFoldStatus(new StableFold());
+			parent.setFoldStatus(new StableFold());
+			child.setFoldStatus(new StableFold());
 			
 		}
 
@@ -917,11 +1041,18 @@ public class Node implements NodeInterface{
 		 * The purpose here now is to add a fold to node instead of a surrogate fold
 		 */
 		public void updateFold() throws WebIDException {
+			//WebID childId = Node.this.getChildNodeID();
+			WebID parentId = Node.this.getWebID();
+			WebID parentsFoldId = getNode(parentId).getFoldID();
 			
-			 //get the child of the surrogate fold of node
 			 WebID childID = Node.getNode(Node.this.getSurrogateFoldID()).getChildNodeID(); /*<- get child would be a bitwise 
-			 function	that would append the 1 to the front of the binary representation of 
-			 the surrogate fold*/
+*/
+			Node child = getNode(childID);
+			Node parent = getNode(parentId);
+			Node parentsFold = getNode(parentsFoldId);
+			 //get the child of the surrogate fold of node
+			 //function	that would append the 1 to the front of the binary representation of 
+			 //the surrogate fold*/
 			  
 			 //set the fold of node to the child
 			 Node.this.setFoldID(childID);
@@ -940,6 +1071,7 @@ public class Node implements NodeInterface{
 			 
 			 //update node's status
 			 Node.this.setFoldStatus(new StableFold());
+			 child.setFoldStatus(new StableFold());
 			 
 			return;
 		}
