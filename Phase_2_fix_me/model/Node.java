@@ -1,5 +1,7 @@
 package model;
 
+import static org.junit.Assert.*;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,10 +9,13 @@ import java.util.List;
 import java.util.Random;
 import java.util.TreeSet;
 
+import org.junit.*;
+
 import exceptions.WebIDException;
 import exceptions.DatabaseException;
 import database.Database;
 import simulation.NodeInterface;
+import simulation.Validator;
 
 
 public class Node implements NodeInterface{
@@ -64,10 +69,11 @@ public class Node implements NodeInterface{
 	public Node(WebID WebID, int height) {
 		this.webID = WebID;
 		this.height = height;
-		
-		
-		
-		
+		this.foldID = null;
+		this.surrogateFoldID = null;
+		this.invSurrogateFoldID = null;
+		this.neighbors = new ArrayList<WebID>();
+		this.surNeighbors = new ArrayList<WebID>();
 		this.invSurNeighbors = new ArrayList<WebID>();
 	}
 
@@ -183,6 +189,7 @@ public class Node implements NodeInterface{
 		}
 		
 	}
+	
 	private void informSurNeighbors(){
 		for (WebID w : surNeighbors){
 			
@@ -190,15 +197,25 @@ public class Node implements NodeInterface{
 		}
 		
 	}
+	
+	private void informInvSurNeighbors() {
+		// TODO Auto-generated method stub
+		for (WebID w : invSurNeighbors){
+			System.out.println("inform inv sur neighbors:");
+			System.out.println(w.getValue());
+			System.out.println("size: " + getNode(w).getSurNeighborList().size());
+			Node current = getNode(w);
+			getNode(w).surNeighbors.remove(this.getWebID());
+			System.out.println();
+		}
+		invSurNeighbors.clear();
+	}
+	
 	private void addInvSurNeighbor(WebID surNeighbor) {
 		// TODO Auto-generated method stub
 		this.invSurNeighbors.add(surNeighbor);
 	}
-
-
-
 		
-	
 	private Node insertChildNode() throws WebIDException {
 		
 		this.increaseHeight();
@@ -226,19 +243,6 @@ public class Node implements NodeInterface{
 		return child;
 	}
 	
-	private void informInvSurNeighbors() {
-		// TODO Auto-generated method stub
-		for (WebID w : invSurNeighbors){
-			System.out.println("inform inv sur neighbors:");
-			System.out.println(w.getValue());
-			System.out.println("size: " + getNode(w).getSurNeighborList().size());
-			Node current = getNode(w);
-			getNode(w).surNeighbors.remove(this.getWebID());
-			System.out.println();
-		}
-		invSurNeighbors.clear();
-	}
-
 	private void increaseHeight() {
 		this.height++;
 	}
@@ -343,7 +347,7 @@ public class Node implements NodeInterface{
 		WebID parentNode = null;
 		
 		try {
-			parentNode = new WebID(this.webID.getValue() ^ ((int)Math.pow(2,this.webID.numberOfBits()-1)));
+			parentNode = new WebID(this.webID.getValue() ^ ((int)Math.pow(2, this.height-1)));
 		} catch (WebIDException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -601,8 +605,7 @@ public class Node implements NodeInterface{
 
 	public WebID getChildNodeID() throws WebIDException {
 
-		return new WebID(((int)Math.pow(2, this.getHeight()-1)) | webID.getValue());
-	
+		return new WebID(((int)Math.pow(2, this.height)) | webID.getValue());
 	}
 	
 	
@@ -624,11 +627,11 @@ public class Node implements NodeInterface{
 					neighborsList.add(neighborID);
 				} else {
 					// the parent node neighbor will never be null, so we can get the parents of the
-					// other would-be neighbors by removing the highest order 1 bit
+					// other would-be neighbors by removing the highest order 1 bit.
 					// because of the above condition, I'm assuming every neighborID that makes
 					// it to this point will begin with a 1 and have the same number of bits as the
-					// this.webID; therefore XOR the highest bit with the proper power of two to cancel it
-					surNeighborID = new WebID(neighborID.getValue() ^ ((int)Math.pow(2, this.webID.numberOfBits()-1)));
+					// this.webID; therefore XOR the highest bit to cancel it
+					surNeighborID = new WebID(neighborID.getValue() ^ Integer.highestOneBit(neighborID.getValue()));
 					surNeighborsList.add(surNeighborID);
 				}
 			} catch (WebIDException e) {
@@ -655,7 +658,7 @@ public class Node implements NodeInterface{
 		return lowerNeighborsList;
 	}
 	
-	private Node findHole(Node checkNode){
+	private Node findHole(){
 		
 		Node parent = null;
 		if (surNeighbors.size() > 0){
@@ -678,12 +681,12 @@ public class Node implements NodeInterface{
 	private Node checkAllNeighborTypes(){
 		Node parent = null;
 		for (WebID w: neighbors){
-			parent = findHole(getNode(w));
+			parent = getNode(w).findHole();
 			
 			if (parent == null){
 				
 				for (WebID won: getNode(w).getNeighborList()){
-					parent = findHole(getNode(won));
+					parent = getNode(won).findHole();
 					
 					if (parent != null){
 						return parent;
@@ -742,7 +745,7 @@ public class Node implements NodeInterface{
 			 * NN
 			 */
 			
-			Node receivingParent = findHole(Node.this);
+			Node receivingParent = Node.this.findHole();
 			if (receivingParent == null) {
 				Node.this.broadcastNodeStateChange();
 				//Node.this.setFoldStatus(new StableFold());
@@ -1080,6 +1083,167 @@ public class Node implements NodeInterface{
 		public int getFoldStateInt() {
 			return 1;
 		}
+
+	}
+	
+	/* Unit Tests for Node Class methods
+	   --------------------------------------------------------------*/
+	
+	public static class NodeMethodsTests {
+
+			private static HyperWeb hw;
+			private static Validator v;
+			
+			@BeforeClass
+			public static void setUpBeforeClass() {
+				hw = new HyperWeb();	
+				v = new Validator(hw);
+			}
+
+			@AfterClass
+			public static void tearDownAfterClass() {
+			}
+
+			@Before
+			public void setUp() throws Exception {
+			}
+
+			@After
+			public void tearDown() throws Exception {
+			}
+			
+			@Test
+			public void testIncreaseHeight() {
+				Node n = new Node(new WebID(0), 1);
+				int h = n.height;
+				n.increaseHeight();
+				assertEquals(h+1, n.height);
+			}
+			
+			@Test
+			public void testGetChildNodeID() {
+				Node n1 = new Node(new WebID(0), 1);
+				Node n2 = new Node(new WebID(0), 2);
+				Node n3 = new Node(new WebID(0), 3);
+				Node n4 = new Node(new WebID(0), 4);
+				Node n5 = new Node(new WebID(5), 3);
+				Node n6 = new Node(new WebID(2), 2);
+				Node n7 = new Node(new WebID(15), 4);
+				Node n8 = new Node(new WebID(1), 5);
+				
+				assertEquals(new WebID(2), n1.getChildNodeID());
+				assertEquals(new WebID(4), n2.getChildNodeID());
+				assertEquals(new WebID(8), n3.getChildNodeID());
+				assertEquals(new WebID(16), n4.getChildNodeID());
+				assertEquals(new WebID(13), n5.getChildNodeID());
+				assertEquals(new WebID(6), n6.getChildNodeID());
+				assertEquals(new WebID(31), n7.getChildNodeID());
+				assertEquals(new WebID(33), n8.getChildNodeID());
+				
+			}
+			
+			@Test
+			public void testUpdateAllNeighborTypes() {
+				hwSetup1();
+				Node n4 = getNode(new WebID(4));
+				
+				n4.updateAllNeighborTypes();
+				
+				assertTrue(n4.neighbors.size() == 2);
+				assertTrue(n4.surNeighbors.size() == 1);
+				assertTrue(n4.neighbors.contains(new WebID(6)));
+				assertTrue(n4.neighbors.contains(new WebID(0)));
+				assertTrue(n4.surNeighbors.contains(new WebID(1)));
+				
+				hwSetup2();
+				Node n7 = getNode(new WebID(7));
+				
+				n7.updateAllNeighborTypes();
+				
+				assertTrue(n7.neighbors.size() == 1);
+				assertTrue(n7.surNeighbors.size() == 2);
+				assertTrue(n7.neighbors.contains(new WebID(3)));
+				assertTrue(n7.surNeighbors.contains(new WebID(2)));
+				assertTrue(n7.surNeighbors.contains(new WebID(1)));
+				
+				hwSetup3();
+				Node n6 = getNode(new WebID(6));
+				n7 = getNode(new WebID(7));
+				
+				n6.updateAllNeighborTypes();
+				n7.updateAllNeighborTypes();
+				
+				assertTrue(n6.neighbors.size() == 3);
+				assertTrue(n6.surNeighbors.size() == 0);
+				assertTrue(n6.neighbors.contains(new WebID(4)));
+				assertTrue(n6.neighbors.contains(new WebID(7)));
+				assertTrue(n6.neighbors.contains(new WebID(2)));
+				
+				assertTrue(n7.neighbors.size() == 2);
+				assertTrue(n7.surNeighbors.size() == 1);
+				assertTrue(n7.neighbors.contains(new WebID(3)));
+				assertTrue(n7.neighbors.contains(new WebID(6)));
+				assertTrue(n7.surNeighbors.contains(new WebID(1)));
+			}
+
+			@Test
+			public void testBroadcastNodeStateChange() {
+				
+			}
+			
+			private void hwSetup1() {
+				Node.initialize();
+				
+				Node n0 = new Node(new WebID(0), 2);
+				Node n1 = new Node(new WebID(1), 1);
+				Node n2 = new Node(new WebID(2), 2);
+				Node n3 = new Node(new WebID(3), 1);
+				Node n4 = new Node(new WebID(4), 2);
+				Node n6 = new Node(new WebID(6), 2);
+				
+				nodes.put(n0.webID, n0);
+				nodes.put(n1.webID, n1);
+				nodes.put(n2.webID, n2);
+				nodes.put(n3.webID, n3);
+				nodes.put(n4.webID, n4);
+				nodes.put(n6.webID, n6);
+			}
+			private void hwSetup2() {
+				Node.initialize();
+				
+				Node n0 = new Node(new WebID(0), 2);
+				Node n1 = new Node(new WebID(1), 1);
+				Node n2 = new Node(new WebID(2), 1);
+				Node n3 = new Node(new WebID(3), 2);
+				Node n4 = new Node(new WebID(4), 2);
+				Node n7 = new Node(new WebID(7), 2);
+				
+				nodes.put(n0.webID, n0);
+				nodes.put(n1.webID, n1);
+				nodes.put(n2.webID, n2);
+				nodes.put(n3.webID, n3);
+				nodes.put(n4.webID, n4);
+				nodes.put(n7.webID, n7);
+			}
+			private void hwSetup3() {
+				Node.initialize();
+				
+				Node n0 = new Node(new WebID(0), 2);
+				Node n1 = new Node(new WebID(1), 1);
+				Node n2 = new Node(new WebID(2), 2);
+				Node n3 = new Node(new WebID(3), 2);
+				Node n4 = new Node(new WebID(4), 2);
+				Node n6 = new Node(new WebID(6), 2);
+				Node n7 = new Node(new WebID(7), 2);
+				
+				nodes.put(n0.webID, n0);
+				nodes.put(n1.webID, n1);
+				nodes.put(n2.webID, n2);
+				nodes.put(n3.webID, n3);
+				nodes.put(n4.webID, n4);
+				nodes.put(n6.webID, n6);
+				nodes.put(n7.webID, n7);
+			}
 
 	}
 }
