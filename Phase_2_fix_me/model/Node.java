@@ -5,9 +5,9 @@ import static org.junit.Assert.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.TreeSet;
 
 import org.junit.*;
 
@@ -199,7 +199,6 @@ public class Node implements NodeInterface{
 	}
 	
 	private void informInvSurNeighbors() {
-		// TODO Auto-generated method stub
 		for (WebID w : invSurNeighbors){
 			System.out.println("inform inv sur neighbors:");
 			System.out.println(w.getValue());
@@ -212,16 +211,22 @@ public class Node implements NodeInterface{
 	}
 	
 	private void addInvSurNeighbor(WebID surNeighbor) {
-		// TODO Auto-generated method stub
 		this.invSurNeighbors.add(surNeighbor);
+	}
+	
+	public void updateFold() {
+		try {
+			this.foldState.updateFold();
+		} catch (WebIDException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 		
 	private Node insertChildNode() throws WebIDException {
-		
 		this.increaseHeight();
 		
 		WebID childID = this.getChildNodeID();
-		
 		
 		Node child = new Node(childID, this.height);
 		nodes.put(childID, child);
@@ -257,7 +262,7 @@ public class Node implements NodeInterface{
 	 */
 	private void broadcastNodeStateChange() {
 		Node neighbor, nNeighbor;
-		TreeSet<Node> visited = new TreeSet<Node>();
+		HashSet<Node> visited = new HashSet<Node>();
 		
 		this.nodeState = new Insertable();
 		// for each neighbor
@@ -588,6 +593,8 @@ public class Node implements NodeInterface{
 		nodes.get(firstId).setFoldID(secondId);
 		nodes.get(secondId).setParent(firstId);
 		
+		nodes.get(firstId).setFoldStatus(nodes.get(firstId).new StableFold());
+		nodes.get(secondId).setFoldStatus(nodes.get(secondId).new StableFold());
 		
 		return nodes.get(secondId);
 
@@ -603,9 +610,15 @@ public class Node implements NodeInterface{
 		foldState = fstate;
 	}
 
+	// assume this.height == the new height of the child
+	// in other words, the parent's height has already been incremented
 	public WebID getChildNodeID() throws WebIDException {
 
-		return new WebID(((int)Math.pow(2, this.height)) | webID.getValue());
+		return new WebID(((int)Math.pow(2, this.height-1)) | webID.getValue());
+	}
+	
+	public WebID getParentNodeID() {
+		return new WebID(this.webID.getValue() ^ Integer.highestOneBit(this.webID.getValue()));
 	}
 	
 	
@@ -618,7 +631,7 @@ public class Node implements NodeInterface{
 		WebID neighborID;
 		WebID surNeighborID;
 		
-		for (int i = 0; i < this.webID.numberOfBits(); i++) {
+		for (int i = 0; i < this.height; i++) {
 			try {
 				// flip one bit of the checking node's webID to get a neighborID
 				neighborID = new WebID(this.webID.getValue() ^ ((int)Math.pow(2, i)));
@@ -631,7 +644,8 @@ public class Node implements NodeInterface{
 					// because of the above condition, I'm assuming every neighborID that makes
 					// it to this point will begin with a 1 and have the same number of bits as the
 					// this.webID; therefore XOR the highest bit to cancel it
-					surNeighborID = new WebID(neighborID.getValue() ^ Integer.highestOneBit(neighborID.getValue()));
+					Node neighbor = new Node(neighborID, this.height);
+					surNeighborID = neighbor.getParentNodeID();
 					surNeighborsList.add(surNeighborID);
 				}
 			} catch (WebIDException e) {
@@ -748,7 +762,7 @@ public class Node implements NodeInterface{
 			Node receivingParent = Node.this.findHole();
 			if (receivingParent == null) {
 				Node.this.broadcastNodeStateChange();
-				//Node.this.setFoldStatus(new StableFold());
+				Node.this.updateFold();
 				//Node.this.setNodeState(new Insertable());
 				String n = "";
 				for (WebID w : nodes.keySet()){
@@ -867,7 +881,7 @@ public class Node implements NodeInterface{
 			Node child = Node.this.insertChildNode();
 			parent.setNodeState(new SlipperySlope());
 			child.setNodeState(new SlipperySlope());
-			
+			parent.updateFold();
 				
 				
 				
@@ -939,6 +953,8 @@ public class Node implements NodeInterface{
 			
 			//give the child the fold of the parent node
 			child.setFoldID(parentsFoldId);
+			child.setSurrogateFoldID(null);
+			child.setInvSurrogateFoldID(null);
 			
 			//Change the fold of node's old fold to the child
 			//Node.getNode(Node.this.getFoldID()).setFoldID(child.getWebID());
@@ -986,7 +1002,7 @@ public class Node implements NodeInterface{
 			
 			WebID childId = Node.this.getChildNodeID();
 			WebID parentId = Node.this.getWebID();
-			WebID parentsFoldId = getNode(parentId).getFoldID();
+			WebID parentsFoldId = Node.this.getSurrogateFoldID();
 			
 			Node parent2 = Node.this;
 			Node child = getNode(childId);
@@ -994,9 +1010,10 @@ public class Node implements NodeInterface{
 			Node parentsFold = getNode(parentsFoldId);
 			
 			//make the fold of the child the inverse surrogate fold of node
-			
-			
 			child.setFoldID(parent.getInvSurrogateFoldID());
+			child.setSurrogateFoldID(null);
+			child.setInvSurrogateFoldID(null);
+			
 			//child.setFoldID(parentsFoldId);
 			//parent.setFoldID(null);
 			System.out.println("childid: " + childId.getValue());
@@ -1005,8 +1022,7 @@ public class Node implements NodeInterface{
 			//System.out.println(" foldid: " + parentsFoldId.getValue());
 			
 			//tell node's inverse surrogate fold that it has a new fold
-			Node.getNode(parent.getInvSurrogateFoldID()).setFoldID(child.getWebID());
-			
+			Node.getNode(parent.getInvSurrogateFoldID()).setFoldID(childId);
 			
 			
 			//tell node's inverse surrogate fold to remove its surrogate fold
@@ -1047,8 +1063,7 @@ public class Node implements NodeInterface{
 			//WebID childId = Node.this.getChildNodeID();
 			WebID parentId = Node.this.getWebID();
 			WebID parentsFoldId = getNode(parentId).getFoldID();
-			
-			 WebID childID = Node.getNode(Node.this.getSurrogateFoldID()).getChildNodeID(); /*<- get child would be a bitwise 
+			WebID childID = Node.getNode(Node.this.getSurrogateFoldID()).getChildNodeID(); /*<- get child would be a bitwise 
 */
 			Node child = getNode(childID);
 			Node parent = getNode(parentId);
@@ -1061,7 +1076,7 @@ public class Node implements NodeInterface{
 			 Node.this.setFoldID(childID);
 			  
 			 //set the fold of the child to this node
-			 Node.getNode(childID).setFoldID(Node.this.getWebID());
+			 child.setFoldID(Node.this.getWebID());
 			  
 			 //tell the surrogate fold of node to forget the inverse surrogate fold
 			 Node.getNode(Node.this.getSurrogateFoldID()).setInvSurrogateFoldID(null);
@@ -1112,6 +1127,122 @@ public class Node implements NodeInterface{
 			public void tearDown() throws Exception {
 			}
 			
+//			this.increaseHeight();
+//			
+//			WebID childID = this.getChildNodeID();
+//			
+//			
+//			Node child = new Node(childID, this.height);
+//			nodes.put(childID, child);
+//			
+//			child.updateAllNeighborTypes();
+//			FoldState f = this.foldState;
+//			//this.foldState.updateFold();
+//			Node parent = (Node) child.getParent();
+//			this.nodeState = parent.nodeState;
+//			//WebID childID = new WebID();
+//			
+//			//we need to inform the neighbors of their new neighbor
+//			//and inform surrogate neighbors of their new inverse surrogate neighbor
+//			child.informNeighbors();
+//			child.informSurNeighbors();
+//			parent.informInvSurNeighbors();
+//			
+//			
+//			return child;
+			
+			@Test
+			public void testUpdateFold() {
+				
+				
+			}
+			
+			@Test
+			public void testInformNeighbors() {
+				hwSetup5();
+				
+				Node n1 = getNode(new WebID(1));
+				assertTrue(n1.neighbors.size() == 2);
+				
+				Node n5 = new Node(new WebID(5), 3);
+				n5.neighbors.add(n1.webID);
+				n5.informNeighbors();
+				
+				assertTrue(n1.neighbors.size() == 3);
+				assertTrue(n1.neighbors.contains(n5.webID));
+				
+				hwSetup3();
+				
+				n1 = getNode(new WebID(1));
+				Node n4 = getNode(new WebID(4));
+				Node n7 = getNode(new WebID(7));
+				
+				n1.updateAllNeighborTypes();
+				n4.updateAllNeighborTypes();
+				n7.updateAllNeighborTypes();
+				
+				assertTrue(n1.neighbors.size() == 2);
+				assertTrue(n4.neighbors.size() == 2);
+				assertTrue(n7.neighbors.size() == 2);
+				
+				n5 = new Node(new WebID(5), 3);
+				n5.neighbors.add(n1.webID);
+				n5.neighbors.add(n4.webID);
+				n5.neighbors.add(n7.webID);
+				n5.informNeighbors();
+				
+				assertTrue(n1.neighbors.size() == 3);
+				assertTrue(n1.neighbors.contains(n5.webID));
+				assertTrue(n4.neighbors.size() == 3);
+				assertTrue(n4.neighbors.contains(n5.webID));
+				assertTrue(n7.neighbors.size() == 3);
+				assertTrue(n7.neighbors.contains(n5.webID));
+			}
+			
+			@Test
+			public void testInformSurNeighbors() {
+				hwSetup5();
+				
+				Node n0 = getNode(new WebID(0));
+				Node n3 = getNode(new WebID(3));
+				
+				assertTrue(n0.invSurNeighbors.size() == 0);
+				assertTrue(n3.invSurNeighbors.size() == 0);
+				
+				Node n5 = new Node(new WebID(5), 3);
+				n5.surNeighbors.add(n0.webID);
+				n5.surNeighbors.add(n3.webID);
+				n5.informSurNeighbors();
+				
+				assertTrue(n0.invSurNeighbors.size() == 1);
+				assertTrue(n0.invSurNeighbors.contains(n5.webID));
+				assertTrue(n3.invSurNeighbors.size() == 1);
+				assertTrue(n3.invSurNeighbors.contains(n5.webID));
+				
+				hwSetup3();
+				
+				n0 = getNode(new WebID(0));
+				n3 = getNode(new WebID(3));
+				
+				n0.updateAllNeighborTypes();
+				n3.updateAllNeighborTypes();
+				
+				assertTrue(n0.invSurNeighbors.size() == 0);
+				assertTrue(n3.invSurNeighbors.size() == 0);
+				
+				n5 = new Node(new WebID(5), 3);
+				assertTrue(n5.surNeighbors.size() == 0);
+				n5.informNeighbors();
+				
+				assertTrue(n0.invSurNeighbors.size() == 0);
+				assertTrue(n3.invSurNeighbors.size() == 0);
+			}
+			
+			@Test
+			public void testInformInvSurNeighbors() {
+				
+			}
+			
 			@Test
 			public void testIncreaseHeight() {
 				Node n = new Node(new WebID(0), 1);
@@ -1121,15 +1252,59 @@ public class Node implements NodeInterface{
 			}
 			
 			@Test
+			public void testGetParent() {
+				Node.initialize();
+				
+				// children
+				Node n1 = new Node(new WebID(2), 2);
+				Node n2 = new Node(new WebID(4), 3);
+				Node n3 = new Node(new WebID(8), 4);
+				Node n4 = new Node(new WebID(16), 5);
+				Node n5 = new Node(new WebID(13), 4);
+				Node n6 = new Node(new WebID(6), 3);
+				Node n7 = new Node(new WebID(31), 5);
+				Node n8 = new Node(new WebID(33), 6);
+				
+				// parents
+				Node n11 = new Node(new WebID(0), 1);
+				Node n22 = new Node(new WebID(0), 2);
+				Node n33 = new Node(new WebID(0), 3);
+				Node n44 = new Node(new WebID(0), 4);
+				Node n55 = new Node(new WebID(5), 3);
+				Node n66 = new Node(new WebID(2), 2);
+				Node n77 = new Node(new WebID(15), 4);
+				Node n88 = new Node(new WebID(1), 5);
+				
+				// getParent uses getNode(), put the parents in nodes
+				nodes.put(n11.webID, n11);
+				nodes.put(n22.webID, n22);
+				nodes.put(n33.webID, n33);
+				nodes.put(n44.webID, n44);
+				nodes.put(n55.webID, n55);
+				nodes.put(n66.webID, n66);
+				nodes.put(n77.webID, n77);
+				nodes.put(n88.webID, n88);
+				
+				assertEquals(n11.webID.getValue(), n1.getParent().getWebId());
+				assertEquals(n22.webID.getValue(), n2.getParent().getWebId());
+				assertEquals(n33.webID.getValue(), n3.getParent().getWebId());
+				assertEquals(n44.webID.getValue(), n4.getParent().getWebId());
+				assertEquals(n55.webID.getValue(), n5.getParent().getWebId());
+				assertEquals(n66.webID.getValue(), n6.getParent().getWebId());
+				assertEquals(n77.webID.getValue(), n7.getParent().getWebId());
+				assertEquals(n88.webID.getValue(), n8.getParent().getWebId());
+			}
+			
+			@Test
 			public void testGetChildNodeID() {
-				Node n1 = new Node(new WebID(0), 1);
-				Node n2 = new Node(new WebID(0), 2);
-				Node n3 = new Node(new WebID(0), 3);
-				Node n4 = new Node(new WebID(0), 4);
-				Node n5 = new Node(new WebID(5), 3);
-				Node n6 = new Node(new WebID(2), 2);
-				Node n7 = new Node(new WebID(15), 4);
-				Node n8 = new Node(new WebID(1), 5);
+				Node n1 = new Node(new WebID(0), 2);
+				Node n2 = new Node(new WebID(0), 3);
+				Node n3 = new Node(new WebID(0), 4);
+				Node n4 = new Node(new WebID(0), 5);
+				Node n5 = new Node(new WebID(5), 4);
+				Node n6 = new Node(new WebID(2), 3);
+				Node n7 = new Node(new WebID(15), 5);
+				Node n8 = new Node(new WebID(1), 6);
 				
 				assertEquals(new WebID(2), n1.getChildNodeID());
 				assertEquals(new WebID(4), n2.getChildNodeID());
@@ -1144,6 +1319,14 @@ public class Node implements NodeInterface{
 			
 			@Test
 			public void testUpdateAllNeighborTypes() {
+				hwSetup5();
+				Node n1 = getNode(new WebID(1));
+				
+				assertTrue(n1.neighbors.size() == 2);
+				assertTrue(n1.surNeighbors.size() == 0);
+				assertTrue(n1.neighbors.contains(new WebID(0)));
+				assertTrue(n1.neighbors.contains(new WebID(3)));
+				
 				hwSetup1();
 				Node n4 = getNode(new WebID(4));
 				
@@ -1188,18 +1371,28 @@ public class Node implements NodeInterface{
 
 			@Test
 			public void testBroadcastNodeStateChange() {
+				hwSetup4();
+				Node n7 = getNode(new WebID(7));
+				n7.broadcastNodeStateChange();
+				Node n3 = getNode(new WebID(3));
+				n3.broadcastNodeStateChange();
 				
+				Node n;
+				for (WebID id : nodes.keySet()) {
+					n = getNode(id);
+					assertEquals(n.getNodeStateInt(), 0);
+				}
 			}
 			
 			private void hwSetup1() {
 				Node.initialize();
 				
-				Node n0 = new Node(new WebID(0), 2);
-				Node n1 = new Node(new WebID(1), 1);
-				Node n2 = new Node(new WebID(2), 2);
-				Node n3 = new Node(new WebID(3), 1);
-				Node n4 = new Node(new WebID(4), 2);
-				Node n6 = new Node(new WebID(6), 2);
+				Node n0 = new Node(new WebID(0), 3);
+				Node n1 = new Node(new WebID(1), 2);
+				Node n2 = new Node(new WebID(2), 3);
+				Node n3 = new Node(new WebID(3), 2);
+				Node n4 = new Node(new WebID(4), 3);
+				Node n6 = new Node(new WebID(6), 3);
 				
 				nodes.put(n0.webID, n0);
 				nodes.put(n1.webID, n1);
@@ -1211,12 +1404,12 @@ public class Node implements NodeInterface{
 			private void hwSetup2() {
 				Node.initialize();
 				
-				Node n0 = new Node(new WebID(0), 2);
-				Node n1 = new Node(new WebID(1), 1);
-				Node n2 = new Node(new WebID(2), 1);
-				Node n3 = new Node(new WebID(3), 2);
-				Node n4 = new Node(new WebID(4), 2);
-				Node n7 = new Node(new WebID(7), 2);
+				Node n0 = new Node(new WebID(0), 3);
+				Node n1 = new Node(new WebID(1), 2);
+				Node n2 = new Node(new WebID(2), 2);
+				Node n3 = new Node(new WebID(3), 3);
+				Node n4 = new Node(new WebID(4), 3);
+				Node n7 = new Node(new WebID(7), 3);
 				
 				nodes.put(n0.webID, n0);
 				nodes.put(n1.webID, n1);
@@ -1228,13 +1421,13 @@ public class Node implements NodeInterface{
 			private void hwSetup3() {
 				Node.initialize();
 				
-				Node n0 = new Node(new WebID(0), 2);
-				Node n1 = new Node(new WebID(1), 1);
-				Node n2 = new Node(new WebID(2), 2);
-				Node n3 = new Node(new WebID(3), 2);
-				Node n4 = new Node(new WebID(4), 2);
-				Node n6 = new Node(new WebID(6), 2);
-				Node n7 = new Node(new WebID(7), 2);
+				Node n0 = new Node(new WebID(0), 3);
+				Node n1 = new Node(new WebID(1), 2);
+				Node n2 = new Node(new WebID(2), 3);
+				Node n3 = new Node(new WebID(3), 3);
+				Node n4 = new Node(new WebID(4), 3);
+				Node n6 = new Node(new WebID(6), 3);
+				Node n7 = new Node(new WebID(7), 3);
 				
 				nodes.put(n0.webID, n0);
 				nodes.put(n1.webID, n1);
@@ -1243,6 +1436,66 @@ public class Node implements NodeInterface{
 				nodes.put(n4.webID, n4);
 				nodes.put(n6.webID, n6);
 				nodes.put(n7.webID, n7);
+			}
+			// perfect 3 dimensional hypercube
+			// used for testBroadcastNodeStateChange
+			private void hwSetup4() {
+				Node.initialize();
+				
+				Node n0 = new Node(new WebID(0), 3);
+				Node n1 = new Node(new WebID(1), 3);
+				Node n2 = new Node(new WebID(2), 3);
+				Node n3 = new Node(new WebID(3), 3);
+				Node n4 = new Node(new WebID(4), 3);
+				Node n5 = new Node(new WebID(5), 3);
+				Node n6 = new Node(new WebID(6), 3);
+				Node n7 = new Node(new WebID(7), 3);
+				
+				nodes.put(n0.webID, n0);
+				nodes.put(n1.webID, n1);
+				nodes.put(n2.webID, n2);
+				nodes.put(n3.webID, n3);
+				nodes.put(n4.webID, n4);
+				nodes.put(n5.webID, n5);
+				nodes.put(n6.webID, n6);
+				nodes.put(n7.webID, n7);
+				
+				n0.updateAllNeighborTypes();
+				n1.updateAllNeighborTypes();
+				n2.updateAllNeighborTypes();
+				n3.updateAllNeighborTypes();
+				n4.updateAllNeighborTypes();
+				n5.updateAllNeighborTypes();
+				n6.updateAllNeighborTypes();
+				n7.updateAllNeighborTypes();
+				
+				n0.setNodeState(n0.new SlipperySlope());
+				n1.setNodeState(n1.new SlipperySlope());
+				n2.setNodeState(n2.new SlipperySlope());
+				n3.setNodeState(n3.new Insertable());
+				n4.setNodeState(n4.new SlipperySlope());
+				n5.setNodeState(n5.new SlipperySlope());
+				n6.setNodeState(n6.new SlipperySlope());
+				n7.setNodeState(n7.new Insertable());
+			}
+			// 2 dimensional hypercube
+			private void hwSetup5() {
+				Node.initialize();
+				
+				Node n0 = new Node(new WebID(0), 2);
+				Node n1 = new Node(new WebID(1), 2);
+				Node n2 = new Node(new WebID(2), 2);
+				Node n3 = new Node(new WebID(3), 2);
+				
+				nodes.put(n0.webID, n0);
+				nodes.put(n1.webID, n1);
+				nodes.put(n2.webID, n2);
+				nodes.put(n3.webID, n3);
+				
+				n0.updateAllNeighborTypes();
+				n1.updateAllNeighborTypes();
+				n2.updateAllNeighborTypes();
+				n3.updateAllNeighborTypes();
 			}
 
 	}
