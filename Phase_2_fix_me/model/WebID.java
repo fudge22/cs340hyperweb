@@ -3,16 +3,16 @@ package model;
 import exceptions.WebIDException;
 
 public class WebID {
-	
+
 	int id;
-	
+
 	public WebID(int id) {
 		if (id < 0) {
 			throw new WebIDException();
 		}
 		this.id = id;
 	}
-	
+
 	/* 
 	 * find the number of bits in an int by subtracting the size of 
 	 * a Java int (32) by the number of leading zeros in the number.
@@ -37,18 +37,18 @@ public class WebID {
 		}
 		this.id = id;
 	}
-	
+
 	public int hashCode() {
         return id;
     }
-	
+
 	public boolean equals(Object o) {
 		WebID other = (WebID) o;
 		return this.id == other.id;
 	}
-	
+
 	public String toString() {
 		return "" + id;
 	}
-	
+
 }
