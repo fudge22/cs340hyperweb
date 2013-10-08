@@ -1,6 +1,6 @@
 package exceptions;
 @SuppressWarnings("serial")
-public class WebIDException extends Exception {
+public class WebIDException extends RuntimeException {
 
 	public WebIDException() {
 		return;
