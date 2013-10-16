@@ -17,6 +17,7 @@ public class HyperWeb implements HyPeerWebInterface {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		/*
 		db = Database.getInstance();
 		try {
 			Node.loadHyperWeb(db.getDatabaseAccessor().loadHyperWeb());
@@ -24,7 +25,7 @@ public class HyperWeb implements HyPeerWebInterface {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	
+	*/
 	}
 	
 	@Override
@@ -45,6 +46,7 @@ public class HyperWeb implements HyPeerWebInterface {
 		}
 		return Node.getNode(myID);
 	}
+	
 	public void addNode()
 	{
 		try {
@@ -54,6 +56,14 @@ public class HyperWeb implements HyPeerWebInterface {
 			e.printStackTrace();
 		}
 		
+	}
+	
+	public void removeNode() {
+		try {
+			Node.removeNode();
+		} catch (WebIDException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

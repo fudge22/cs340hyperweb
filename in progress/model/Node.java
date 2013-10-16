@@ -392,6 +392,12 @@ public class Node implements NodeInterface {
 		printHyperWeb();// prints all of the nodes information in the hyperweb
 	}
 	
+	
+	private static void emptyHyperWeb() {
+		// TODO Auto-generated method stub
+		
+	}
+
 	private static void debugInfo(String info) {
 		if (true) {
 			System.out.println(info);
@@ -469,6 +475,15 @@ public class Node implements NodeInterface {
 	}
 
 	public static Node addToHyperWeb() {
+		Node insertPoint = getRandomNode();
+		
+		debugInfo("Trying to insert at " + insertPoint.getWebId());
+		insertPoint.getNodeState().addToNode(insertPoint);
+		
+		return nodes.get(0);
+	}
+	
+	public static Node getRandomNode() {
 		Random generator = new Random();
 		int randomInsertionPoint = generator.nextInt(nodes.size() - 1);
 		// possibly will have to change logic later
@@ -485,11 +500,7 @@ public class Node implements NodeInterface {
 		// function to find closest node
 
 		Node insertPoint = getNode(insertPointID);
-		
-		debugInfo("Trying to insert at " + insertPointID);
-		insertPoint.getNodeState().addToNode(insertPoint);
-		
-		return nodes.get(0);
+		return insertPoint;
 	}
 
 	public static Node addToEmptyHyperWeb() {
@@ -531,6 +542,28 @@ public class Node implements NodeInterface {
 
 		return nodes.get(secondId);
 
+	}
+	
+	/**
+	 * The function called by the HyperWeb that will removed a node from the hyperWeb
+	 * we assume that the hyperweb is not empty when we call the getNode function, as
+	 * we should not be able to remove from an empty hyperweb
+	 * 
+	 * there will be special cases if the highest node available to be disconnected has
+	 * a webID of either one or zero
+	 */
+	public static void removeNode() {
+		Node removeNode = getRandomNode();
+		
+		//throw into function to find highest node;
+		//if(node.getWebID() == 1 or 0 you are screwed)
+		if (removeNode.getWebId() == 1) {
+			return;
+		} else if (removeNode.getWebId() == 0) {
+			emptyHyperWeb();
+		} else {
+			
+		}
 	}
 
 	public static void loadHyperWeb(HashMap<WebID, Node> loadHyperWeb) {
@@ -981,4 +1014,5 @@ public class Node implements NodeInterface {
 		}
 
 	}
+
 }
