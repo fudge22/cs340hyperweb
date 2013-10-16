@@ -12,7 +12,14 @@ import org.junit.*;
 
 import database.Database;
 import simulation.NodeInterface;
-import states.*;
+import states.FoldState;
+import states.Insertable;
+import states.NodeState;
+import states.SlipperySlope;
+import states.StableFold;
+import states.UnstableISF;
+import states.UnstableSF;
+
 
 public class Node implements NodeInterface {
 
@@ -601,8 +608,39 @@ public class Node implements NodeInterface {
 		}
 		return parent;
 	}
+	
+	public Node findHighestNode(){
+		
+		Node highestNode = null;
+		// check this node first
+		if (this.invSurNeighbors.size() > 0) {
 
+			highestNode = getNode(this.invSurNeighbors.get(0));
 
+		} else if (this.invSurrogateFoldID != null) {
+			highestNode = getNode(this.invSurrogateFoldID);
+
+		} else if (this.checkHigherNeighbors().size() > 0) {
+
+			highestNode = getNode(this.checkHigherNeighbors().get(0));
+		}
+		return highestNode;
+	}
+
+	public List<WebID> checkHigherNeighbors() {
+		
+		//TODO returns a list of the higher neighbors
+		ArrayList<WebID> higherNeighborsList = new ArrayList<WebID>();
+
+		for (WebID neighborID : neighbors) {
+			if (getNode(neighborID).height > this.height) {
+				higherNeighborsList.add(neighborID);
+			}
+		}
+
+		return higherNeighborsList;
+	}
+	
 	/*
 	 * Unit Tests for Node Class methods
 	 * --------------------------------------------------------------
