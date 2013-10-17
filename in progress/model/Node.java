@@ -270,6 +270,10 @@ public class Node implements NodeInterface {
 		// for each neighbor
 		for (WebID neighborID : this.neighbors) {
 			neighbor = getNode(neighborID);
+			// we don't want to check neighbors with higher heights than us, causes loops
+			if (neighbor.getHeight() > this.height) {
+				continue;
+			}
 			visited.add(neighbor);
 			// for each neighbors neighbor
 			for (WebID nNeighborID : neighbor.neighbors) {
@@ -392,12 +396,11 @@ public class Node implements NodeInterface {
 		printHyperWeb();// prints all of the nodes information in the hyperweb
 	}
 	
-	
 	private static void emptyHyperWeb() {
 		// TODO Auto-generated method stub
 		
 	}
-
+	
 	private static void debugInfo(String info) {
 		if (true) {
 			System.out.println(info);
@@ -543,7 +546,7 @@ public class Node implements NodeInterface {
 		return nodes.get(secondId);
 
 	}
-	
+
 	/**
 	 * The function called by the HyperWeb that will removed a node from the hyperWeb
 	 * we assume that the hyperweb is not empty when we call the getNode function, as
@@ -565,7 +568,7 @@ public class Node implements NodeInterface {
 			
 		}
 	}
-
+	
 	public static void loadHyperWeb(HashMap<WebID, Node> loadHyperWeb) {
 		nodes = Database.getInstance().getDatabaseAccessor().loadHyperWeb();
 
@@ -629,22 +632,52 @@ public class Node implements NodeInterface {
 
 		return lowerNeighborsList;
 	}
+	
+	public List<WebID> checkHigherNeighbors() {
+		ArrayList<WebID> higherNeighborsList = new ArrayList<WebID>();
 
-	public Node findHole() {
-		Node parent = null;
+		for (WebID neighborID : neighbors) {
+			if (getNode(neighborID).height > this.height) {
+				higherNeighborsList.add(neighborID);
+			}
+		}
+
+		return higherNeighborsList;
+	}
+
+
+	public Node findLowerNode() {
+		Node lowerNode = null;
 		// check this node first
 		if (this.surNeighbors.size() > 0) {
 
-			parent = getNode(this.surNeighbors.get(0));
+			lowerNode = getNode(this.surNeighbors.get(0));
 
 		} else if (this.surrogateFoldID != null) {
-			parent = getNode(this.surrogateFoldID);
+			lowerNode = getNode(this.surrogateFoldID);
 
 		} else if (this.checkLowerNeighbors().size() > 0) {
 
-			parent = getNode(this.checkLowerNeighbors().get(0));
+			lowerNode = getNode(this.checkLowerNeighbors().get(0));
 		}
-		return parent;
+		return lowerNode;
+	}
+	
+	public Node findHigherNode() {
+		Node higherNode = null;
+		// check this node first
+		if (this.invSurNeighbors.size() > 0) {
+
+			higherNode = getNode(this.invSurNeighbors.get(0));
+
+		} else if (this.invSurrogateFoldID != null) {
+			higherNode = getNode(this.invSurrogateFoldID);
+
+		} else if (this.checkHigherNeighbors().size() > 0) {
+
+			higherNode = getNode(this.checkHigherNeighbors().get(0));
+		}
+		return higherNode;
 	}
 
 
@@ -1014,5 +1047,4 @@ public class Node implements NodeInterface {
 		}
 
 	}
-
 }
