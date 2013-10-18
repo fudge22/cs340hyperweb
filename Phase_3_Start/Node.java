@@ -20,7 +20,11 @@ import states.StableFold;
 import states.UnstableISF;
 import states.UnstableSF;
 
-
+/**
+ * Node Class for each Node within the Hypeerweb.
+ * 
+ *
+ */
 public class Node implements NodeInterface {
 
 	// instance variables
@@ -36,6 +40,20 @@ public class Node implements NodeInterface {
 	private NodeState nodeState;
 	private FoldState foldState;
 	
+	/**
+	 * Constructor to create a new Node.
+	 * 
+	 * @param webID
+	 * @param height
+	 * @param foldID
+	 * @param surrogateFoldID
+	 * @param invSurrogateFoldID
+	 * @param neighbors
+	 * @param surNeighbors
+	 * @param invSurNeighbors
+	 * @param foldStateInt
+	 * @param nodeStateInt
+	 */
 	// constructors
 	public Node(WebID webID, int height, WebID foldID, WebID surrogateFoldID,
 				WebID invSurrogateFoldID, List<WebID> neighbors, List<WebID> surNeighbors, 
@@ -83,111 +101,211 @@ public class Node implements NodeInterface {
 		this.invSurNeighbors = new ArrayList<WebID>();
 	}
 
+	/**
+	 * Get the WebID
+	 * @return
+	 */
 	// getters and setters
 	public WebID getWebID() {
 		return webID;
 	}
 
+	/**
+	 * Set the WebID
+	 * @param webID
+	 */
 	public void setWebID(WebID webID) {
 		this.webID = webID;
 	}
 
+	/**
+	 * Get the Height
+	 */
 	public int getHeight() {
 		return height;
 	}
 
+	/**
+	 * Set the Height
+	 * @param height
+	 */
 	public void setHeight(int height) {
 		this.height = height;
 	}
 
+	/**
+	 * Get the FoldID
+	 * @return
+	 */
 	public WebID getFoldID() {
 		return foldID;
 	}
 
+	/**
+	 * Set the FoldID
+	 * @param foldID
+	 */
 	public void setFoldID(WebID foldID) {
 		this.foldID = foldID;
 	}
 
+	/**
+	 * Get the Surrogate Fold ID
+	 * @return
+	 */
 	public WebID getSurrogateFoldID() {
 		return surrogateFoldID;
 	}
 
+	/**
+	 * Set the surrogate fold ID
+	 * @param surrogateFoldID
+	 */
 	public void setSurrogateFoldID(WebID surrogateFoldID) {
 		this.surrogateFoldID = surrogateFoldID;
 	}
 
+	/**
+	 * get the inverse surrogate Fold ID
+	 * @return
+	 */
 	public WebID getInvSurrogateFoldID() {
 		return invSurrogateFoldID;
 	}
 
+	/**
+	 * Set Inverse Surrogate Fold ID
+	 * @param invSurrogateFoldID
+	 */
 	public void setInvSurrogateFoldID(WebID invSurrogateFoldID) {
 		this.invSurrogateFoldID = invSurrogateFoldID;
 	}
 
+	/**
+	 * Get a list of neighbors
+	 * @return
+	 */
 	public List<WebID> getNeighborList() {
 		return neighbors;
 	}
 
+	/**
+	 * set the list of neighbors
+	 * @param neighbors
+	 */
 	public void setNeighborList(List<WebID> neighbors) {
 		this.neighbors = neighbors;
 	}
 
+	/**
+	 * get a list of the surrogate neighbors
+	 * @return
+	 */
 	public List<WebID> getSurNeighborList() {
 		return surNeighbors;
 	}
 
+	/**
+	 * set the list of surrogate neighbors
+	 * @param surNeighbors
+	 */
 	public void setSurNeighborList(List<WebID> surNeighbors) {
 		this.surNeighbors = surNeighbors;
 	}
 
+	/**
+	 * get the list of inverse surrogate neighbors
+	 * @return
+	 */
 	public List<WebID> getInvSurNeighborList() {
 		return invSurNeighbors;
 	}
 
+	/**
+	 * set the list of inverse surrogate neighbors
+	 * @param invSurNeighbors
+	 */
 	public void setInvSurNeighborList(List<WebID> invSurNeighbors) {
 		this.invSurNeighbors = invSurNeighbors;
 	}
 
+	/**
+	 * get the fold state
+	 * @return
+	 */
 	public FoldState getFoldState() {
 		return foldState;
 	}
 	
+	/**
+	 * Set the fold state
+	 * @param foldState
+	 */
 	public void setFoldState(FoldState foldState) {
 
 		this.foldState = foldState;
 	}
 
+	/**
+	 * get the integer representing the fold state
+	 * @return
+	 */
 	public int getFoldStateInt() {
 		return foldState.getFoldStateInt();
 	}
 
+	/**
+	 * get the node state
+	 * @return
+	 */
 	public NodeState getNodeState() {
 		return nodeState;
 	}
 	
+	/**
+	 * set the node state
+	 * @param nodeState
+	 */
 	public void setNodeState(NodeState nodeState) {
 		this.nodeState = nodeState;
 	}
 
+	/**
+	 * get the integer representing the node state.
+	 * @return
+	 */
 	public int getNodeStateInt() {
 		return nodeState.getNodeStateInt();
 	}
 	
+	/**
+	 * method to see if one node is the same as another node
+	 */
 	@Override
 	public boolean equals(Object o) {
 		Node other = (Node) o;
 		return this.webID.equals(other.webID);
 	}
 
+	/**
+	 * method to initialize the node
+	 */
 	public static void initialize() {
 		nodes = new HashMap<WebID, Node>();
 	}
 	
+	/**
+	 * Get the node with the corresponding web ID
+	 * @param id
+	 * @return
+	 */
 	public static Node getNode(WebID id) {
 		return nodes.get(id);// if null, return null node
 	}
 
-	// loop through neighbors and let them know that you are their neighbor
+	/**
+	 * Method to let a node's neighbors know that they are new neighbors
+	 */
 	public void informNeighbors() {
 		for (WebID w : neighbors) {
 			getNode(w).addNeighbor(this.getWebID());
@@ -195,17 +313,21 @@ public class Node implements NodeInterface {
 
 	}
 
+	/**
+	 * method to inform a node's surrogate neighbors that they are now surrogate neighbors.
+	 */
 	public void informSurNeighbors() {
 		for (WebID w : surNeighbors) {
 			getNode(w).addInvSurNeighbor(this.getWebID());
 		}
 
 	}
-
-	// finds all of the inverse surrogate neighbors and deletes their surrogate
-	// neighbors
-	// and then deletes the inverse surrogate neighbors
-	// This is used when a child is inserted
+	
+	/**
+	 * When a new child is inserted, this method finds all of the inverse surrogate neighbors 
+	 * and deletes their surrogate neighbors and then deletes the inverse surrogate neighbors.
+	 * @param child
+	 */
 	public void informInvSurNeighbors(Node child) {
 		for (WebID w : invSurNeighbors) {
 			getNode(w).surNeighbors.remove(this.getWebID());
@@ -213,10 +335,18 @@ public class Node implements NodeInterface {
 		invSurNeighbors.clear();
 	}
 
+	/**
+	 * Adds an inverse surrogate neighbor to a node.
+	 * @param surNeighbor
+	 */
 	public void addInvSurNeighbor(WebID surNeighbor) {
 		this.invSurNeighbors.add(surNeighbor);
 	}
 
+	/**
+	 * Inserts a new child node to a node.
+	 * @return
+	 */
 	public Node insertChildNode() {
 		this.increaseHeight();
 
@@ -240,17 +370,26 @@ public class Node implements NodeInterface {
 		return child;
 	}
 
+	/**
+	 * increases the height of the node
+	 */
 	public void increaseHeight() {
 		this.height++;
 	}
 
 	/*
+	 * 
+	 */
+	/**
 	 * There is a condition that exists when a node is inserted into a hyperweb
 	 * and that node fills a hole, meaning that all of the nodes neighbors
 	 * already exist, in which the nodes neighbors and the nodes neighbors
 	 * neighbors will be in a slippery slope state prior to the insert. Once the
 	 * node is inserted and fills that hole, that node, its neighbors, and its
 	 * neighbors neighbors will then all need to be in the insertable state.
+	 * 
+	 * This method broadcasts a node state change 2 hops away.
+	 * @param nodeStateInt
 	 */
 	public void broadcastNodeStateChange(int nodeStateInt) {
 		HashSet<Node> twoHopsAway = new HashSet<Node>();
@@ -268,6 +407,11 @@ public class Node implements NodeInterface {
 		}
 	}
 
+	/**
+	 * Gets a set of nodes 2 hops away from the current node. 
+	 * 
+	 * @return
+	 */
 	public HashSet<Node> getAll2Hops() {
 		Node neighbor, nNeighbor;
 		HashSet<Node> visited = new HashSet<Node>();
@@ -292,12 +436,18 @@ public class Node implements NodeInterface {
 	 * --------------------------------------------------------------
 	 */
 
-	// Woodfield's interface method (lower case d)
+	
+	/**
+	 * Gets the web Id in form of an integer
+	 */
 	@Override
 	public int getWebId() {
 		return webID.getValue();
 	}
 
+	/**
+	 * gets a list of surrogate neighbors as an array of nodeInterface
+	 */
 	@Override
 	public NodeInterface[] getSurrogateNeighbors() {
 		NodeInterface[] surNeighborArray = new Node[surNeighbors.size()];
@@ -310,6 +460,9 @@ public class Node implements NodeInterface {
 		return surNeighborArray;
 	}
 
+	/**
+	 * gets a list of inverse surrogate neighbors as an array of nodeInterface
+	 */
 	@Override
 	public NodeInterface[] getInverseSurrogateNeighbors() {
 		NodeInterface[] invSurNeighborArray = new Node[invSurNeighbors.size()];
@@ -322,23 +475,35 @@ public class Node implements NodeInterface {
 		return invSurNeighborArray;
 	}
 
+	/**
+	 * get the fold in form of a nodeInterface
+	 */
 	@Override
 	public NodeInterface getFold() {
 		return getNode(foldID);
 	}
 
+	/**
+	 * get the surrogate fold in form of a nodeInterface
+	 */
 	@Override
 	public NodeInterface getSurrogateFold() {
 		return getNode(surrogateFoldID);
 
 	}
 
+	/**
+	 * gets the inverse surrogate fold as a nodeInterface
+	 */
 	@Override
 	public NodeInterface getInverseSurrogateFold() {
 		return getNode(invSurrogateFoldID);
 
 	}
 	
+	/**
+	 * gets the parent as a nodeInterface
+	 */
 	@Override
 	public NodeInterface getParent() {
 		WebID parentNode = null;
@@ -348,9 +513,12 @@ public class Node implements NodeInterface {
 		return getNode(parentNode);
 	}
 
+	/**
+	 * compares one node to another node
+	 */
 	@Override
 	public int compareTo(NodeInterface node) {
-		if (webID.getValue() < node.getWebId()) {
+		if (webID.getValue() > node.getWebId()) {
 			return 1;
 		}
 		else if (webID.getValue() < node.getWebId()) {
@@ -361,6 +529,9 @@ public class Node implements NodeInterface {
 		}
 	}
 
+	/**
+	 * Gets an array in form of nodeInterface for all the neighbors of the current node
+	 */
 	@Override
 	public NodeInterface[] getNeighbors() {
 		NodeInterface[] neighborArray = new Node[neighbors.size()];
@@ -373,6 +544,10 @@ public class Node implements NodeInterface {
 		return neighborArray;
 	}
 
+	/**
+	 * gets an array in form of nodeInterface for all the nodes corresponding to the current node
+	 * @return
+	 */
 	public static NodeInterface[] allNodes() {
 		Node[] nodeArray = new Node[nodes.size()];
 		nodes.values().toArray(nodeArray); // the toArray() function fills in
@@ -381,6 +556,9 @@ public class Node implements NodeInterface {
 
 	}
 
+	/**
+	 * add a new node to the hypeerweb
+	 */
 	public static void addNode() {
 		if (nodes.size() == 0) {
 			addToEmptyHyperWeb();// base case with no nodes in the
@@ -395,6 +573,9 @@ public class Node implements NodeInterface {
 		printHyperWeb();// prints all of the nodes information in the hyperweb
 	}
 
+	/**
+	 * a private method that prints out the hypeerweb for testing purposes
+	 */
 	private static void printHyperWeb() {
 		String n = "";
 		for (WebID w : nodes.keySet()) {
@@ -459,10 +640,18 @@ public class Node implements NodeInterface {
 		System.out.println(n);
 	}
 
+	/**
+	 * add a neighbor to the curent node
+	 * @param neighborId
+	 */
 	public void addNeighbor(WebID neighborId) {
 		this.neighbors.add(neighborId);
 	}
 
+	/**
+	 * adds a node to the hypeerweb
+	 * @return
+	 */
 	public static Node addToHyperWeb() {
 		Random generator = new Random();
 		int randomInsertionPoint = generator.nextInt(nodes.size() - 1);
@@ -487,6 +676,10 @@ public class Node implements NodeInterface {
 		return nodes.get(0);
 	}
 
+	/**
+	 * adds a new node to an empty hyperweb
+	 * @return
+	 */
 	public static Node addToEmptyHyperWeb() {
 		ArrayList<WebID> neighbors = new ArrayList<WebID>();
 		// we inserted an empty list into surNeighbors so it always exists in the future
@@ -504,6 +697,10 @@ public class Node implements NodeInterface {
 		return nodes.get(new WebID(0));
 	}
 
+	/**
+	 * adds a second node to a hypeerweb. The hypeerweb needs to have 1.
+	 * @return
+	 */
 	public static Node addSecondNode() {
 		ArrayList<WebID> neighbors = new ArrayList<WebID>();
 		ArrayList<WebID> surNeighbors = new ArrayList<WebID>();
@@ -528,17 +725,29 @@ public class Node implements NodeInterface {
 
 	}
 
+	/**
+	 * loads the hypeerweb from the database
+	 * @param loadHyperWeb
+	 */
 	public static void loadHyperWeb(HashMap<WebID, Node> loadHyperWeb) {
 		nodes = Database.getInstance().getDatabaseAccessor().loadHyperWeb();
 
 	}
 
-	// assume this.height == the new height of the child
-	// in other words, the parent's height has already been incremented
+	/**
+	 * Gets the web ID of the child node of the current node.
+	 * @return
+	 */
 	public WebID getChildNodeID() {
+		// assume this.height == the new height of the child
+		// in other words, the parent's height has already been incremented
 		return new WebID(((int) Math.pow(2, this.height - 1)) | webID.getValue());
 	}
 
+	/**
+	 * gets the web ID of the parent node to the current node
+	 * @return
+	 */
 	public WebID getParentNodeID() {
 		return new WebID(this.webID.getValue() ^ Integer.highestOneBit(this.webID.getValue()));
 	}
@@ -547,6 +756,11 @@ public class Node implements NodeInterface {
 	/*
 	 * "State Checker" Methods
 	 * --------------------------------------------------------------
+	 */
+	
+	
+	/**
+	 * updates the list of neighbors and surrogate neighbors for the current node
 	 */
 	public void updateAllNeighborTypes() {
 		ArrayList<WebID> surNeighborsList = new ArrayList<WebID>();
@@ -580,6 +794,10 @@ public class Node implements NodeInterface {
 
 	}
 
+	/**
+	 * gets a list of type webID for all of the lower neighbors to the current node
+	 * @return
+	 */
 	public List<WebID> checkLowerNeighbors() {
 		ArrayList<WebID> lowerNeighborsList = new ArrayList<WebID>();
 
@@ -592,6 +810,10 @@ public class Node implements NodeInterface {
 		return lowerNeighborsList;
 	}
 
+	/**
+	 * finds the lowest node, where a node can be inserted at
+	 * @return
+	 */
 	public Node findHole() {
 		Node parent = null;
 		// check this node first
@@ -609,6 +831,10 @@ public class Node implements NodeInterface {
 		return parent;
 	}
 	
+	/**
+	 * finds a node that is at the highest location which will be used in the deletion process
+	 * @return
+	 */
 	public Node findHighestNode(){
 		
 		Node highestNode = null;
@@ -627,9 +853,12 @@ public class Node implements NodeInterface {
 		return highestNode;
 	}
 
+	/**
+	 * gets a list of higher neighbors for the current node.
+	 * @return
+	 */
 	public List<WebID> checkHigherNeighbors() {
 		
-		//TODO returns a list of the higher neighbors
 		ArrayList<WebID> higherNeighborsList = new ArrayList<WebID>();
 
 		for (WebID neighborID : neighbors) {
@@ -646,6 +875,10 @@ public class Node implements NodeInterface {
 	 * --------------------------------------------------------------
 	 */
 
+	/**
+	 * Unit tests for the node class
+	 *
+	 */
 	public static class NodeMethodsTests {
 
 		@BeforeClass
@@ -664,6 +897,9 @@ public class Node implements NodeInterface {
 		public void tearDown() throws Exception {
 		}
 
+		/**
+		 * tests the moethod that informs all of a node's neighbors that they are now neighbors
+		 */
 		@Test
 		public void testInformNeighbors() {
 			hwSetup5();
@@ -706,6 +942,9 @@ public class Node implements NodeInterface {
 			assertTrue(n7.neighbors.contains(n5.webID));
 		}
 
+		/**
+		 * tests the method that informs all of a node's surrogate neighbors that they are now surrogate neighbors
+		 */
 		@Test
 		public void testInformSurNeighbors() {
 			hwSetup5();
@@ -745,6 +984,9 @@ public class Node implements NodeInterface {
 			assertTrue(n3.invSurNeighbors.size() == 0);
 		}
 
+		/**
+		 * tests the method that increases the height of a node
+		 */
 		@Test
 		public void testIncreaseHeight() {
 			Node n = new Node(new WebID(0), 1);
@@ -753,6 +995,9 @@ public class Node implements NodeInterface {
 			assertEquals(h + 1, n.height);
 		}
 
+		/**
+		 * tests the method that gets the parent
+		 */
 		@Test
 		public void testGetParent() {
 			Node.initialize();
@@ -797,6 +1042,9 @@ public class Node implements NodeInterface {
 			assertEquals(n88.webID.getValue(), n8.getParent().getWebId());
 		}
 
+		/**
+		 * tests the method that gets the child of a given node
+		 */
 		@Test
 		public void testGetChildNodeID() {
 			Node n1 = new Node(new WebID(0), 2);
@@ -819,6 +1067,9 @@ public class Node implements NodeInterface {
 
 		}
 
+		/**
+		 * tests the method that updates all the neighbor types
+		 */
 		@Test
 		public void testUpdateAllNeighborTypes() {
 			hwSetup5();
@@ -871,6 +1122,9 @@ public class Node implements NodeInterface {
 			assertTrue(n7.surNeighbors.contains(new WebID(1)));
 		}
 
+		/**
+		 * tests the method that broadcasts the node state change
+		 */
 		@Test
 		public void testBroadcastNodeStateChange() {
 			hwSetup4();
@@ -888,6 +1142,9 @@ public class Node implements NodeInterface {
 			}
 		}
 
+		/**
+		 * creates a hyperweb with 6 nodes, not including webID 5 and 7
+		 */
 		private void hwSetup1() {
 			Node.initialize();
 
@@ -906,6 +1163,9 @@ public class Node implements NodeInterface {
 			nodes.put(n6.webID, n6);
 		}
 
+		/**
+		 * creates a hyperweb with 6 nodes, not including webID 5 and 6
+		 */
 		private void hwSetup2() {
 			Node.initialize();
 
@@ -924,6 +1184,9 @@ public class Node implements NodeInterface {
 			nodes.put(n7.webID, n7);
 		}
 
+		/**
+		 * creates a hypeerweb with 8 nodes
+		 */
 		private void hwSetup3() {
 			Node.initialize();
 
@@ -944,8 +1207,9 @@ public class Node implements NodeInterface {
 			nodes.put(n7.webID, n7);
 		}
 
-		// perfect 3 dimensional hypercube
-		// used for testBroadcastNodeStateChange
+		/**
+		 * tests a 3 dimensional hypeercube, which is used for testBroadcastNodeStateChange
+		 */
 		private void hwSetup4() {
 			Node.initialize();
 
@@ -986,7 +1250,9 @@ public class Node implements NodeInterface {
 			n7.setNodeState(Insertable.getSingleton());
 		}
 
-		// 2 dimensional hypercube
+		/**
+		 * tests a 2 dimensional hypeerweb
+		 */
 		private void hwSetup5() {
 			Node.initialize();
 
