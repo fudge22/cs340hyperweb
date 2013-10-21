@@ -601,26 +601,17 @@ public class Node implements NodeInterface {
 		
 		}
 		return start;
-		
-		
-		
-	
-		
 	}
+	
 	public static Node getRandomNode() {
 		Random generator = new Random();
 		int randomInsertionPoint = generator.nextInt(2147483647);
 		
-
-		
-		
 		WebID insertPointID = null;
 		
 		for (WebID id : nodes.keySet()) {
-			
-				insertPointID = id;
-				break;
-			
+			insertPointID = id;
+			break;
 		}
 		
 		Node insertPoint  = Node.getNode(getNearNode(new WebID( randomInsertionPoint),insertPointID));
@@ -652,6 +643,29 @@ public class Node implements NodeInterface {
 		} else {
 			// disconnect and replace deleted
 		}
+		
+	}
+	
+	public void disconnect() {
+		WebID parentID = this.getParentNodeID();
+		Node parent = getNode(parentID);
+		parent.decreaseHeight();
+		
+		ArrayList<WebID> neighborList = new ArrayList<WebID>();
+		ArrayList<WebID> surNeighborList = new ArrayList<WebID>();
+		neighborList.addAll(this.neighbors);
+		surNeighborList.addAll(this.surNeighbors);
+		// set parent of this node as surNeighbor to my neighbors 
+		for (WebID neighborID : neighborList) {
+			if (!neighborID.equals(parentID)) {
+				getNode(neighborID).addSurNeighbor(parentID);
+			}
+		}
+		// remove all invSurNeighbors that point to this node
+		for (WebID surNeighborID : surNeighborList) {
+			getNode(surNeighborID).removeInvSurNeighbor(this.getWebID());
+		}
+		this.getFoldState().removeFoldsOf(this);
 		
 	}
 	

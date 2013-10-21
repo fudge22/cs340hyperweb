@@ -75,14 +75,14 @@ public class UnstableISF extends FoldState {
 	}
 
 	/**
-	 * I am not sure how to do this, I have some good pictures of possibilities, but not much else
+	 * Should never be called here because an edge node will never be in this fold state
+	 * (it has up pointers in the form of a inv sur fold)
 	 * 
 	 * @param d	The node to be removed
 	 */
 	@Override
 	public void removeFoldsOf(Node d) {
-		
-		
+		System.err.println("can't disconnect here because it has an inv sur fold (up pointer)");
 	}
 	/**
 	 * returns an integer value of this type of fold state which should always be two

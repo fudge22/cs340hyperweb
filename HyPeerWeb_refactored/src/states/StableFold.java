@@ -103,11 +103,11 @@ public class StableFold extends FoldState {
 		//The fold of d is going to be removed and will get the parent of d as the surrogate fold
 		fold.setFoldState(UnstableSF.getSingleton());
 		fold.setFoldID(null);
-		fold.setSurrogateFoldID(newSurrogateFold.getWebID());
+		fold.addSurFold(newSurrogateFold.getWebID());
 		
 		//the parent of d will get to know the old fold of d
 		newSurrogateFold.setFoldState(UnstableISF.getSingleton());
-		newSurrogateFold.setInvSurrogateFoldID(fold.getWebID());
+		newSurrogateFold.addInvSurFold(fold.getWebID());	
 	}
 	
 	/**
@@ -123,13 +123,20 @@ public class StableFold extends FoldState {
 		
 		//d needs to cut all of it's connections and set it's fold to become folds with another node
 		Node fold = (Node) d.getFold();
-		Node invSurFold = (Node) d.getFold().getInverseSurrogateFold();
+		Node invSurFold = (Node) fold.getInverseSurrogateFold();
 		
 		invSurFold.setFoldID(fold.getWebID());
-		invSurFold.setSurrogateFoldID(null);
 		
-		fold.setFoldID(invSurFold.getFoldID());
-		fold.setInvSurrogateFoldID(null);
+		WebID surFoldToRemove = invSurFold.getSurrogateFoldID();
+		if (surFoldToRemove != null) {
+			invSurFold.removeSurFold(surFoldToRemove);
+		}
+		
+		fold.setFoldID(invSurFold.getWebID());
+		WebID invSurFoldToRemove = fold.getInvSurrogateFoldID();
+		if (invSurFoldToRemove != null) {
+			fold.removeSurFold(invSurFoldToRemove);
+		}
 	}
 
 	/**

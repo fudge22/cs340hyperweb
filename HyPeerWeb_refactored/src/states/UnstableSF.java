@@ -66,20 +66,15 @@ public class UnstableSF extends FoldState {
 	}
 
 	/**
-	 * This function assumes that the node being deleted has a surrogate fold but no fold and no
-	 * Inverse Surrogate fold. In such a case, the node to be removed (node d) only needs to tell
-	 * its surrogate fold that it no longer has a surrogate fold, and to change its status to a 
-	 * stable fold. 
+	 * Should never be called here because an edge node will never be in this fold state
+	 * (this node should have a child. in other words, this node is not an edge node)
 	 * 
 	 * @param d	the node that will be removed
 	 */
 	@Override
 	public void removeFoldsOf(Node d) {
-		Node surrogateFold = (Node) d.getSurrogateFold();
-		surrogateFold.setFoldState(StableFold.getSingleton());
-		surrogateFold.setInvSurrogateFoldID(null);
-		
-		d.setSurrogateFoldID(null);
+		System.err.println("can't disconnect here because it this node should "
+				+ "have a child (in other words, this is not an edge node");
 	}
 	
 	/**

@@ -1,9 +1,6 @@
 package states;
 
-import java.util.List;
-
 import model.Node;
-import model.WebID;
 
 /*
  * a node is in the "Insertable" state if ALL of these conditions are true:
