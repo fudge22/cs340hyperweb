@@ -570,24 +570,63 @@ public class Node implements NodeInterface {
 		
 		return nodes.get(0);
 	}
+	private static WebID getNearNode(WebID bigNumber, WebID startID){
+		WebID start = startID;
+		int highest = start.getNumberBitsInCommon(bigNumber);
 	
+		boolean reached = false;
+		while (!reached){
+		HashSet<WebID> relations = new HashSet<WebID>();
+				
+		Node check = Node.getNode(start);
+		relations.addAll(check.getNeighborList());
+		relations.addAll(check.getSurNeighborList());
+		relations.addAll(check.getInvSurNeighborList());
+		if (check.getFoldID() != null)
+			relations.add(check.getFoldID());
+		if (check.getSurrogateFoldID() != null)
+			relations.add(check.getSurrogateFoldID());
+		reached = true;
+		for (WebID w : relations){
+			int number  = w.getNumberBitsInCommon(bigNumber);
+			if (number > highest){
+				start = w;
+				
+				reached = false;
+				
+				highest = number;
+			}
+			
+		}
+		
+		}
+		return start;
+		
+		
+		
+	
+		
+	}
 	public static Node getRandomNode() {
 		Random generator = new Random();
-		int randomInsertionPoint = generator.nextInt(nodes.size() - 1);
-		// possibly will have to change logic later
+		int randomInsertionPoint = generator.nextInt(2147483647);
+		
 
-		int count = 0;
-		WebID insertPointID = new WebID(0);
+		
+		
+		WebID insertPointID = null;
+		
 		for (WebID id : nodes.keySet()) {
-			if (count == randomInsertionPoint) {
+			
 				insertPointID = id;
 				break;
-			}
-			count++;
+			
 		}
+		
+		Node insertPoint  = Node.getNode(getNearNode(new WebID( randomInsertionPoint),insertPointID));
 		// function to find closest node
 
-		Node insertPoint = getNode(insertPointID);
+		
 		return insertPoint;
 	}
 

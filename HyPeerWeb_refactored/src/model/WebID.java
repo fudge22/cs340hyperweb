@@ -36,5 +36,28 @@ public class WebID {
 	public String toString() {
 		return "" + id;
 	}
-	
+	private  int countNumZero(String binString)
+	{
+	    int counter = 0;
+	    char compare = '0';
+	    for (int x = 0; x< binString.length(); x++){
+	    	if (binString.charAt(x) == compare){
+	    		counter++;
+	    	}
+	    }
+	   return counter;
+	}
+	public int getNumberBitsInCommon( WebID w){
+		int a = this.id ^ w.getValue();
+		String binString = Integer.toBinaryString(a);
+		String pad = "";
+		for (int x = 0; x< 32 -binString.length(); x++){
+			pad += "0";
+		}
+		String countNum = pad + binString;
+		
+		int count = countNumZero(countNum);
+
+		return count;
+	}
 }
