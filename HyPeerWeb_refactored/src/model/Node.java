@@ -639,13 +639,40 @@ public class Node implements NodeInterface {
 		
 		// if the node we are trying to delete is an edge node, just delete it
 		if (randomDeleteNode.getUpState().equals(Deletable.getSingleton())) {
-			// disconnect
+			disconnectPoint.disconnect();
 		} else {
 			// disconnect and replace deleted
+			disconnectPoint.disconnect();
+			disconnectPoint.getConnectionsFrom(randomDeleteNode);
+			nodes.put(randomDeleteNode.getWebID(), disconnectPoint);
+			
 		}
+		nodes.remove(disconnectPoint.getWebId());
+
+	}
+	private void getConnectionsFrom(Node n) {
+		
+		this.webID = n.webID;
+		this.height = n.height;
+		this.foldID = n.foldID;
+		this.surrogateFoldID = n.surrogateFoldID;
+		this.invSurrogateFoldID = n.invSurrogateFoldID;
+		this.neighbors = n.neighbors;
+		this.surNeighbors = n.surNeighbors;
+		this.invSurNeighbors = n.invSurNeighbors;
+		this.selfDown = n.selfDown;
+		this.neighborDown = n.neighborDown;
+		this.doubleNeighborDown = n.doubleNeighborDown;
+		this.selfUp = n.selfUp;
+		this.neighborUp = n.neighborUp;
+		this.doubleNeighborUp = n.doubleNeighborUp;
+		this.lowerNeighbors = n.lowerNeighbors;
+		this.higherNeighbors = n.higherNeighbors;
+		this.upState = n.upState;
+		this.downState = n.downState;
+		this.foldState = n.foldState;
 		
 	}
-	
 	public void disconnect() {
 		WebID parentID = this.getParentNodeID();
 		Node parent = getNode(parentID);
