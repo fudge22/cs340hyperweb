@@ -1,0 +1,37 @@
+package states;
+
+import model.Node;
+
+/*
+ * a node is in the "Insertable" state if ALL of these conditions are true:
+ * - it has no neighbors who are a lower height - it has no surrogate
+ * neighbors - it has no surrogate fold
+ * 
+ * the node will change to the "Slippery Slope" state when any of the above
+ * conditions are false
+ */
+public class Insertable extends DownState {
+	
+	private static DownState singleton = null;
+	
+	public static final int STATE_INT = 0;
+	
+	public static DownState getSingleton() {
+		if (singleton == null) {
+			singleton = new Insertable();
+		}
+		return singleton;
+	}
+	
+	private Insertable() {};
+
+	@Override
+	public void addToNode(Node parent) {
+		parent.insertChildNode();
+	}
+
+	@Override
+	public int getDownStateInt() {
+		return STATE_INT;
+	}
+}
