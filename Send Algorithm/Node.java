@@ -809,13 +809,6 @@ public class Node implements NodeInterface {
 			}
 		}
 		
-		/*
-		if(closestWebID != null) {
-			sendNode(getNode(closestWebID), endNode);
-			return;
-		}
-		*/
-		
 		for(WebID w :startNode.getNeighborList()){
 			int currentID = w.getNumberBitsInCommon(endNode.getWebID());
 			if(currentID > closestID) {
