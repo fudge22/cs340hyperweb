@@ -38,7 +38,9 @@ public class Node implements NodeInterface {
 	private Set<WebID> doubleNeighborUp;
 	private Set<WebID> lowerNeighbors;
 	private Set<WebID> higherNeighbors;
+
 	private WebID currentChild;
+	private Contents contents = new Contents();
 	
 	// constructors
 	public Node(WebID webID, int height, WebID foldID, WebID surrogateFoldID,
@@ -1087,6 +1089,14 @@ public class Node implements NodeInterface {
 			n.updateUpState();
 		} 
 		
+	}
+
+	public void accept(Visitor visitor, Parameters parameters){
+		visitor.visit(this, parameters);
+	}
+	
+	public Contents getContents(){
+		return contents;
 	}
 }
 
