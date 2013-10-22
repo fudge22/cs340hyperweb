@@ -14,7 +14,7 @@ import states.*;
 public class Node implements NodeInterface {
 
 	// debug flag
-	private static boolean debug = false;
+	private static boolean debug = true;
 	// instance variables
 	private static HashMap<WebID, Node> nodes;
 	private WebID webID;
@@ -38,6 +38,7 @@ public class Node implements NodeInterface {
 	private Set<WebID> doubleNeighborUp;
 	private Set<WebID> lowerNeighbors;
 	private Set<WebID> higherNeighbors;
+	private WebID currentChild;
 	
 	// constructors
 	public Node(WebID webID, int height, WebID foldID, WebID surrogateFoldID,
@@ -45,7 +46,7 @@ public class Node implements NodeInterface {
 				List<WebID> invSurNeighbors, Set<WebID> selfDown, Set<WebID> neighborDown, 
 				Set<WebID> doubleNeighborDown, Set<WebID> selfUp, Set<WebID> neighborUp, 
 				Set<WebID> doubleNeighborUp, Set<WebID> lowerNeighbors, Set<WebID> higherNeighbors,
-				int foldStateInt, int downStateInt, int upStateInt) {
+				WebID currentChild, int foldStateInt, int downStateInt, int upStateInt) {
 		this.webID = webID;
 		this.height = height;
 		this.foldID = foldID;
@@ -62,6 +63,7 @@ public class Node implements NodeInterface {
 		this.doubleNeighborUp = doubleNeighborUp;
 		this.lowerNeighbors = lowerNeighbors;
 		this.higherNeighbors = higherNeighbors;
+		this.currentChild = currentChild;
 		
 		switch (foldStateInt) {
 		case 0:
@@ -115,6 +117,7 @@ public class Node implements NodeInterface {
 		this.downState = Insertable.getSingleton();
 		this.upState = Deletable.getSingleton();
 		this.foldState = StableFold.getSingleton();
+		this.currentChild = null;
 	}
 
 	// getters and setters
@@ -294,6 +297,8 @@ public class Node implements NodeInterface {
 		parent.informInvSurNeighbors();
 
 		parent.foldState.updateFoldOf(parent, child);
+		
+		parent.setCurrentChild(childID);
 
 		return child;
 	}
@@ -528,7 +533,8 @@ public class Node implements NodeInterface {
 
 		nodes.put(new WebID(0), new Node(new WebID(0), 0));
 		
-		nodes.get(new WebID(0)); // it has no parent
+		nodes.get(new WebID(0)).setUpState(Deletable.getSingleton());
+		
 		return nodes.get(new WebID(0));
 	}
 
@@ -552,11 +558,13 @@ public class Node implements NodeInterface {
 		first.setDownState(Insertable.getSingleton());
 		second.setDownState(Insertable.getSingleton());
 		
-		first.setUpState(Deletable.getSingleton());
+		first.setUpState(Incline.getSingleton());
 		second.setUpState(Deletable.getSingleton());
 		
 		first.setFoldState(StableFold.getSingleton());
 		second.setFoldState(StableFold.getSingleton());
+		
+		first.setCurrentChild(second.getWebID());
 
 		return second;
 
@@ -633,9 +641,13 @@ public class Node implements NodeInterface {
 		Node randomStartNode = getRandomNode();
 		Node randomDeleteNode = getRandomNode();
 		
-		Node disconnectPoint = randomStartNode.getUpState().findEdgeNodeFrom(randomStartNode);
+		debugInfo("Starting at node " + randomStartNode.getWebId());
 		
-		debugInfo("Trying to remove from " + disconnectPoint.getWebId());
+		Node disconnectPoint = randomStartNode.getUpState().findEdgeNodeFrom(randomStartNode);
+		WebID disconnectID = disconnectPoint.getWebID();
+		
+		debugInfo("Trying to disconnect " + disconnectPoint.getWebId());
+		debugInfo("Trying to delete " + randomDeleteNode.getWebId());
 		
 		// if the node we are trying to delete is an edge node, just delete it
 		if (randomDeleteNode.getUpState().equals(Deletable.getSingleton())) {
@@ -647,7 +659,9 @@ public class Node implements NodeInterface {
 			nodes.put(randomDeleteNode.getWebID(), disconnectPoint);
 			
 		}
-		nodes.remove(disconnectPoint.getWebId());
+		nodes.remove(disconnectID);
+		
+		printHyperWeb();
 
 	}
 	private void getConnectionsFrom(Node n) {
@@ -673,10 +687,13 @@ public class Node implements NodeInterface {
 		this.foldState = n.foldState;
 		
 	}
+	
 	public void disconnect() {
 		WebID parentID = this.getParentNodeID();
 		Node parent = getNode(parentID);
 		parent.decreaseHeight();
+		
+		parent.setCurrentChild(parent.getChildNodeID());
 		
 		ArrayList<WebID> neighborList = new ArrayList<WebID>();
 		ArrayList<WebID> surNeighborList = new ArrayList<WebID>();
@@ -704,6 +721,10 @@ public class Node implements NodeInterface {
 	// assume this.height < the new height of the child
 	// in other words, the parent's height has NOT already been incremented
 	public WebID getChildNodeID() {
+		// no height means no children or no neighbors
+		if (this.height == 0) {
+			return null;
+		}
 		return new WebID(((int) Math.pow(2, this.height)) | webID.getValue());
 	}
 
@@ -746,16 +767,21 @@ public class Node implements NodeInterface {
 		Node neighbor;
 		for (WebID neighborID : this.getNeighborList()) {
 			neighbor = getNode(neighborID);
+			// after increase from add - child will only have equal neighbors and 
+			// parent will only have equal or lower neighbors
+			// after decrease from delete - parent will only have equal or higher neighbors
 			if (this.getHeight() == neighbor.getHeight()) {
 				this.removeLowerNeighbor(neighborID);
 				this.removeHigherNeighbor(neighborID);
 				neighbor.removeLowerNeighbor(this.getWebID());
 				neighbor.removeHigherNeighbor(this.getWebID());
 			}
+			// only happens to parent on increase
 			else if (this.getHeight() > neighbor.getHeight()) {
 				this.addLowerNeighbor(neighborID);
 				neighbor.addHigherNeighbor(this.getWebID());
 			}
+			// only happens on decrease
 			else {
 				this.addHigherNeighbor(neighborID);
 				neighbor.addLowerNeighbor(this.getWebID());
@@ -947,18 +973,22 @@ public class Node implements NodeInterface {
 	
 	public void addHigherNeighbor(WebID id) {
 		this.higherNeighbors.add(id);
-		this.selfUp.add(id);
-		this.updateUpState();
-		this.addUpStatusTwoHopsAway();
+//		this.selfUp.add(id);
+//		this.updateUpState();
+//		this.addUpStatusTwoHopsAway();
 	}
 	
 	public void removeHigherNeighbor(WebID id) {
 		this.higherNeighbors.remove(id);
-		this.selfUp.remove(id);
-		this.updateUpState();
-		if (!hasUpPointers()) {
-			this.removeUpStatusTwoHopsAway();
-		}
+//		this.selfUp.remove(id);
+//		this.updateUpState();
+//		if (!hasUpPointers()) {
+//			this.removeUpStatusTwoHopsAway();
+//		}
+	}
+	
+	public void setCurrentChild(WebID childID) {
+		this.currentChild = childID;
 	}
 	
 	public WebID slideUp() {
@@ -970,6 +1000,9 @@ public class Node implements NodeInterface {
 		}
 		else if (this.doubleNeighborUp.size() > 0) {
 			return this.doubleNeighborUp.iterator().next();
+		}
+		else if (this.currentChild != null) {
+			return this.currentChild;
 		}
 		else {
 			System.err.println("No higher node found in incline");
@@ -992,7 +1025,8 @@ public class Node implements NodeInterface {
 	public boolean knowsUpPointers() {
 		return (this.selfUp.size() > 0 ||
 				this.neighborUp.size() > 0 ||
-				this.doubleNeighborUp.size() > 0);
+				this.doubleNeighborUp.size() > 0 ||
+				this.currentChild != null);
 	}
 	
 	public void addUpStatusTwoHopsAway() {
