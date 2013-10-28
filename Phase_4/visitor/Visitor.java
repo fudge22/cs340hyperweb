@@ -6,6 +6,6 @@ import model.Node;
  * Interface for the visitor pattern.
  *
  */
-public interface Visitor {
-	public void visit(Node node, Parameters parameters);
+abstract public class Visitor {
+	abstract public void visit(Node node, Parameters parameters);
 }
