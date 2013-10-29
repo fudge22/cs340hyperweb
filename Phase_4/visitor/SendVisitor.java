@@ -1,25 +1,48 @@
 package visitor;
 
 import model.Node;
+import model.WebID;
 
-public class SendVisitor implements Visitor{
+public class SendVisitor extends Visitor{
 
-	protected static String TARGET_KEY;
+	protected static WebID myID;
 	
 	/**
 	 * default constructor
 	 */
 	public SendVisitor(){
-		super();
-		TARGET_KEY = "";
+		myID = new WebID(0);
 	}
+	
+	public SendVisitor(WebID targetID) {
+		myID = targetID;
+	}
+	
 	
 	/**
 	 * visit method
 	 */
-	@Override
-	public void visit(Node node, Parameters parameters) {
-		node.accept(this,parameters);
+	public void visit(Node node) {
+		if(node.getWebID() == myID) {
+			targetOperation(node);
+		} else {
+			intermediateOperation(node);
+			node = node.sendFirstNode(myID);
+			secondVisit(node);
+		}
+	}
+	
+	public void secondVisit(Node node) {
+		if(node.getWebID().equals(myID)) {
+			targetOperation(node);
+		} else {
+			intermediateOperation(node);
+			Node nextNode = node.sendNode(myID);
+			if(nextNode != null) {
+				nextNode.accept(this);
+			}
+		}
+		//node.accept(this, parameters);
 	}
 	
 	/**
@@ -29,7 +52,7 @@ public class SendVisitor implements Visitor{
 	 * @return
 	 */
 	public static Parameters createInitialParameters(int target){
-		TARGET_KEY = "" + target;
+		myID = new WebID(target);
 		return new Parameters(target);
 	}
 	
@@ -39,9 +62,9 @@ public class SendVisitor implements Visitor{
 	 * @param node
 	 * @param parameters
 	 */
-	protected void intermediateOperation(Node node, Parameters parameters){
-		// TODO this operation needs to be performed on a node as we traverse to the target node.
-		
+	protected void intermediateOperation(Node node){
+		System.out.println("Visiting node " + node.getWebId() + " through vistor pattern and " + 
+				"trying to get to node " + myID.toString());
 	}
 	
 	/**
@@ -50,10 +73,8 @@ public class SendVisitor implements Visitor{
 	 * @param node
 	 * @param parameters
 	 */
-	protected /*abstract*/ void targetOperation(Node node, Parameters parameters){
-		// TODO this is the abstract operation to be performed on the targetNode. 
-		//      It must be overridden in any concrete subclass and have abstract added to the method header.
-		//      Not really sure what the subclass would be.
-		
+	protected void targetOperation(Node node){
+		System.out.println(node.toString() + "\npackage delivered\n");
+		return;
 	}
 }

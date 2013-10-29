@@ -751,17 +751,17 @@ public class Node implements NodeInterface {
 	 * @param startNone	the node that we are sending the command from
 	 * @param endNode	the node that will be recieving the command from the start node 
 	 */
-	public static Node sendFirstNode(Node startNode, WebID endNode) {
+	public Node sendFirstNode(WebID endNode) {
 		//compare the closeness of a neighbor of the start node, and the fold of the node
-		WebID foldID = startNode.getFoldID();
+		WebID foldID = this.getFoldID();
 		if(foldID == null) {
-			foldID = startNode.getSurrogateFoldID();
+			foldID = this.getSurrogateFoldID();
 		}
 		
 		// all neighbors will have the same distance from the start node, so just grab the first one
-		WebID neighborID = startNode.getNeighborList().get(0);
+		WebID neighborID = this.getNeighborList().get(0);
 		if(neighborID == null) {
-			neighborID = startNode.getInvSurNeighborList().get(0);
+			neighborID = this.getInvSurNeighborList().get(0);
 		}
 		
 		//compare the two webIDs for which one will get us closer to the final node
@@ -770,7 +770,7 @@ public class Node implements NodeInterface {
 		
 		if(commonNeighborID > commonFoldID) {
 			//go through the neighbors
-			return startNode;
+			return this;
 		} else {
 			//go to the fold and then go through the neighbors
 			return getNode(foldID);
@@ -793,14 +793,14 @@ public class Node implements NodeInterface {
 	 * @param startNode
 	 * @param endNode
 	 */
-	public static Node sendNode(Node startNode, WebID endNode) {
+	public Node sendNode(WebID endNode) {
 		//Check to see if we have arrived at the end node
-		System.out.println("Start node: " + startNode.getWebId());
+		System.out.println("Start node: " + this.getWebId());
 		System.out.println("End node: " + endNode.toString());
 		
 		int closestID = 0;
 		WebID closestWebID = null;
-		for(WebID w : startNode.getInvSurNeighborList()){
+		for(WebID w : this.getInvSurNeighborList()){
 			int currentID = w.getNumberBitsInCommon(endNode);
 			if(currentID > closestID) {
 				closestID = currentID;
@@ -808,7 +808,7 @@ public class Node implements NodeInterface {
 			}
 		}
 		
-		for(WebID w :startNode.getNeighborList()){
+		for(WebID w : this.getNeighborList()){
 			int currentID = w.getNumberBitsInCommon(endNode);
 			if(currentID > closestID) {
 				closestID = currentID;
@@ -822,7 +822,7 @@ public class Node implements NodeInterface {
 			return node;
 		}
 		
-		for(WebID w :startNode.getSurNeighborList()){
+		for(WebID w : this.getSurNeighborList()){
 			int currentID = w.getNumberBitsInCommon(endNode);
 			if(currentID == closestID) {
 				closestID = currentID;
