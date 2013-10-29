@@ -66,7 +66,7 @@ public class Parameters {
 	 * @param key
 	 * @param value
 	 */
-	public void set(String key, Object value){
+	public void set(String key, Object value){//command?
 		map.put(key, (int)value);
 	}
 }

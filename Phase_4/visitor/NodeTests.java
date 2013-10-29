@@ -1,10 +1,9 @@
-package tests;
+package visitor;
 import static org.junit.Assert.*;
 
 import model.HyperWeb;
 import model.Node;
 import model.WebID;
-import visitor.*;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -37,17 +36,6 @@ public class NodeTests {
 	public void tearDown() throws Exception {
 	}
 	
-	/*
-	@Test
-	public void addMoreNodes() {
-		for (int i = 0; i < 32; i++) {
-			System.out.println(i);
-			hw.addNode();
-			v.validate();
-		}
-	}
-	*/
-	
 	@Test 
 	public void testSend() {
 		for(int i = 0; i < 32; i++) {
@@ -63,9 +51,17 @@ public class NodeTests {
 		
 		newVisitor = new SendVisitor(new WebID(15));
 		newVisitor.visit(Node.getNode(new WebID(0)));
-		
-		int foo = Integer.parseInt("1001", 2);
-		System.out.println(foo);
+	}
+	
+	@Test 
+	public void testBroadcast() {
+		for(int i = 0; i < 32; i++) {
+			//System.out.println(i);
+			hw.addNode();
+			v.validate();
+		}
+		BroadcastVisitor newVisitor = new BroadcastVisitor();
+		newVisitor.visit(Node.getNode(new WebID(0)));
 	}
 
 }

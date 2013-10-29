@@ -46,21 +46,9 @@ public class SendVisitor extends Visitor{
 	}
 	
 	/**
-	 * Created the initial parameters
-	 * 
-	 * @param target
-	 * @return
-	 */
-	public static Parameters createInitialParameters(int target){
-		myID = new WebID(target);
-		return new Parameters(target);
-	}
-	
-	/**
 	 * This is the operation that needs to be performed on a node as it is traversed to the target node. (Track the path)
 	 * 
 	 * @param node
-	 * @param parameters
 	 */
 	protected void intermediateOperation(Node node){
 		System.out.println("Visiting node " + node.getWebId() + " through vistor pattern and " + 
@@ -71,7 +59,6 @@ public class SendVisitor extends Visitor{
 	 * This is the operation that needs to be performed on the target node.
 	 * 
 	 * @param node
-	 * @param parameters
 	 */
 	protected void targetOperation(Node node){
 		System.out.println(node.toString() + "\npackage delivered\n");

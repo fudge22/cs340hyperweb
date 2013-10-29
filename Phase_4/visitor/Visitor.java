@@ -7,5 +7,5 @@ import model.Node;
  *
  */
 abstract public class Visitor {
-	abstract public void visit(Node node, Parameters parameters);
+	abstract public void visit(Node node);
 }
