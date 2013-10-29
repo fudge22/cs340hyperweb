@@ -100,44 +100,47 @@ public class StableFold extends FoldState {
 	
 			Node fold = (Node) d.getFold();
 			Node parent = (Node) d.getParent();
-			System.out.println("Node to remove folds of: " + d.getWebID());
-			System.out.println("That Node's parent: " + parent.getWebId());
-			System.out.println("Fold: " + fold.getWebId());
-		if (fold.getFoldState() == StableFold.getSingleton()  && d.getWebId() != 1 ){
-		
 			
 			
-			//The fold of d is going to be removed and will get the parent of d as the surrogate fold
-			fold.setFoldState(UnstableSF.getSingleton());
-			fold.setFoldID(null);
-			fold.addSurFold(parent.getWebID());
-			parent.setFoldState(UnstableISF.getSingleton());
+			
+			if (parent.getFoldState().equals(StableFold.getSingleton())){
+				
+				if (d.getWebID().equals(new WebID(1)))
+				{
+				    fold.setFoldID(null);
+				    
+					return;
+				}
+				
+				if (d.getWebID().equals(new WebID(0)))
+				return;
+				
+			
+				parent.addInvSurFold(fold.getWebID());
+				fold.setFoldID(null);
+				fold.addSurFold(parent.getWebID());
+				parent.setFoldState(UnstableISF.getSingleton());
+				((Node)parent.getInverseSurrogateFold()).setFoldState(UnstableSF.getSingleton());
+				
+				
+				
+			}
+			else if (parent.getFoldState().equals(UnstableSF.getSingleton())) //should always be either stable or unstable surrogate fold state
+			{
+				parent.setFoldID(parent.getSurrogateFoldID());
+				parent.removeSurFold(parent.getSurrogateFoldID());
+				Node parentFold = Node.getNode(parent.getFoldID());
+				parentFold.setFoldID(parent.getWebID());
+				parentFold.removeInvSurFold(parentFold.getInvSurrogateFoldID());
+				parent.setFoldState(StableFold.getSingleton());
+				parentFold.setFoldState(StableFold.getSingleton());
+			} else {
+				System.err.println("should always be either stable or unstable surrogate fold state?");
+			}
+			
 			
 		
-			parent.addInvSurFold(fold.getWebID());	
 		
-		}
-		else if (fold.getFoldState() == StableFold.getSingleton() && d.getWebId() == 1)
-		{
-		parent.setFoldState(StableFold.getSingleton());	
-		parent.setInvSurrogateFoldID(null);
-		parent.setSurrogateFoldID(null);
-		
-	
-		}
-		else
-		{
-			fold.setFoldState(StableFold.getSingleton());
-			fold.setFoldID(parent.getWebID());
-			
-			
-			parent.setFoldState(StableFold.getSingleton());
-			parent.setFoldID(fold.getWebID());
-			fold.setInvSurrogateFoldID(null);
-		}
-		
-		fold.updateUpState();
-		parent.updateUpState();
 	}
 	
 	/**

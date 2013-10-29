@@ -28,6 +28,12 @@ public class Incline extends UpState {
 	@Override
 	public Node findEdgeNodeFrom(Node n) {
 		Node higherNode = n;
+		if ( higherNode == null) {
+			System.out.println("hi");
+		}
+		if ( higherNode.getUpState() == null) {
+			System.out.println("bob");
+		}
 		// keep sliding as long as we are slippery
 		while (higherNode.getUpState().equals(Incline.getSingleton())) {
 			higherNode = Node.getNode(higherNode.slideUp());

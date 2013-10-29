@@ -38,13 +38,13 @@ public class NodeTests {
 	
 	@Test
 	public void addMoreNodes() {
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < 1000; i++) {
 			System.out.println(i);
 			hw.addNode();
 			v.validate();
 		}
 		
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < 1000; i++) {
 			System.out.println(i);
 			hw.removeNode();
 			v.validate();

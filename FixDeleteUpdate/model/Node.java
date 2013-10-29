@@ -14,7 +14,7 @@ import states.*;
 public class Node implements NodeInterface {
 
 	// debug flag
-	private static boolean debug = true;
+	private static boolean debug = false;
 	// instance variables
 	private static HashMap<WebID, Node> nodes;
 	private WebID webID;
@@ -611,7 +611,7 @@ parentNode = new WebID(this.webID.getValue() ^ Integer.highestOneBit(this.webID.
 				
 		Node check = Node.getNode(start);
 		if (check == null){
-			System.out.println("error");
+			System.err.println("error");
 		}
 		relations.size();
 		check.getNeighborList();
@@ -715,6 +715,7 @@ parentNode = new WebID(this.webID.getValue() ^ Integer.highestOneBit(this.webID.
 		this.upState = n.upState;
 		this.downState = n.downState;
 		this.foldState = n.foldState;
+		this.currentChild = n.currentChild;
 		
 	}
 	
@@ -734,6 +735,7 @@ parentNode = new WebID(this.webID.getValue() ^ Integer.highestOneBit(this.webID.
 		for (WebID neighborID : neighborList) {
 			if (!neighborID.equals(parentID)) {
 				getNode(neighborID).addSurNeighbor(parentID);
+				getNode(parentID).addInvSurNeighbor(neighborID);
 			}
 			getNode(neighborID).removeHigherNeighbor(this.getWebID());
 			getNode(neighborID).removeLowerNeighbor(this.getWebID());
@@ -1027,7 +1029,6 @@ parentNode = new WebID(this.webID.getValue() ^ Integer.highestOneBit(this.webID.
 		
 	}
 	public WebID getCurrentChild(){
-		
 		int numLeadingZero = this.height - (Integer.SIZE - Integer.numberOfLeadingZeros(this.getWebId()));
 		if (numLeadingZero > 0){
 			return new WebID(((int) Math.pow(2, this.height - 1 )) | webID.getValue());
@@ -1035,7 +1036,11 @@ parentNode = new WebID(this.webID.getValue() ^ Integer.highestOneBit(this.webID.
 		return null;
 	}
 	public WebID slideUp() {
-		if (this.selfUp.size() > 0) {
+		if (this.currentChild != null) {
+			return this.currentChild;
+		}
+		
+		else if (this.selfUp.size() > 0) {
 			return this.selfUp.iterator().next();
 		}
 		else if (this.neighborUp.size() > 0) {
@@ -1044,9 +1049,7 @@ parentNode = new WebID(this.webID.getValue() ^ Integer.highestOneBit(this.webID.
 		else if (this.doubleNeighborUp.size() > 0) {
 			return this.doubleNeighborUp.iterator().next();
 		}
-		else if (this.currentChild != null) {
-			return this.currentChild;
-		}
+		
 		else {
 			System.err.println("No higher node found in incline");
 			return null;
@@ -1066,12 +1069,6 @@ parentNode = new WebID(this.webID.getValue() ^ Integer.highestOneBit(this.webID.
 	}
 	
 	public boolean knowsUpPointers() {
-		System.out.println("begin: " + this.getWebID());
-		System.out.println(this.selfUp.toString());
-		System.out.println(this.neighborUp);
-		System.out.println(this.doubleNeighborDown);
-		System.out.println(this.currentChild);
-		System.out.println("end");
 		return (this.selfUp.size() > 0 ||
 				this.neighborUp.size() > 0 ||
 				this.doubleNeighborUp.size() > 0 ||
@@ -1089,7 +1086,7 @@ parentNode = new WebID(this.webID.getValue() ^ Integer.highestOneBit(this.webID.
 		// loop through neighbors
 		for (Node n : neighborList) {
 			// we don't want to update neighbors with higher heights than us
-			if (this.getHeight() < n.getHeight()) {
+			if (this.getHeight() < n.getHeight() || n.getParentNodeID().equals(this.getWebID())) {
 				continue;
 			}
 			n.neighborUp.add(this.getWebID());
