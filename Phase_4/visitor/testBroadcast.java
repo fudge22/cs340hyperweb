@@ -14,14 +14,16 @@ public class testBroadcast {
 		HyperWeb hw = new HyperWeb();	
 		Validator v = new Validator(hw);
 		
-		for(int i = 0; i < 32; i++) {
+		for(int i = 0; i < 1000; i++) {
 			//System.out.println(i);
 			hw.addNode();
 			v.validate();
 		}
+		
+		
+		
 		BroadcastVisitor newVisitor = new BroadcastVisitor();
 		newVisitor.visit(Node.getNode(new WebID(0)));
-
 	}
 
 }

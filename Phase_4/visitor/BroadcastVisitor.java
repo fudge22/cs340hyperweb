@@ -7,11 +7,14 @@ import model.WebID;
 
 public class BroadcastVisitor extends Visitor{
 	
+	public static int visitCount = 1;
+	
 	/**
 	 * Default Constructor
 	 */
 	public BroadcastVisitor(){
 		super();
+		visitCount = 1;
 	}
 	
 	/**
@@ -58,7 +61,9 @@ public class BroadcastVisitor extends Visitor{
 			WebID tempWebId = new WebID(Integer.parseInt(listOfNodesToTest.get(index), 2));
 			Node tempNode = Node.getNode(tempWebId);
 			if(tempNode != null){
+				visitCount++;
 				tempNode.accept(this);
+				
 			}
 		}
 	}
@@ -75,10 +80,6 @@ public class BroadcastVisitor extends Visitor{
 		for(int index = FurthestRightOneBit; index < testNodeBSR.length()-1;index++){
 			returnList.add(testNodeBSR.substring(0, index+1) + "1" + testNodeBSR.substring(index+2, testNodeBSR.length()));
 		}
-		//special case when the string is "0"
-		if(testNodeBSR.length()==1){
-			returnList.add("1");
-		}
 		return returnList;
 	}
 
@@ -89,7 +90,7 @@ public class BroadcastVisitor extends Visitor{
 	 * @return
 	 */
 	private int findPositionOfRightwiseBitOne(String testNodeBSR) {
-		int returnValue = 0;
+		int returnValue = -1;
 		for(int index = 0; index < testNodeBSR.length();index++){
 			if(testNodeBSR.substring(index, index+1).equals("1")){
 				returnValue = index;
@@ -104,6 +105,6 @@ public class BroadcastVisitor extends Visitor{
 	 * @param node
 	 */
 	protected void intermediateOperation(Node node){
-		System.out.println("Visiting node " + node.getWebId() + " through vistor pattern, trying to broadcast.");
+		System.out.println("Visiting node " + node.getWebId() + " through vistor pattern, trying to broadcast. Total visit count = " + visitCount);
 	}
 }

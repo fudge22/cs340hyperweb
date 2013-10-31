@@ -20,6 +20,19 @@ public class Node implements NodeInterface {
 
 	// debug flag
 	private static boolean debug = false;
+	
+	@Override
+	public String toString() {
+		return "Node [webID=" + webID + 
+				"\n      height=" + height + 
+				"\n      foldID=" + foldID + 
+				"\n      surrogateFoldID=" + surrogateFoldID + 
+				"\n      invSurrogateFoldID=" + invSurrogateFoldID + 
+				"\n      neighbors=" + neighbors + 
+				"\n      surNeighbors=" + surNeighbors + 
+				"\n      invSurNeighbors=" + invSurNeighbors + "]";
+	}
+
 	// instance variables
 	private static HashMap<WebID, Node> nodes;
 	private WebID webID;
@@ -458,7 +471,6 @@ public class Node implements NodeInterface {
 		if (debug) {
 			System.out.println(info);
 		}
-		System.out.println();
 	}
 
 	private static void printHyperWeb() {

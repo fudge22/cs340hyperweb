@@ -55,7 +55,7 @@ public class NodeTests {
 	
 	@Test 
 	public void testBroadcast() {
-		for(int i = 0; i < 32; i++) {
+		for(int i = 0; i < 1000; i++) {
 			//System.out.println(i);
 			hw.addNode();
 			v.validate();
