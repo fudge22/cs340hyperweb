@@ -39,12 +39,12 @@ public class NodeTests {
 	
 	@Test
 	public void addMoreNodes() {
-		for (int i = 0; i < 32; i++) {
-			System.out.println(i);
+		for (int i = 0; i < 10000; i++) {
+//			System.out.println(i);
 			hw.addNode();
-			Validator valid = new Validator(hw);
-			valid.validate();
 		}
+		Validator valid = new Validator(hw);
+		valid.validate();
 	}
 	
 	@Test

@@ -14,7 +14,7 @@ import states.*;
 public class Node implements NodeInterface {
 
 	// debug flag
-	private static boolean debug = true;
+	private static boolean debug = false;
 	private static String lastPrintState = "";
 	private static String currentPrintState = "";
 	private static int iterationCount = 0;
@@ -309,6 +309,9 @@ public class Node implements NodeInterface {
 		
 		insertPointInfo = parent.getWebId();
 		insertedNodeInfo = child.getWebId();
+		
+		parent.updateDownPointers();
+		child.updateDownPointers();
 
 		return child;
 	}
@@ -468,98 +471,96 @@ public class Node implements NodeInterface {
 	private static void debugInfo(String info) {
 		if (debug) {
 			System.out.println(info);
+			System.out.println();
 		}
-		System.out.println();
 	}
 	
 	public static void updateInfoString() {
-		lastPrintState = currentPrintState;
-		currentPrintState = "";
-		currentPrintState += "iteration: " + iterationCount + "\n";
-		currentPrintState += "Starting at: " + startPointInfo + "\n";
-		currentPrintState += "Inserting child at: " + insertPointInfo + "\n";
-		currentPrintState += "Child inserted: " + insertedNodeInfo + "\n";	
-		currentPrintState += "# Nodes in HW: " + nodes.size() + "\n";
-		currentPrintState += "\n";
-		for (WebID w : nodes.keySet()) {
-			Node n1 = getNode(w);
-			currentPrintState += "WebID: " + w.getValue() + "\n";
-			currentPrintState += "Height: " + getNode(w).getHeight() + "\n";
-
-			if (n1.getFoldState() != null) {
-				currentPrintState += "FoldState: " + n1.getFoldState().getClass().getName()
-						+ "\n";
-			} else {
-				currentPrintState += "FoldState: null\n";
-			}
-
-			if (n1.getDownState() != null) {
-				currentPrintState += "NodeState: " + n1.getDownState().getClass().getName()
-						+ "\n";
-
-			} else {
-				currentPrintState += "NodeState: null\n";
-			}
-
-			if (n1.getFold() != null) {
-				currentPrintState += "FoldID: " + getNode(w).getFoldID().getValue() + "\n";
-			} else {
-				currentPrintState += "FoldID: null \n";
-
-			}
-
-			if (n1.getSurrogateFoldID() != null) {
-				currentPrintState += "SurrogateFoldID: "
-						+ getNode(w).getSurrogateFoldID().getValue() + "\n";
-			} else {
-				currentPrintState += "SurrogateFoldID: null\n";
-			}
-
-			if (n1.getInvSurrogateFoldID() != null) {
-				currentPrintState += "InverseSurrogateFold: "
-						+ getNode(w).getInvSurrogateFoldID().getValue() + "\n";
-			} else {
-				currentPrintState += "InverseSurrogateFold: null \n";
-			}
-			currentPrintState += "Neighbors:\n";
-			for (WebID neighbor : getNode(w).getNeighborList()) {
-				currentPrintState += "Neighbor: " + neighbor.getValue() + "\n";
-
-			}
-			currentPrintState += "Inverse Surrogate Neighbors:\n";
-			for (WebID invNeighbor : getNode(w).getInvSurNeighborList()) {
-				currentPrintState += "Inverse Neighbor: " + invNeighbor.getValue() + "\n";
-
-			}
-			currentPrintState += "Surrogate Neighbors:\n";
-			for (WebID surNeighbor : getNode(w).getSurNeighborList()) {
-				currentPrintState += "Surrogate Neighbor: " + surNeighbor.getValue() + "\n";
-
-			}
-			
-			currentPrintState += "Self Down:\n";
-			currentPrintState += n1.selfDown.toString() + "\n";
-			
-			currentPrintState += "Neighbor Down:\n";
-			currentPrintState += n1.neighborDown.toString() + "\n";
-			
-			currentPrintState += "Double Neighbor Down:\n";
-			currentPrintState += n1.doubleNeighborDown.toString() + "\n";
+		if (debug) {
+			lastPrintState = currentPrintState;
+			currentPrintState = "";
+			currentPrintState += "iteration: " + iterationCount + "\n";
+			currentPrintState += "Starting at: " + startPointInfo + "\n";
+			currentPrintState += "Inserting child at: " + insertPointInfo + "\n";
+			currentPrintState += "Child inserted: " + insertedNodeInfo + "\n";	
+			currentPrintState += "# Nodes in HW: " + nodes.size() + "\n";
 			currentPrintState += "\n";
-
+			for (WebID w : nodes.keySet()) {
+				Node n1 = getNode(w);
+				currentPrintState += "WebID: " + w.getValue() + "\n";
+				currentPrintState += "Height: " + getNode(w).getHeight() + "\n";
+	
+				if (n1.getFoldState() != null) {
+					currentPrintState += "FoldState: " + n1.getFoldState().getClass().getName()
+							+ "\n";
+				} else {
+					currentPrintState += "FoldState: null\n";
+				}
+	
+				if (n1.getDownState() != null) {
+					currentPrintState += "NodeState: " + n1.getDownState().getClass().getName()
+							+ "\n";
+	
+				} else {
+					currentPrintState += "NodeState: null\n";
+				}
+	
+				if (n1.getFold() != null) {
+					currentPrintState += "FoldID: " + getNode(w).getFoldID().getValue() + "\n";
+				} else {
+					currentPrintState += "FoldID: null \n";
+	
+				}
+	
+				if (n1.getSurrogateFoldID() != null) {
+					currentPrintState += "SurrogateFoldID: "
+							+ getNode(w).getSurrogateFoldID().getValue() + "\n";
+				} else {
+					currentPrintState += "SurrogateFoldID: null\n";
+				}
+	
+				if (n1.getInvSurrogateFoldID() != null) {
+					currentPrintState += "InverseSurrogateFold: "
+							+ getNode(w).getInvSurrogateFoldID().getValue() + "\n";
+				} else {
+					currentPrintState += "InverseSurrogateFold: null \n";
+				}
+				currentPrintState += "Neighbors:\n";
+				for (WebID neighbor : getNode(w).getNeighborList()) {
+					currentPrintState += "Neighbor: " + neighbor.getValue() + "\n";
+	
+				}
+				currentPrintState += "Inverse Surrogate Neighbors:\n";
+				for (WebID invNeighbor : getNode(w).getInvSurNeighborList()) {
+					currentPrintState += "Inverse Neighbor: " + invNeighbor.getValue() + "\n";
+	
+				}
+				currentPrintState += "Surrogate Neighbors:\n";
+				for (WebID surNeighbor : getNode(w).getSurNeighborList()) {
+					currentPrintState += "Surrogate Neighbor: " + surNeighbor.getValue() + "\n";
+	
+				}
+				
+				currentPrintState += "Self Down:\n";
+				currentPrintState += n1.selfDown.toString() + "\n";
+				
+				currentPrintState += "Neighbor Down:\n";
+				currentPrintState += n1.neighborDown.toString() + "\n";
+				
+				currentPrintState += "Double Neighbor Down:\n";
+				currentPrintState += n1.doubleNeighborDown.toString() + "\n";
+				currentPrintState += "\n";
+	
+			}
+			currentPrintState += "\n----------------------------------------------------------------------------------------------------\n";
+			
+			operationList.append(currentPrintState);
+			iterationCount++;
 		}
-		currentPrintState += "\n----------------------------------------------------------------------------------------------------\n";
-		
-		operationList.append(currentPrintState);
-		iterationCount++;
 	}
 	
 	public static void printHyperWeb() {
 		if (debug) {
-//			System.out.println("State of HW BEFORE most recent operation: ");
-//			System.out.println(lastPrintState);
-//			
-//			System.out.println("State of HW AFTER most recent operation: ");
 			System.out.println(currentPrintState);
 		}
 	}
@@ -830,6 +831,65 @@ public class Node implements NodeInterface {
 		}
 	}
 	
+	public void updateDownPointers() {
+		ArrayList<HashSet<Node>> twoHopsAway = new ArrayList<HashSet<Node>>();
+		// get ALL neighbors and neighbors neighbors
+		twoHopsAway = this.getAll2Hops();
+		
+		HashSet<Node> neighborList = twoHopsAway.get(0);
+		HashSet<Node> doubleNeighborList = twoHopsAway.get(1);
+		
+		// loop through neighbors
+		for (Node n : neighborList) {
+			if (n.hasDownPointers()) {
+				this.neighborDown.add(n.getWebID());
+			}
+			else {
+				this.neighborDown.remove(n.getWebID());
+			}
+		}
+		
+		// loop through neighbors neighbors
+		for (Node n : doubleNeighborList) {
+			if (n.hasDownPointers()) {
+				this.doubleNeighborDown.add(n.getWebID());
+			}
+			else {
+				this.doubleNeighborDown.remove(n.getWebID());
+			}
+		}
+		this.updateDownState();
+	}
+	
+	public void updateUpPointers() {
+		ArrayList<HashSet<Node>> twoHopsAway = new ArrayList<HashSet<Node>>();
+		// get ALL neighbors and neighbors neighbors
+		twoHopsAway = this.getAll2Hops();
+		
+		HashSet<Node> neighborList = twoHopsAway.get(0);
+		HashSet<Node> doubleNeighborList = twoHopsAway.get(1);
+		
+		// loop through neighbors
+		for (Node n : neighborList) {
+			if (n.hasUpPointers()) {
+				this.neighborUp.add(n.getWebID());
+			}
+			else {
+				this.neighborUp.remove(n.getWebID());
+			}
+		}
+		
+		// loop through neighbors neighbors
+		for (Node n : doubleNeighborList) {
+			if (n.hasUpPointers()) {
+				this.doubleNeighborUp.add(n.getWebID());
+			}
+			else {
+				this.doubleNeighborUp.remove(n.getWebID());
+			}
+		} 
+	}
+	
 	// Down Pointer Management Methods
 	
 	public void addSurNeighbor(WebID id) {
@@ -926,6 +986,10 @@ public class Node implements NodeInterface {
 		
 		// loop through neighbors
 		for (Node n : neighborList) {
+			// we don't want to update neighbors with lower heights than us
+			if (this.getHeight() > n.getHeight()) {
+				continue;
+			}
 			n.neighborDown.add(this.getWebID());
 			n.updateDownState();
 		}

@@ -72,7 +72,6 @@ public class Validator {
                 System.err.print(node.getWebId() + "(" + node.getHeight() + "), ");
             }
             System.err.println();
-            Node.printHyperWeb();
             
             Logger logger = Logger.getLogger(Validator.class.getName()); 
             logger.setUseParentHandlers(false);
