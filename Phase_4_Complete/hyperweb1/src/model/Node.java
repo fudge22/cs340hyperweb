@@ -1,5 +1,9 @@
 package model;
 
+import gui.BroadcastVisitor;
+import gui.Contents;
+import gui.SendVisitor;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
