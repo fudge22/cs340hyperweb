@@ -33,7 +33,6 @@ public class GUI extends JFrame
 	public GUI(HyperWeb hypeerweb){
 		this.hypeerweb = hypeerweb;
 		this.setTitle("HyPeerWeb DEBUGGER V 1.1");
-
 		this.addWindowListener(new WindowAdapter() {
 			  public void windowClosing(WindowEvent we) {
 				shutdown();
@@ -51,7 +50,7 @@ public class GUI extends JFrame
 	}
 	
 	private void shutdown(){
-		//hypeerweb.close();
+		hypeerweb.close();
 	}
 	
 	public static GUI getSingleton(HyperWeb hypeerweb){
@@ -64,7 +63,7 @@ public class GUI extends JFrame
 			catch(Exception e)	{
 				JOptionPane.showMessageDialog(null, e.getMessage(), "ERROR",JOptionPane.ERROR_MESSAGE);
 				e.printStackTrace();
-				//hypeerweb.close();
+				hypeerweb.close();
 				System.exit(1);
 			}
 		}
@@ -75,8 +74,11 @@ public class GUI extends JFrame
 	 * Start Point of the Program
 	 */
 	public static void main (String[] args){
-		GUI.getSingleton(null);
-		//HyperWeb.getHyPeerWeb();
+		GUI gui = GUI.getSingleton(HyperWeb.getHyPeerWeb());
+	
+	
+	
+	
 	}
 
 	/**
@@ -96,7 +98,7 @@ public class GUI extends JFrame
 	}
 	
 	public void finalize(){
-		//hypeerweb.close();
+		hypeerweb.close();
 	}
 
 }

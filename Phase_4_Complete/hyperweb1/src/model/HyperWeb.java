@@ -9,6 +9,11 @@ import simulation.NodeInterface;
 public class HyperWeb implements HyPeerWebInterface {
 
 	private Database db;
+	
+	private static HyperWeb hyperwebsingleton;
+	
+	
+	
 	public HyperWeb(){
 		Node.initialize();
 		try {
@@ -64,6 +69,20 @@ public class HyperWeb implements HyPeerWebInterface {
 		} catch (WebIDException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void close() {
+		// TODO Do something when you close the gui for the hyperweb
+		hyperwebsingleton = null;
+	}
+
+	public static HyperWeb getHyPeerWeb() {
+		//if hyperwebsingleton is null instantiate
+		if(hyperwebsingleton == null){
+			hyperwebsingleton = new HyperWeb();
+		}
+		
+		return hyperwebsingleton;
 	}
 
 }
