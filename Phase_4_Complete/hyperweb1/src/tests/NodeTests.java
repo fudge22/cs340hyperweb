@@ -1,8 +1,5 @@
 package tests;
 import static org.junit.Assert.*;
-import gui.BroadcastVisitor;
-import gui.SendVisitor;
-import gui.Visitor;
 import model.HyperWeb;
 import model.Node;
 import model.WebID;
@@ -14,6 +11,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import simulation.Validator;
+import states.Insertable;
 
 public class NodeTests {
 
@@ -42,12 +40,55 @@ public class NodeTests {
 	@Test
 	public void addMoreNodes() {
 		for (int i = 0; i < 10000; i++) {
-			System.out.println(i);
+//			System.out.println(i);
 			hw.addNode();
-			v.validate();
 		}
+		Validator valid = new Validator(hw);
+		valid.validate();
+	}
+	
+	@Test
+	public void removeNodes() {
+//		for (int i = 0; i < 8; i++) {
+//			System.out.println(i);
+//			hw.addNode();
+//			v.validate();
+//		}
+//		
+//		for (int i = 0; i < 8; i++) {
+//			System.out.println(i);
+//			hw.removeNode();
+//			v.validate();
+//		}
 	}
 
+	@Test
+	public void loopTesting() {
+		
+	}
+	
+//	@Test
+//	public void slideDown() {
+//		WebID highest = null;
+//		for (int i = 0; i < 5; i++) {
+//			hw.addNode();
+//		}
+//		for (WebID id : Node.getNodeMap().keySet()) {
+//			if(highest == null)
+//				highest = id;
+//			else if (id.getValue() > highest.getValue())
+//				highest = id;
+//		}
+//		Node n = Node.getNode(highest);
+//		WebID lowerNode;
+//		lowerNode = n.slideDown();
+//		System.out.println("LowerNode = " + lowerNode);
+//		lowerNode = n.slideDown();
+//		System.out.println("LowerNode = " + lowerNode);
+//		lowerNode = n.slideDown();
+//		System.out.println("LowerNode = " + lowerNode);
+//	}
+	
 	@Test
 	public void testInformNeighbors() {
 		hwSetup5();
@@ -322,31 +363,4 @@ public class NodeTests {
 		n3.updateAllNeighborTypes();
 	}
 
-	@Test 
-	public void testSend() {
-		for(int i = 0; i < 32; i++) {
-			//System.out.println(i);
-			hw.addNode();
-			v.validate();
-		}
-		Visitor newVisitor = new SendVisitor(new WebID(3));
-		newVisitor.visit(Node.getNode(new WebID(0)));
-		
-		newVisitor = new SendVisitor(new WebID(5));
-		newVisitor.visit(Node.getNode(new WebID(10)));
-		
-		newVisitor = new SendVisitor(new WebID(15));
-		newVisitor.visit(Node.getNode(new WebID(0)));
-	}
-	
-	@Test 
-	public void testBroadcast() {
-		for(int i = 0; i < 1000; i++) {
-			//System.out.println(i);
-			hw.addNode();
-			v.validate();
-		}
-		BroadcastVisitor newVisitor = new BroadcastVisitor();
-		newVisitor.visit(Node.getNode(new WebID(0)));
-	}
 }

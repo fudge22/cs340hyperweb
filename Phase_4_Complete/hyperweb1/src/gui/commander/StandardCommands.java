@@ -146,8 +146,10 @@ public class StandardCommands extends JPanel
 	public void insertButtonPressed()	{
 		//TODO Phase 5 -- Add functionality for inserting a node.
 		//I. Get the size of the "nodeListing" component.
+		
 		//II. If the size is greater than or equal to the max number of nodes allowed in a NodeListing
 		//		(see constant in class NodeListing) print an error in the the "debugStatus" component.
+		
 		//III.Otherwise
 	    //		A. Create a new node
 		//		B. Get the id of the startNode from the HyPeerWeb using the selected index of the nodeListing component.
@@ -155,6 +157,9 @@ public class StandardCommands extends JPanel
 		//      D. If a node is found it is the start node.  If so then
 		//              1. invoke your "addToHyPeerWeb" command on the startNode passing in the new node created previously.
 		//				2. Increase the nodeListing size (See the NodeListing class for details).
+		
+		
+		
 	}
 	
 	/**
