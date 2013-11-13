@@ -8,6 +8,7 @@ import model.WebID;
 public class BroadcastVisitor extends Visitor{
 	
 	public static int visitCount = 1;
+	private Parameters parameters;
 	
 	/**
 	 * Default Constructor
@@ -15,13 +16,27 @@ public class BroadcastVisitor extends Visitor{
 	public BroadcastVisitor(){
 		super();
 		visitCount = 1;
+		parameters = new Parameters();
+	}
+	
+	public void setParameters(Parameters newParameters) {
+		this.parameters = newParameters;
+	}
+
+	public void addParameter(String key, Object value){
+		this.parameters.set(key, value);
+	}
+	
+	@Override
+	public void visit(Node node, Parameters parameters) {
+		this.parameters = parameters;
+		broadcast(node);
 	}
 	
 	/**
-	 * visit method for the broadcast
+	 * broadcast method for the broadcast
 	 */
-	@Override
-	public void visit(Node node) {
+	public void broadcast(Node node) {
 		/*
 		 * find all children with id's with trailing 0's
 		 * flip the trailing zeroes to create a list of possible neighbors to check
@@ -105,6 +120,8 @@ public class BroadcastVisitor extends Visitor{
 	 * @param node
 	 */
 	protected void intermediateOperation(Node node){
-		System.out.println("Visiting node " + node.getWebId() + " through vistor pattern, trying to broadcast. Total visit count = " + visitCount);
+		System.out.println("Visiting node " + node.getWebId() + " through vistor pattern, trying to broadcast. Total visit count = " + visitCount
+				+ " " + this.parameters.get("message"));
 	}
+
 }
