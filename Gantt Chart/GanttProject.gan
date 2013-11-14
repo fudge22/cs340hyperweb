@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?><project name="CS 340 Hyperweb" company="CS 340" webLink="http://" view-date="2013-11-22" view-index="0" gantt-divider-location="353" resource-divider-location="300" version="2.0" locale="en_US">
+    <description/>
+    <view zooming-state="default:2" id="gantt-chart">
+        <field id="tpd3" name="Name" width="57" order="0"/>
+        <field id="tpd4" name="Begin date" width="21" order="1"/>
+        <field id="tpd5" name="End date" width="21" order="2"/>
+    </view>
+    <view id="resource-table">
+        <field id="0" name="Name" width="50" order="0"/>
+        <field id="1" name="Default role" width="50" order="1"/>
+    </view>
+    <!-- -->
+    <calendars>
+        <day-types>
+            <day-type id="0"/>
+            <day-type id="1"/>
+            <calendar id="1" name="default">
+                <default-week sun="1" mon="0" tue="0" wed="0" thu="0" fri="0" sat="1"/>
+                <only-show-weekends value="false"/>
+                <overriden-day-types/>
+                <days/>
+            </calendar>
+        </day-types>
+    </calendars>
+    <tasks empty-milestones="true">
+        <taskproperties>
+            <taskproperty id="tpd0" name="type" type="default" valuetype="icon"/>
+            <taskproperty id="tpd1" name="priority" type="default" valuetype="icon"/>
+            <taskproperty id="tpd2" name="info" type="default" valuetype="icon"/>
+            <taskproperty id="tpd3" name="name" type="default" valuetype="text"/>
+            <taskproperty id="tpd4" name="begindate" type="default" valuetype="date"/>
+            <taskproperty id="tpd5" name="enddate" type="default" valuetype="date"/>
+            <taskproperty id="tpd6" name="duration" type="default" valuetype="int"/>
+            <taskproperty id="tpd7" name="completion" type="default" valuetype="int"/>
+            <taskproperty id="tpd8" name="coordinator" type="default" valuetype="text"/>
+            <taskproperty id="tpd9" name="predecessorsr" type="default" valuetype="text"/>
+        </taskproperties>
+        <task id="9" name="Finish Delete" color="#ff0000" meeting="false" start="2013-11-13" duration="3" complete="0" priority="4" expand="true"/>
+        <task id="0" name="Implement GUI" color="#ff9900" meeting="false" start="2013-11-13" duration="3" complete="0" priority="2" expand="true"/>
+        <task id="1" name="Start to understand the last phase" color="#ffff00" meeting="false" start="2013-11-13" duration="4" complete="0" priority="2" expand="true">
+            <notes><![CDATA[We are to read though the specs about the last part of the project twice through]]></notes>
+        </task>
+        <task id="11" name="Object Identification" color="#8cb6ce" meeting="false" start="2013-11-18" duration="1" complete="0" expand="true">
+            <notes><![CDATA[Look and and decide what Objects are needed for the next part of the HyPeerWeb.
+
+Come to class with an idea about what classes we need and discuss them]]></notes>
+        </task>
+        <task id="7" name="Add Peer Comminicator to the HyPeerWeb" color="#8cb6ce" meeting="false" start="2013-11-18" duration="2" complete="0" expand="true">
+            <notes><![CDATA[We are to add each part of the Peer Communucator Code into our main code]]></notes>
+        </task>
+        <task id="10" name="Proxy Constructor" color="#8cb6ce" meeting="false" start="2013-11-18" duration="3" complete="0" expand="true">
+            <notes><![CDATA[We are to implement the Proxy constructor and test it out]]></notes>
+            <depend id="12" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="12" name="Seperation of GUI" color="#ffff33" meeting="false" start="2013-11-21" duration="2" complete="0" expand="true">
+            <depend id="13" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="13" name="Test GUI and HyPeerWeb on different machines" color="#33ff33" meeting="false" start="2013-11-25" duration="1" complete="0" expand="true">
+            <notes><![CDATA[By this time, we should be able to step onto different machines and test the code from two different places]]></notes>
+        </task>
+        <task id="26" name="Pass of seperated GUI and HyPeerWeb" color="#33ff33" meeting="true" start="2013-11-26" duration="0" complete="0" expand="true"/>
+        <task id="28" name="Create HyPeerWeb Segment Class" color="#8cb6ce" meeting="false" start="2013-11-26" duration="1" complete="0" expand="true">
+            <notes><![CDATA[It should Inherit from the HyPeerWeb Class and refer to it]]></notes>
+        </task>
+        <task id="29" name="Propose fisrt node Algorithm" color="#8cb6ce" meeting="false" start="2013-12-02" duration="1" complete="0" expand="true">
+            <notes><![CDATA[We need to come up with an algorithm to add the first node to the HyPeerWeb from any hyPeerWeb segment]]></notes>
+            <depend id="34" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="34" name="Test Multiple HyPeerWeb Segments" color="#33ff33" meeting="false" start="2013-12-03" duration="2" complete="0" expand="true">
+            <notes><![CDATA[Testing to see if we can have several hypeerweb segements running]]></notes>
+            <depend id="35" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="30" name="Serialize a node" color="#8cb6ce" meeting="false" start="2013-12-02" duration="1" complete="0" expand="true">
+            <notes><![CDATA[We are to create a function which will serialize a node]]></notes>
+            <depend id="31" type="2" difference="0" hardness="Strong"/>
+            <depend id="32" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="31" name="readResolve method" color="#8cb6ce" meeting="false" start="2013-12-03" duration="1" complete="0" expand="true">
+            <depend id="33" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="32" name="writeReplace Method" color="#8cb6ce" meeting="false" start="2013-12-03" duration="1" complete="0" expand="true">
+            <depend id="33" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="33" name="Test Serializeable" color="#33ff33" meeting="false" start="2013-12-04" duration="1" complete="0" expand="true">
+            <depend id="35" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="35" name="Test distributed System" color="#33ff33" meeting="false" start="2013-12-05" duration="1" complete="0" expand="true">
+            <notes><![CDATA[Test add, delete, send, and broadcast from every segment]]></notes>
+            <depend id="54" type="2" difference="0" hardness="Strong"/>
+            <depend id="56" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="36" name="Pass off Part 2" color="#33ff33" meeting="true" start="2013-12-06" duration="0" complete="0" expand="true"/>
+        <task id="54" name="Implement Observer Pattern" color="#8cb6ce" meeting="false" start="2013-12-06" duration="1" complete="0" expand="true">
+            <depend id="57" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="56" name="Node Migration" color="#8cb6ce" meeting="false" start="2013-12-06" duration="1" complete="0" expand="true">
+            <depend id="57" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="57" name="Shut Down HyPeerWeb" color="#ffff33" meeting="false" start="2013-12-09" duration="2" complete="0" expand="true">
+            <depend id="64" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="64" name="Test Whole HyPeerWeb" color="#33ff33" meeting="false" start="2013-12-11" duration="1" complete="0" expand="true"/>
+        <task id="55" name="Pass of part 3 and everything else" color="#33ff33" meeting="true" start="2013-12-12" duration="0" complete="0" expand="true">
+            <notes><![CDATA[This is the last day of classes so we need to turn everything and anything in at this time]]></notes>
+        </task>
+    </tasks>
+    <resources/>
+    <allocations/>
+    <vacations/>
+    <taskdisplaycolumns>
+        <displaycolumn property-id="tpd2" order="-1" width="75" visible="false"/>
+        <displaycolumn property-id="tpd7" order="-1" width="75" visible="false"/>
+        <displaycolumn property-id="tpd8" order="-1" width="75" visible="false"/>
+        <displaycolumn property-id="tpd6" order="-1" width="75" visible="false"/>
+        <displaycolumn property-id="tpd10" order="-1" width="75" visible="false"/>
+        <displaycolumn property-id="tpd11" order="-1" width="75" visible="false"/>
+        <displaycolumn property-id="tpd9" order="-1" width="75" visible="false"/>
+        <displaycolumn property-id="tpd1" order="-1" width="75" visible="false"/>
+        <displaycolumn property-id="tpd0" order="-1" width="75" visible="false"/>
+        <displaycolumn property-id="tpd3" order="0" width="199" visible="true"/>
+        <displaycolumn property-id="tpd4" order="1" width="75" visible="true"/>
+        <displaycolumn property-id="tpd5" order="2" width="75" visible="true"/>
+    </taskdisplaycolumns>
+    <previous/>
+    <roles roleset-name="Default"/>
+</project>
