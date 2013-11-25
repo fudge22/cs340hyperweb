@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS "Nodes" ("webID" INTEGER PRIMARY KEY  NOT NULL  UNIQUE , "height" INTEGER, "foldID" INTEGER, "surFoldID" INTEGER, "invSurFoldID" INTEGER, "foldState" INTEGER, "currentChild" INTEGER, "downState" INTEGER, "upState" INTEGER);
+CREATE TABLE IF NOT EXISTS "SurNeighbors" ("webID" INTEGER, "surNeighborID" INTEGER);
+CREATE TABLE IF NOT EXISTS "Neighbors" ("webID" INTEGER, "neighborID" INTEGER);
+CREATE TABLE IF NOT EXISTS "InvSurNeighbors" ("webID" INTEGER, "invSurNeighborID" INTEGER);
+CREATE TABLE IF NOT EXISTS "SelfDown" ("webID" INTEGER, "selfDownID" INTEGER);
+CREATE TABLE IF NOT EXISTS "NeighborDown" ("webID" INTEGER, "neighborDown" INTEGER);
+CREATE TABLE IF NOT EXISTS "DoubleNeighborDown" ("webID" INTEGER, "doubleNeighborDownID" INTEGER);
+CREATE TABLE IF NOT EXISTS "SelfUp" ("webID" INTEGER, "selfUpID" INTEGER);
+CREATE TABLE IF NOT EXISTS "NeighborUp" ("webID" INTEGER, "neighborUpID" INTEGER);
+CREATE TABLE IF NOT EXISTS "DoubleNeighborUp" ("webID" INTEGER, "doubleNeighborUpID" INTEGER);
+CREATE TABLE IF NOT EXISTS "LowerNeighbors" ("webID" INTEGER, "lowerNeighborID" INTEGER);
+CREATE TABLE IF NOT EXISTS "HigherNeighbors" ("webID" INTEGER, "higherNeighborID" INTEGER);
