@@ -1,3 +1,0 @@
-CREATE TABLE IF NOT EXISTS "Nodes" ("webID" INTEGER PRIMARY KEY  NOT NULL  UNIQUE , "height" INTEGER, "foldID" INTEGER, "surFoldID" INTEGER, "invSurFoldID" INTEGER, "foldState" INTEGER, "insertableState" INTEGER, "selfFlat" INTEGER, "neighborsFlat" INTEGER, "nofneighborsFlat" INTEGER);
-CREATE TABLE IF NOT EXISTS "SurNeighbors" ("webID" INTEGER, "surID" INTEGER);
-CREATE TABLE IF NOT EXISTS "Neighbors" ("webID" INTEGER, "neighborID" INTEGER)

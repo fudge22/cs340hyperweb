@@ -3,6 +3,11 @@ package simulation;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import states.Deletable;
+import states.Incline;
+import model.Node;
+import model.WebID;
+
 /**
  * Use to validate all of the nodes in a HyPeerWeb as to whether they satisfy the constraints of the conceptual model of a HyPeerWeb.
  * Requires the hypeerWeb to satisfy the specification of a HyPeerWebInterface.
@@ -163,8 +168,190 @@ public class Validator {
         
         validationFailed = checkNeighborsNeighborsConstraints(node, validationFailed);
 
+        validationFailed = checkUpPointersConstraints(node, validationFailed); 
+       
+        
         return !validationFailed;
     }
+
+private boolean checkUpPointersConstraints(NodeInterface node, boolean validationFailed) {
+		Node current = (Node) node;
+		
+	
+		for (WebID w :current.neighborUp)
+		{
+			if (Node.getNode(w) == null) 
+			{
+				System.err.println("invalid neighbor up");
+			validationFailed = true;
+			}
+			
+		}
+		for (WebID w :current.doubleNeighborUp)
+		{
+			if (Node.getNode(w) == null) 
+			{
+				System.err.println("invalid double neighbor up");
+			validationFailed = true;
+			}
+			
+		}
+		if (current.getUpState().equals(Deletable.getSingleton()) 
+				&& (current.selfUp.size() > 0 || current.neighborUp.size() > 0 
+				|| current.doubleNeighborUp.size() > 0 || Node.getNode(current.currentChild) != null)){
+			System.err.println("Node " +current.getWebId() +" deletable with up pointers or current child");
+			validationFailed = true;
+			
+		}
+		if (current.getUpState().equals(Incline.getSingleton()) 
+				&& (current.selfUp.size() == 0 && current.neighborUp.size() == 0 
+				&& current.doubleNeighborUp.size() == 0 && current.currentChild  == null)){
+			System.err.println("Node " +current.getWebId() +" on incline but no up pointers or current child");
+			validationFailed = true;
+			
+		}
+		//all of the nodes are valid at this point, now deal with checking if they actually go up
+		
+		HashSet<WebID> hs = current.getAllUpRelations();
+		
+		HashSet<WebID> queriedUpPointers = new HashSet<WebID>();
+		for (WebID w : hs){
+			if (Node.getNode(w).getHeight() > current.getHeight() /*&& current.selfUp.contains(w)*/)
+			{
+				
+				queriedUpPointers.add(w);
+			}
+			
+		}
+		
+		HashSet<WebID> doubleNeighbors = new HashSet<WebID>();
+		for (WebID w : current.getNeighborList()){
+			
+			for (WebID w1: Node.getNode(w).getAllUpRelations()){
+				if (Node.getNode(w1).getHeight() > current.getHeight() )
+				{
+					
+					doubleNeighbors.add(w);
+				}
+				
+			}
+			
+		}
+		
+		
+		HashSet<WebID> doubledoubleNeighbors = new HashSet<WebID>();
+		for (WebID w : doubleNeighbors){
+			if (!doubleNeighbors.contains(w) && !w.equals(current.getWebID())){
+				for (WebID w2: (Node.getNode(w)).getNeighborList()){
+				
+					for (WebID w1: Node.getNode(w2).getAllUpRelations()){
+						if (Node.getNode(w1).getHeight() > current.getHeight() )
+						{
+							
+							doubledoubleNeighbors.add(w);
+						}
+						
+					}
+				}
+			}
+		}
+		
+		//get own up pointer and see if they are still in 
+		
+		if (queriedUpPointers.size() > current.selfUp.size()){
+			System.err.println("Node " +current.getWebId() +" is missing self up pointers");
+			validationFailed = true;
+			
+			for (WebID w: queriedUpPointers){
+				if (!current.selfUp.contains(w)){
+					System.err.println(w);
+					
+				}
+				
+			}
+			System.err.println(current.selfUp);
+			System.err.println(queriedUpPointers);
+		}
+		else if (queriedUpPointers.size() < current.selfUp.size()){
+			System.err.println("Node " +current.getWebId() +" has extra self up pointers");
+			for (WebID w: current.selfUp){
+				if (!queriedUpPointers.contains(w)){
+					System.err.println(w);
+				}
+				
+			}
+			System.err.println(current.selfUp);
+			System.err.println(queriedUpPointers);
+			validationFailed = true;
+		}
+		
+		if (doubleNeighbors.size() > current.neighborUp.size()){
+			System.err.println("Node " +current.getWebId() +" is missing neighbor up pointers");
+			validationFailed = true;
+			
+			for (WebID w: doubleNeighbors){
+				if (!current.neighborUp.contains(w)){
+					System.err.println(w);
+					
+				}
+				
+			}
+			System.err.println(current.neighborUp);
+			System.err.println(doubleNeighbors);
+		}
+		else if (doubleNeighbors.size() > current.neighborUp.size()){
+			System.err.println("Node " +current.getWebId() +" has extra neighbor up pointers");
+			for (WebID w: current.neighborUp){
+				if (!doubleNeighbors.contains(w)){
+					System.err.println(w);
+				}
+				
+			}
+			validationFailed = true;
+			System.err.println(current.neighborUp);
+			System.err.println(doubleNeighbors);
+		}
+		
+		if (doubledoubleNeighbors.size() > current.doubleNeighborUp.size()){
+			System.err.println("Node " +current.getWebId() +" is missing double neighbor up pointers");
+			validationFailed = true;
+			
+			for (WebID w: doubledoubleNeighbors){
+				if (!current.doubleNeighborUp.contains(w)){
+					System.err.println(w);
+					
+				}
+				
+			}
+			System.err.println(current.doubleNeighborUp);
+			System.err.println(doubledoubleNeighbors);
+		}
+		else if (doubledoubleNeighbors.size() > current.doubleNeighborUp.size()){
+			System.err.println("Node " +current.getWebId() +" has extra double neighbor up pointers");
+			for (WebID w: current.doubleNeighborUp){
+				if (!doubledoubleNeighbors.contains(w)){
+					System.err.println(w);
+				}
+				
+			}
+			System.err.println(current.doubleNeighborUp);
+			System.err.println(doubledoubleNeighbors);
+			validationFailed = true;
+		}
+		
+//		for (WebID w :current.selfUp)
+//		{
+//			if (Node.getNode(w) == null) 
+//				{
+//				System.err.println("invalid self up");
+//				validationFailed = true;
+//				}
+//			if (queriedUpPoint
+//			
+//		}
+	
+		return validationFailed;
+	}
 
 //Commands
     
