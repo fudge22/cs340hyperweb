@@ -1,5 +1,7 @@
 package model;
 
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,6 +9,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import Phase6.GlobalObjectId;
 import database.Database;
 import simulation.NodeInterface;
 import states.*;
@@ -15,19 +18,20 @@ import visitor.Contents;
 import visitor.Parameters;
 import visitor.SendVisitor;
 
-public class Node implements NodeInterface {
+public class Node implements NodeInterface, Serializable {
 
 	// debug flag
-	private static boolean debug = false;
-	private static String lastPrintState = "";
-	private static String currentPrintState = "";
-	private static int iterationCount = 0;
-	private static int startPointInfo = -1;
-	private static int insertPointInfo = -1;
-	private static int insertedNodeInfo = -1;
-	public static StringBuilder operationList = new StringBuilder();
+
+	
+	
 	// instance variables
-	private static HashMap<WebID, Node> nodes;
+	
+	
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6055635090486424898L;
 	private WebID webID;
 	private int height;
 	private WebID foldID;
@@ -40,22 +44,20 @@ public class Node implements NodeInterface {
 	
 	// state manager variables
 	private DownState downState;
-	private UpState upState;
-	private Set<WebID> selfDown;
-	private Set<WebID> neighborDown;
-	private Set<WebID> doubleNeighborDown;
-	private Set<WebID> selfUp;
-	private Set<WebID> neighborUp;
-	private Set<WebID> doubleNeighborUp;
-	private Set<WebID> lowerNeighbors;
-	private Set<WebID> higherNeighbors;
-	private WebID currentChild;
+	public UpState upState;
+	public Set<WebID> selfDown;
+	public Set<WebID> neighborDown;
+	public Set<WebID> doubleNeighborDown;
+	public Set<WebID> selfUp;
+	public Set<WebID> neighborUp;
+	public Set<WebID> doubleNeighborUp;
+	public Set<WebID> lowerNeighbors;
+	public Set<WebID> higherNeighbors;
+	public WebID currentChild;
 	
 	private Contents contents = new Contents();
 	
-	public Node() {
-		
-	}
+	public GlobalObjectId gid  = new GlobalObjectId();
 	
 	// constructors
 	public Node(WebID webID, int height, WebID foldID, WebID surrogateFoldID,
@@ -64,6 +66,7 @@ public class Node implements NodeInterface {
 				Set<WebID> doubleNeighborDown, Set<WebID> selfUp, Set<WebID> neighborUp, 
 				Set<WebID> doubleNeighborUp, Set<WebID> lowerNeighbors, Set<WebID> higherNeighbors,
 				WebID currentChild, int foldStateInt, int downStateInt, int upStateInt) {
+		
 		this.webID = webID;
 		this.height = height;
 		this.foldID = foldID;
@@ -113,7 +116,21 @@ public class Node implements NodeInterface {
 		}
 
 	}
+	public Node(){
+		//set up for node proxy, but seems kind of useless
+		
+	}
+public HashSet<WebID> getAllUpRelations(){ // made for validaing up pointers
+		
+		HashSet<WebID> relations = new HashSet<WebID>();
+		relations.addAll(getInvSurNeighborList());
+	
+		if (this.getInvSurrogateFoldID() != null)
+			relations.add(getInvSurrogateFoldID() );
 
+		return relations;
+
+	}
 	public Node(WebID WebID, int height) {
 		this.webID = WebID;
 		this.height = height;
@@ -245,29 +262,20 @@ public class Node implements NodeInterface {
 		return this.webID.equals(other.webID);
 	}
 
-	public static void initialize() {
-		nodes = new HashMap<WebID, Node>();
-	}
 	
-	public static HashMap<WebID, Node> getNodeMap() {
-		return nodes;
-	}
 	
-	public static Node getNode(WebID id) {
-		return nodes.get(id);// if null, return null node
-	}
 
 	// loop through neighbors and let them know that you are their neighbor
 	public void informNeighbors() {
 		for (WebID w : neighbors) {
-			getNode(w).addNeighbor(this.getWebID());
+			w.getNode().addNeighbor(this.getWebID());
 		}
 
 	}
 
 	public void informSurNeighbors() {
 		for (WebID w : surNeighbors) {
-			getNode(w).addInvSurNeighbor(this.getWebID());
+			w.getNode().addInvSurNeighbor(this.getWebID());
 		}
 
 	}
@@ -284,8 +292,8 @@ public class Node implements NodeInterface {
 		
 		Node invSurN, surN;
 		for (WebID w : invSurNeighborList) {
-			invSurN = getNode(w);
-			surN = getNode(this.getWebID());
+			invSurN = w.getNode();
+			surN = this.getWebID().getNode();
 			
 			invSurN.removeSurNeighbor(surN.getWebID());
 			surN.removeInvSurNeighbor(invSurN.getWebID());
@@ -293,12 +301,17 @@ public class Node implements NodeInterface {
 	}
 
 	public Node insertChildNode() {
+//		if (debug) {
+//			currentPrintState += "Starting at: " + startPointInfo + "\n";
+//			currentPrintState += "Inserting child at: " + insertPointInfo + "\n";
+//			currentPrintState += "Child inserted: " + insertedNodeInfo + "\n";	
+//		}
 
 		WebID childID = this.getChildNodeID();
 
 		Node child = new Node(childID, this.height);
 		
-		nodes.put(childID, child);
+		HyperWeb.getSingleton().putWrapper(childID, child);
 		
 		this.increaseHeight();
 		child.increaseHeight();
@@ -317,11 +330,11 @@ public class Node implements NodeInterface {
 		
 		parent.setCurrentChild(childID);
 		
-		insertPointInfo = parent.getWebId();
-		insertedNodeInfo = child.getWebId();
+		//insertPointInfo = parent.getWebId();
+		//insertedNodeInfo = child.getWebId();
 		
-		parent.updateDownPointers();
-		child.updateDownPointers();
+		parent.updatePointers();
+		child.updatePointers();
 
 		return child;
 	}
@@ -344,13 +357,13 @@ public class Node implements NodeInterface {
 
 		// for each neighbor
 		for (WebID neighborID : this.neighbors) {
-			neighbor = getNode(neighborID);
+			neighbor = neighborID.getNode();
 			
 			neighborList.add(neighbor);
 			// for each neighbors neighbor
 			for (WebID nNeighborID : neighbor.neighbors) {
 				if (!nNeighborID.equals(this.webID)) {
-					nNeighbor = getNode(nNeighborID);
+					nNeighbor = nNeighborID.getNode();
 					nNeighborList.add(nNeighbor);
 				}
 			}
@@ -379,7 +392,7 @@ public class Node implements NodeInterface {
 		int counter = 0;
 		
 		for (WebID x : surNeighbors) {
-			surNeighborArray[counter] = getNode(x);
+			surNeighborArray[counter] = x.getNode();
 			counter++;
 		}
 		return surNeighborArray;
@@ -391,7 +404,7 @@ public class Node implements NodeInterface {
 		int counter = 0;
 		
 		for (WebID x : invSurNeighbors) {
-			invSurNeighborArray[counter] = getNode(x);
+			invSurNeighborArray[counter] = x.getNode();
 			counter++;
 		}
 		return invSurNeighborArray;
@@ -399,21 +412,28 @@ public class Node implements NodeInterface {
 
 	@Override
 	public NodeInterface getFold() {
-		return getNode(foldID);
+		
+		return nullCheck(foldID);
 	}
 
 	@Override
 	public NodeInterface getSurrogateFold() {
-		return getNode(surrogateFoldID);
+		
+		return nullCheck(surrogateFoldID);
 
 	}
 
 	@Override
 	public NodeInterface getInverseSurrogateFold() {
-		return getNode(invSurrogateFoldID);
+		
+		return nullCheck(invSurrogateFoldID);
 
 	}
-	
+	private Node nullCheck(WebID w){
+		if (w == null)
+			return null;
+		else return w.getNode();
+	}
 	@Override
 	public NodeInterface getParent() {
 		WebID parentNode = null;
@@ -421,8 +441,7 @@ public class Node implements NodeInterface {
 		if (this.webID.getValue() != 0) {
 			parentNode = new WebID(this.webID.getValue() ^ ((int) Math.pow(2, this.height - 1)));
 		}
-
-		return getNode(parentNode);
+		return nullCheck(parentNode);
 	}
 
 	@Override
@@ -443,360 +462,37 @@ public class Node implements NodeInterface {
 		NodeInterface[] neighborArray = new Node[neighbors.size()];
 		int counter = 0;
 		for (WebID x : neighbors) {
-			neighborArray[counter] = getNode(x);
+			neighborArray[counter] = x.getNode();
 			counter++;
-		}ƒ
+		}
 
 		return neighborArray;
 	}
 
-	public static NodeInterface[] allNodes() {
-		Node[] nodeArray = new Node[nodes.size()];
-		nodes.values().toArray(nodeArray); // the toArray() function fills in
-											// the array nodeArray
-		return nodeArray;
+	
 
-	}
 
-	public static Node addNode() {
-		Node returnNode = null;
-		if (nodes.size() == 0) {
-			returnNode = addToEmptyHyperWeb();// base case with no nodes in the
-												// hyperweb
-		} else if (nodes.size() == 1) {
-			returnNode = addSecondNode();// base case with only one node in the
-										// hyperweb
-		} else {
-			returnNode = addToHyperWeb();
-		}
-
-		updateInfoString();
-		printHyperWeb();// prints all of the nodes information in the hyperweb
-		return returnNode;
-	}
-
-	public static void addNode(int start) {
-		if (nodes.size() == 0) {
-			addToEmptyHyperWeb();// base case with no nodes in the
-												// hyperweb
-		} else if (nodes.size() == 1) {
-			addSecondNode();// base case with only one node in the
-										// hyperweb
-		} else {
-			addToHyperWebSpecial(start);
-		}
-
-		updateInfoString();
-		printHyperWeb();// prints all of the nodes information in the hyperweb
-	}
 	
-	private static void emptyHyperWeb() {
-		// TODO Auto-generated method stub
-		
-	}
 	
-	private static void debugInfo(String info) {
-		if (debug) {
-			System.out.println(info);
-			System.out.println();
-		}
-	}
 	
-	public static void updateInfoString() {
-		if (debug) {
-			lastPrintState = currentPrintState;
-			currentPrintState = "";
-			currentPrintState += "iteration: " + iterationCount + "\n";
-			currentPrintState += "Starting at: " + startPointInfo + "\n";
-			currentPrintState += "Inserting child at: " + insertPointInfo + "\n";
-			currentPrintState += "Child inserted: " + insertedNodeInfo + "\n";	
-			currentPrintState += "# Nodes in HW: " + nodes.size() + "\n";
-			currentPrintState += "\n";
-			for (WebID w : nodes.keySet()) {
-				Node n1 = getNode(w);
-				currentPrintState += "WebID: " + w.getValue() + "\n";
-				currentPrintState += "Height: " + getNode(w).getHeight() + "\n";
-	
-				if (n1.getFoldState() != null) {
-					currentPrintState += "FoldState: " + n1.getFoldState().getClass().getName()
-							+ "\n";
-				} else {
-					currentPrintState += "FoldState: null\n";
-				}
-	
-				if (n1.getDownState() != null) {
-					currentPrintState += "NodeState: " + n1.getDownState().getClass().getName()
-							+ "\n";
-	
-				} else {
-					currentPrintState += "NodeState: null\n";
-				}
-	
-				if (n1.getFold() != null) {
-					currentPrintState += "FoldID: " + getNode(w).getFoldID().getValue() + "\n";
-				} else {
-					currentPrintState += "FoldID: null \n";
-	
-				}
-	
-				if (n1.getSurrogateFoldID() != null) {
-					currentPrintState += "SurrogateFoldID: "
-							+ getNode(w).getSurrogateFoldID().getValue() + "\n";
-				} else {
-					currentPrintState += "SurrogateFoldID: null\n";
-				}
-	
-				if (n1.getInvSurrogateFoldID() != null) {
-					currentPrintState += "InverseSurrogateFold: "
-							+ getNode(w).getInvSurrogateFoldID().getValue() + "\n";
-				} else {
-					currentPrintState += "InverseSurrogateFold: null \n";
-				}
-				currentPrintState += "Neighbors:\n";
-				for (WebID neighbor : getNode(w).getNeighborList()) {
-					currentPrintState += "Neighbor: " + neighbor.getValue() + "\n";
-	
-				}
-				currentPrintState += "Inverse Surrogate Neighbors:\n";
-				for (WebID invNeighbor : getNode(w).getInvSurNeighborList()) {
-					currentPrintState += "Inverse Neighbor: " + invNeighbor.getValue() + "\n";
-	
-				}
-				currentPrintState += "Surrogate Neighbors:\n";
-				for (WebID surNeighbor : getNode(w).getSurNeighborList()) {
-					currentPrintState += "Surrogate Neighbor: " + surNeighbor.getValue() + "\n";
-	
-				}
-				
-				currentPrintState += "Self Down:\n";
-				currentPrintState += n1.selfDown.toString() + "\n";
-				
-				currentPrintState += "Neighbor Down:\n";
-				currentPrintState += n1.neighborDown.toString() + "\n";
-				
-				currentPrintState += "Double Neighbor Down:\n";
-				currentPrintState += n1.doubleNeighborDown.toString() + "\n";
-				currentPrintState += "\n";
-	
-			}
-			currentPrintState += "\n----------------------------------------------------------------------------------------------------\n";
-			
-			operationList.append(currentPrintState);
-			iterationCount++;
-		}
-	}
-	
-	public static void printHyperWeb() {
-		if (debug) {
-			System.out.println(currentPrintState);
-		}
-	}
 	
 	public void addNeighbor(WebID neighborId) {
 		this.neighbors.add(neighborId);
 	}
 
-	public static Node addToEmptyHyperWeb() {
-
-		nodes.put(new WebID(0), new Node(new WebID(0), 0));
-		
-		nodes.get(new WebID(0)).setUpState(Deletable.getSingleton());
-		
-		return nodes.get(new WebID(0));
-	}
-
-	public static Node addSecondNode() {
-		WebID firstID = new WebID(0);
-		WebID secondID = new WebID(1);
-
-		nodes.put(secondID, new Node(secondID, 0));
-		
-		Node first = nodes.get(firstID);
-		Node second = nodes.get(secondID);
-		
-		first.addNeighbor(secondID);
-		first.setFoldID(secondID);
-		first.setHeight(1);
-		
-		second.addNeighbor(firstID);
-		second.setFoldID(firstID);
-		second.setHeight(1);
-		
-		first.setDownState(Insertable.getSingleton());
-		second.setDownState(Insertable.getSingleton());
-		
-		first.setUpState(Incline.getSingleton());
-		second.setUpState(Deletable.getSingleton());
-		
-		first.setFoldState(StableFold.getSingleton());
-		second.setFoldState(StableFold.getSingleton());
-		
-		first.setCurrentChild(second.getWebID());
-
-		return second;
-
-	}
 	
-	public static Node addToHyperWeb() {
-		Node insertPoint = getRandomNode();
-		
-		startPointInfo = insertPoint.getWebId();
-		debugInfo("Trying to insert at " + insertPoint.getWebId());
-		Node returnNode = insertPoint.getDownState().addToNode(insertPoint);
-		System.out.println();
-		return returnNode;
-	}
-	
-	public static Node addToHyperWebSpecial(int start) {
-		Node insertPoint = getSpecialNode(start);
-		
-		startPointInfo = insertPoint.getWebId();
-		debugInfo("Trying to insert at " + insertPoint.getWebId());
-		insertPoint.getDownState().addToNode(insertPoint);
-		
-		return nodes.get(0);
-	}
-	
-	private static WebID getNearNode(WebID bigNumber, WebID startID){
-		WebID start = startID;
-		int highest = start.getNumberBitsInCommon(bigNumber);
-	
-		boolean reached = false;
-		while (!reached){
-		HashSet<WebID> relations = new HashSet<WebID>();
-				
-		Node check = Node.getNode(start);
-		relations.addAll(check.getNeighborList());
-		relations.addAll(check.getSurNeighborList());
-		relations.addAll(check.getInvSurNeighborList());
-		if (check.getFoldID() != null)
-			relations.add(check.getFoldID());
-		if (check.getSurrogateFoldID() != null)
-			relations.add(check.getSurrogateFoldID());
-		reached = true;
-		for (WebID w : relations){
-			int number  = w.getNumberBitsInCommon(bigNumber);
-			if (number > highest){
-				start = w;
-				
-				reached = false;
-				
-				highest = number;
-			}
-			
-		}
-		
-		}
-		return start;
-	}
-	
-	public static Node getRandomNode() {
-		Random generator = new Random();
-		int randomInsertionPoint = generator.nextInt(2147483647);
-		
-		WebID insertPointID = null;
-		
-		for (WebID id : nodes.keySet()) {
-			insertPointID = id;
-			break;
-		}
-		
-		Node insertPoint  = Node.getNode(getNearNode(new WebID( randomInsertionPoint),insertPointID));
-		// function to find closest node
 
-		
-		return insertPoint;
-	}
-
-	public static Node getSpecialNode(int start) {
-		int randomInsertionPoint = start;
-		
-		WebID insertPointID = null;
-		
-		for (WebID id : nodes.keySet()) {
-			insertPointID = id;
-			break;
-		}
-		
-		Node insertPoint  = Node.getNode(getNearNode(new WebID( randomInsertionPoint),insertPointID));
-		// function to find closest node
-
-		
-		return insertPoint;
-	}
 	
 	/**
 	 * The function called by the HyperWeb that will removed a node from the hyperWeb
-	 * we assume that the hyperweb is not empty when we call the getNode function, as
+	 * we assume that the hyperweb is not empty when we call the dfkdjkfd().getNode function, as
 	 * we should not be able to remove from an empty hyperweb
 	 * 
 	 * there will be special cases if the highest node available to be disconnected has
 	 * a webID of either one or zero
-	 * @return 
 	 */
-	public static Node removeNode() {
-		Node randomStartNode = getRandomNode();
-		Node randomDeleteNode = getRandomNode();
-		
-		debugInfo("Starting at node " + randomStartNode.getWebId());
-		
-		Node disconnectPoint = randomStartNode.getUpState().findEdgeNodeFrom(randomStartNode);
-		WebID disconnectID = disconnectPoint.getWebID();
-		
-		debugInfo("Trying to disconnect " + disconnectPoint.getWebId());
-		debugInfo("Trying to delete " + randomDeleteNode.getWebId());
-		
-		// if the node we are trying to delete is an edge node, just delete it
-		if (randomDeleteNode.getUpState().equals(Deletable.getSingleton())) {
-			disconnectPoint.disconnect();
-		} else {
-			// disconnect and replace deleted
-			disconnectPoint.disconnect();
-			disconnectPoint.getConnectionsFrom(randomDeleteNode);
-			nodes.put(randomDeleteNode.getWebID(), disconnectPoint);
-			
-		}
-		Node temp = nodes.get(disconnectID);
-		
-		nodes.remove(disconnectID);
-		
-		updateInfoString();
-		printHyperWeb();
-		return temp;
-	}
 
-	public static Node removeNode(int StartNode) {
-		Node randomStartNode = getRandomNode();
-		Node randomDeleteNode = getNode(new WebID(StartNode));
-		
-		debugInfo("Starting at node " + randomStartNode.getWebId());
-		
-		Node disconnectPoint = randomStartNode.getUpState().findEdgeNodeFrom(randomStartNode);
-		WebID disconnectID = disconnectPoint.getWebID();
-		
-		debugInfo("Trying to disconnect " + disconnectPoint.getWebId());
-		debugInfo("Trying to delete " + randomDeleteNode.getWebId());
-		
-		// if the node we are trying to delete is an edge node, just delete it
-		if (randomDeleteNode.getUpState().equals(Deletable.getSingleton())) {
-			disconnectPoint.disconnect();
-		} else {
-			// disconnect and replace deleted
-			disconnectPoint.disconnect();
-			disconnectPoint.getConnectionsFrom(randomDeleteNode);
-			nodes.put(randomDeleteNode.getWebID(), disconnectPoint);
-			
-		}
-		Node temp = nodes.get(disconnectID);
-		
-		nodes.remove(disconnectID);
-		
-		updateInfoString();
-		printHyperWeb();
-		return temp;
-	}
-	
-	private void getConnectionsFrom(Node n) {
+	public void getConnectionsFrom(Node n) {
 		
 		this.webID = n.webID;
 		this.height = n.height;
@@ -817,38 +513,46 @@ public class Node implements NodeInterface {
 		this.upState = n.upState;
 		this.downState = n.downState;
 		this.foldState = n.foldState;
+		this.currentChild = n.currentChild;
 		
 	}
 	
 	public void disconnect() {
 		WebID parentID = this.getParentNodeID();
-		Node parent = getNode(parentID);
+		Node parent = parentID.getNode();
 		parent.decreaseHeight();
 		
-		parent.setCurrentChild(parent.getChildNodeID());
+		parent.setCurrentChild(parent.getCurrentChildNodeID());
 		
 		ArrayList<WebID> neighborList = new ArrayList<WebID>();
 		ArrayList<WebID> surNeighborList = new ArrayList<WebID>();
 		neighborList.addAll(this.neighbors);
 		surNeighborList.addAll(this.surNeighbors);
 		// set parent of this node as surNeighbor to my neighbors 
+		System.out.println("ID to remove: " + this.getWebID());
 		for (WebID neighborID : neighborList) {
 			if (!neighborID.equals(parentID)) {
-				getNode(neighborID).addSurNeighbor(parentID);
+				neighborID.getNode().addSurNeighbor(parentID);
 			}
+			neighborID.getNode().neighbors.remove(this.getWebID());
 		}
+		for (WebID neighborID : this.neighbors) {
+			System.out.println("neighbors of  " + neighborID + ": " + neighborID.getNode().neighbors);
+		}
+		
 		// remove all invSurNeighbors that point to this node
 		for (WebID surNeighborID : surNeighborList) {
-			getNode(surNeighborID).removeInvSurNeighbor(this.getWebID());
+			surNeighborID.getNode().removeInvSurNeighbor(this.getWebID());
 		}
 		this.getFoldState().removeFoldsOf(this);
 		
+		parent.updateNeighborHeightRelations();
+		parent.updatePointers();
+		
+		this.removePointersTwoHopsAway();
 	}
 	
-	public static void loadHyperWeb(HashMap<WebID, Node> loadHyperWeb) {
-		nodes = Database.getInstance().getDatabaseAccessor().loadHyperWeb();
-
-	}
+	
 
 	// assume this.height < the new height of the child
 	// in other words, the parent's height has NOT already been incremented
@@ -858,6 +562,20 @@ public class Node implements NodeInterface {
 			return null;
 		}
 		return new WebID(((int) Math.pow(2, this.height)) | webID.getValue());
+	}
+	
+	// assume height has already been decremented/incremented
+	public WebID getCurrentChildNodeID() {
+		// no height means no children or no neighbors
+		if (this.height == 0) {
+			return null;
+		}
+		
+		WebID id = new WebID(((int) Math.pow(2, this.height-1)) ^ webID.getValue());
+		if (id.getValue() == 0) {
+			return null;
+		}
+		return id;
 	}
 
 	public WebID getParentNodeID() {
@@ -877,7 +595,7 @@ public class Node implements NodeInterface {
 			// flip one bit of the checking node's webID to get a neighborID
 			neighborID = new WebID(this.webID.getValue() ^ ((int) Math.pow(2, i)));
 
-			if (getNode(neighborID) != null) {
+			if (neighborID.getNode() != null) {
 				this.addNeighbor(neighborID);
 			} else {
 				// the parent node neighbor will never be null, so we can get the parents of the
@@ -887,7 +605,7 @@ public class Node implements NodeInterface {
 				// this.webID; therefore XOR the highest bit to cancel it
 				Node neighbor = new Node(neighborID, this.height);
 				surNeighborID = neighbor.getParentNodeID();
-				if (getNode(surNeighborID) != null) {
+				if (surNeighborID.getNode() != null) {
 					this.addSurNeighbor(surNeighborID);
 				}
 			}
@@ -898,7 +616,7 @@ public class Node implements NodeInterface {
 	public void updateNeighborHeightRelations() {
 		Node neighbor;
 		for (WebID neighborID : this.getNeighborList()) {
-			neighbor = getNode(neighborID);
+			neighbor = neighborID.getNode();
 			// after increase from add - child will only have equal neighbors and 
 			// parent will only have equal or lower neighbors
 			// after decrease from delete - parent will only have equal or higher neighbors
@@ -921,7 +639,32 @@ public class Node implements NodeInterface {
 		}
 	}
 	
-	public void updateDownPointers() {
+	public void removePointersTwoHopsAway() {
+		ArrayList<HashSet<Node>> twoHopsAway = new ArrayList<HashSet<Node>>();
+		// get ALL neighbors and neighbors neighbors
+		twoHopsAway = this.getAll2Hops();
+		
+		HashSet<Node> neighborList = twoHopsAway.get(0);
+		HashSet<Node> doubleNeighborList = twoHopsAway.get(1);
+		
+		// loop through neighbors
+		for (Node n : neighborList) {
+			n.neighborDown.remove(this.getWebID());
+			n.neighborUp.remove(this.getWebID());
+			n.updateDownState();
+			n.updateUpState();
+		}
+		
+		// loop through neighbors neighbors
+		for (Node n : doubleNeighborList) {
+			n.doubleNeighborDown.remove(this.getWebID());
+			n.doubleNeighborUp.remove(this.getWebID());
+			n.updateDownState();
+			n.updateUpState();
+		} 
+	}
+	
+	public void updatePointers() {
 		ArrayList<HashSet<Node>> twoHopsAway = new ArrayList<HashSet<Node>>();
 		// get ALL neighbors and neighbors neighbors
 		twoHopsAway = this.getAll2Hops();
@@ -937,6 +680,13 @@ public class Node implements NodeInterface {
 			else {
 				this.neighborDown.remove(n.getWebID());
 			}
+			
+			if (n.hasUpPointers() && n.getWebID().minBitRep() >= this.getWebID().minBitRep()) {
+				this.neighborUp.add(n.getWebID());
+			}
+			else if (!n.hasUpPointers() && n.getWebID().minBitRep() >= this.getWebID().minBitRep()) {
+				this.neighborUp.remove(n.getWebID());
+			}
 		}
 		
 		// loop through neighbors neighbors
@@ -947,37 +697,16 @@ public class Node implements NodeInterface {
 			else {
 				this.doubleNeighborDown.remove(n.getWebID());
 			}
-		}
-		this.updateDownState();
-	}
-	
-	public void updateUpPointers() {
-		ArrayList<HashSet<Node>> twoHopsAway = new ArrayList<HashSet<Node>>();
-		// get ALL neighbors and neighbors neighbors
-		twoHopsAway = this.getAll2Hops();
-		
-		HashSet<Node> neighborList = twoHopsAway.get(0);
-		HashSet<Node> doubleNeighborList = twoHopsAway.get(1);
-		
-		// loop through neighbors
-		for (Node n : neighborList) {
-			if (n.hasUpPointers()) {
+			
+			if (n.hasUpPointers() && n.getWebID().minBitRep() >= this.getWebID().minBitRep()) {
 				this.neighborUp.add(n.getWebID());
 			}
-			else {
+			else if (!n.hasUpPointers() && n.getWebID().minBitRep() >= this.getWebID().minBitRep()) {
 				this.neighborUp.remove(n.getWebID());
 			}
 		}
-		
-		// loop through neighbors neighbors
-		for (Node n : doubleNeighborList) {
-			if (n.hasUpPointers()) {
-				this.doubleNeighborUp.add(n.getWebID());
-			}
-			else {
-				this.doubleNeighborUp.remove(n.getWebID());
-			}
-		} 
+		this.updateDownState();
+		this.updateUpState();
 	}
 	
 	// Down Pointer Management Methods
@@ -1180,6 +909,7 @@ public class Node implements NodeInterface {
 	
 	public void setCurrentChild(WebID childID) {
 		this.currentChild = childID;
+		this.updateUpState();
 	}
 	
 	public WebID slideUp() {
@@ -1214,7 +944,8 @@ public class Node implements NodeInterface {
 	}
 	
 	public boolean knowsUpPointers() {
-		return (this.selfUp.size() > 0 ||
+		return (this.invSurrogateFoldID != null || 
+				this.selfUp.size() > 0 ||
 				this.neighborUp.size() > 0 ||
 				this.doubleNeighborUp.size() > 0 ||
 				this.currentChild != null);
@@ -1231,7 +962,7 @@ public class Node implements NodeInterface {
 		// loop through neighbors
 		for (Node n : neighborList) {
 			// we don't want to update neighbors with higher heights than us
-			if (this.getHeight() < n.getHeight()) {
+			if (this.getHeight() < n.getHeight() ||  this.getWebID().minBitRep() < n.getWebID().minBitRep()) {
 				continue;
 			}
 			n.neighborUp.add(this.getWebID());
@@ -1241,7 +972,7 @@ public class Node implements NodeInterface {
 		// loop through neighbors neighbors
 		for (Node n : doubleNeighborList) {
 			// we don't want to update neighbors with higher heights than us
-			if (this.getHeight() < n.getHeight()) {
+			if (this.getHeight() < n.getHeight() ||  this.getWebID().minBitRep() < n.getWebID().minBitRep()) {
 				continue;
 			}
 			n.doubleNeighborUp.add(this.getWebID());
@@ -1276,7 +1007,8 @@ public class Node implements NodeInterface {
 			}
 			n.doubleNeighborUp.remove(this.getWebID());
 			n.updateUpState();
-		}
+		} 
+		
 	}
 	
 	/**
@@ -1284,7 +1016,7 @@ public class Node implements NodeInterface {
 	 * the two nodes. The Send First Node checks if the fold or inverse surrogate fold is closer
 	 * to the endNode. If it is not, then it will only look though the neighbors of the start node.
 	 * 
-	 * We assume that there is an end node and a start node inside the hyperweb. If given a node that
+	 * We assume that there is an end node and a start node inside the dfkdjkfd(). If given a node that
 	 * is not in the hyperweb, we return a null and say that there is no node and the package can't be delivered
 	 * 
 	 * 
@@ -1292,23 +1024,20 @@ public class Node implements NodeInterface {
 	 * @param endNode	the node that will be recieving the command from the start node 
 	 */
 	public Node sendFirstNode(WebID endNode) {
-		
 		//compare the closeness of a neighbor of the start node, and the fold of the node
 		WebID foldID = this.getFoldID();
-		
 		if(foldID == null) {
 			foldID = this.getSurrogateFoldID();
 		}
 		
 		// all neighbors will have the same distance from the start node, so just grab the first one
 		WebID neighborID = this.getNeighborList().get(0);
+		if(neighborID == null) {
+			neighborID = this.getInvSurNeighborList().get(0);
+		}
 		
-		
-			
 		//compare the two webIDs for which one will get us closer to the final node
 		int commonFoldID = foldID.getNumberBitsInCommon(endNode);
-		
-		//int temp = endNode.getNumberBitsInCommon(endNode);
 		int commonNeighborID = neighborID.getNumberBitsInCommon(endNode);
 		
 		if(commonNeighborID > commonFoldID) {
@@ -1316,12 +1045,12 @@ public class Node implements NodeInterface {
 			return this;
 		} else {
 			//go to the fold and then go through the neighbors
-			return Node.getNode(foldID);
+			return foldID.getNode();
 		}
 	}
 	
 	/**
-	 * The function that will get closer to the end node by hopping through the hyperweb. 
+	 * The function that will get closer to the end node by hopping through the dfkdjkfd(). 
 	 * we first check if the start node is the end node (this meaning that we have reached the 
 	 * end node) and deliver the command
 	 * 
@@ -1337,10 +1066,11 @@ public class Node implements NodeInterface {
 	 * @param endNode
 	 */
 	public Node sendNode(WebID endNode) {
+		//Check to see if we have arrived at the end node
 		System.out.println("Start node: " + this.getWebId());
 		System.out.println("End node: " + endNode.toString());
 		
-		int closestID = this.getNeighborList().get(0).getNumberBitsInCommon(endNode);
+		int closestID = 0;
 		WebID closestWebID = null;
 		for(WebID w : this.getInvSurNeighborList()){
 			int currentID = w.getNumberBitsInCommon(endNode);
@@ -1352,33 +1082,34 @@ public class Node implements NodeInterface {
 		
 		for(WebID w : this.getNeighborList()){
 			int currentID = w.getNumberBitsInCommon(endNode);
-			if(currentID >= closestID) {
+			if(currentID > closestID) {
 				closestID = currentID;
 				closestWebID = w;
 			}
 		}
 		
 		if(closestWebID != null) {
-			Node node = getNode(closestWebID);
+			Node node = closestWebID.getNode();
+			//sendNode(node, endNode);
 			return node;
 		}
 		
 		for(WebID w : this.getSurNeighborList()){
 			int currentID = w.getNumberBitsInCommon(endNode);
-			if(currentID >= closestID) {
+			if(currentID == closestID) {
 				closestID = currentID;
 				closestWebID = w;
 			}
 		}
 		
 		if(closestWebID != null) {
-			Node node = getNode(closestWebID);
+			Node node = closestWebID.getNode();
+			//sendNode(node, endNode);
 			return node;
 		}
 		return null;
 	}
-
-
+	
 	public void accept(SendVisitor sendVisitor) {
 		sendVisitor.secondVisit(this);
 	}
