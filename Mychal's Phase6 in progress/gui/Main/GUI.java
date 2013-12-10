@@ -1,0 +1,208 @@
+package gui.Main;
+
+
+import gui.Main.HyPeerWebDebugger;
+
+import java.awt.Dimension;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
+import javax.swing.*;
+
+import Phase6.GlobalObjectId;
+import Phase6.LocalObjectId;
+import Phase6.ObjectDB;
+import Phase6.PeerCommunicator;
+import Phase6.PortNumber;
+import model.HyperWeb;
+import model.HyperWebProxy;
+import model.HyperwebFace;
+
+/**
+ * The central GUI used to display information about the HyPeerWeb and debug information
+ * 
+ * @author Matthew Smith
+ *
+ */
+public class GUI extends JFrame
+{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5929132479735942774L;
+
+	private static GUI singleton = null;
+	
+	/** Main Debugger Panel**/
+	private HyPeerWebDebugger debugger;
+	
+	private HyperwebFace hypeerweb;
+	private JScrollPane scrollPane;
+	
+	private HyperWebProxy hwProxy;
+	
+	private GlobalObjectId globalID;
+	private LocalObjectId localID;
+	
+	/**
+	 * Creates and initializes the GUI as being the root
+	 */
+	public GUI(){
+		
+		this.setTitle("HyPeerWeb DEBUGGER V 1.1");
+		this.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent we) 
+			{
+				shutdown();
+				System.exit(0);
+			}
+		});
+		
+		debugger = new HyPeerWebDebugger(this);
+		scrollPane = new JScrollPane(debugger);
+		scrollPane.setPreferredSize(new Dimension(debugger.WIDTH+20, debugger.HEIGHT));
+		
+		this.getContentPane().add(scrollPane);
+		
+		this.pack();
+	}
+	
+	private void shutdown(){
+//		if (hypeerweb != null) // So if you are not connected to a hyperweb segment, than you can still close
+//			hypeerweb.close();
+	}
+	
+	public void addHyperWeb(HyperwebFace hypeerweb){
+		
+		this.hypeerweb = hypeerweb;
+		// TODO: add hwProxy?
+		
+	}
+	
+	public static GUI getSingleton(){
+		if(singleton == null){
+			try{
+//				singleton = new GUI(hypeerweb);
+				singleton = new GUI();
+						
+				singleton.setVisible(true);
+			}
+			catch(Exception e)	{
+				JOptionPane.showMessageDialog(null, e.getMessage(), "ERROR",JOptionPane.ERROR_MESSAGE);
+				e.printStackTrace();
+				//hypeerweb.close();
+				System.exit(1);
+			}
+		}
+		return singleton;
+	}
+	
+	/**
+	 * Start Point of the Program
+	 */
+	public static void main (String[] args) {
+		PortNumber port = null;
+		// parse command line args
+    	if (args.length != 2) {
+    		System.out.println("Using default port for gui");
+    		port = new PortNumber(8090);
+    	}
+    	else if(args[0].equals("-p")) {
+            try
+            {
+                int portNum = Integer.parseInt(args[1]);
+                port = new PortNumber(portNum);
+            }
+            catch(NumberFormatException e)
+            {
+            	System.out.println("valid command line args are: -p (port number)");
+        		System.exit(-1);
+            }
+        }
+        else
+        {
+        	System.out.println("valid command line args are: -p (port number)");
+    		System.exit(-1);
+        }
+    	
+        GlobalObjectId globalID;
+		try {
+			globalID = new GlobalObjectId(InetAddress.getLocalHost().getHostName(), port, new LocalObjectId(-200));
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			globalID = null;
+		}
+        GUI gui = GUI.getSingleton();
+        gui.printToTracePanel("GUI is not connected to a segment");
+        gui.setGlobalID(globalID);
+        gui.setLocalID(globalID.getLocalObjectId());
+        ObjectDB db = ObjectDB.getSingleton();
+        db.store(gui.getLocalID(), gui);
+        PeerCommunicator.createPeerCommunicator(port);
+        PeerCommunicator.getSingleton().run();
+	}
+
+	/**
+	 * Retrieves the HyPeerWeb Debugging Panel
+	 * @return HyPeerWebDebugger
+	 */
+	public HyPeerWebDebugger getHyPeerWebDebugger() {
+		return debugger;
+	}
+	
+	public HyperwebFace getHyPeerWeb() {
+		return hypeerweb;
+	}
+	
+	public void printToTracePanel(Object msg) {
+		debugger.getTracePanel().print(msg);
+	}
+	
+	public void refreshGUI() {
+        debugger.getMapper().getNodeListing().refreshList();
+    }
+	
+	public void addNode(int id) {
+        debugger.getMapper().getNodeListing().addNode(id);
+    }
+    
+    public void deletNode(int id) {
+        debugger.getMapper().getNodeListing().deleteNode(id);
+    }
+    
+    public void connectToSegment() {
+    	hwProxy.connectGUI(this.globalID);
+    }
+    
+    public GlobalObjectId getGlobalID() {
+    	return this.globalID;
+    }
+    public void setGlobalID(GlobalObjectId globalID) {
+    	this.globalID = globalID;
+    }
+    
+    public void setLocalID(LocalObjectId localID) {
+    	this.localID = localID;
+    }
+    
+    public LocalObjectId getLocalID() {
+        return localID;
+    }
+    
+    public HyperWebProxy getCurrentSegment() {
+    	return hwProxy;
+    }
+    
+    public void setCurrentSegment(GlobalObjectId globalID) {
+    	hwProxy = new HyperWebProxy(globalID);
+    	
+    }
+	
+//	public void finalize(){
+//		hypeerweb.close();
+//	}
+
+}
