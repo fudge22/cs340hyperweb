@@ -141,7 +141,7 @@ public class Command
 			}
 			if(isSynchronous){
 				result = method.invoke(target, actualParameters);
-				System.out.println("params1: " + ((GUISender)actualParameters[0]).getParameters().get("message"));
+				
 
 			} else {
 				method.invoke(target, actualParameters);
