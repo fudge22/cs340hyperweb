@@ -10,10 +10,6 @@ import model.WebID;
 
 public class BroadcastVisitor extends Visitor{
 	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 2871823695985736691L;
 	public static int visitCount = 1;
 	private Parameters parameters;
 	
@@ -24,7 +20,6 @@ public class BroadcastVisitor extends Visitor{
 		super();
 		visitCount = 1;
 		parameters = new Parameters();
-		parameters.set("pathString","");
 	}
 	
 	public void setParameters(Parameters newParameters) {
@@ -51,7 +46,7 @@ public class BroadcastVisitor extends Visitor{
 		 * if you send to the neighbors, check their children.
 		 * 
 		 */
-		intermediateOperation(node, parameters);
+		intermediateOperation(node);
 		String testNodeBSR = Integer.toBinaryString(node.getWebID().getValue());
 		int heightOfNode = node.getHeight();
 		int lengthOfStringRepresentation = testNodeBSR.length();
@@ -78,6 +73,8 @@ public class BroadcastVisitor extends Visitor{
 				}
 			}
 		}
+		// TODO broadcast an unimplemented message to the current node
+		
 		for(int index = 0; index < listOfNodesToTest.size(); index++){
 			WebID tempWebId = new WebID(Integer.parseInt(listOfNodesToTest.get(index), 2));
 			Node tempNode = tempWebId.getNode();
@@ -125,16 +122,13 @@ public class BroadcastVisitor extends Visitor{
 	 * 
 	 * @param node
 	 */
-	protected void intermediateOperation(Node node, Parameters parameters){
+	protected void intermediateOperation(Node node){
 		String outputString = "Visiting node " + node.getWebId() + " through vistor pattern, trying to broadcast. Total visit count = "
-				+ visitCount + " " + parameters.get("message") + ".\n";
+				+ visitCount + " " + this.parameters.get("message") + ".\n";
 		
-		parameters.set("pathString", parameters.get("pathString") + outputString);
-//		HyperWeb myWeb = HyperWeb.getSingleton();
-//		GUI myGUI = GUI.getSingleton();
-//		System.out.println(outputString);
-		
-//		myGUI.printToTracePanel(outputString);
+		HyperWeb myWeb = HyperWeb.getSingleton();
+		GUI myGUI = GUI.getSingleton();
+		myGUI.printToTracePanel(outputString);
 	}
 
 }

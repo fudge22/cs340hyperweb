@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -46,6 +47,8 @@ public class NodeListing extends JPanel {
 	public static final int MAX_NUMBER_OF_NODES = 128;
 	
 	private int listSize = 1;
+	
+	private ArrayList<Integer> nodes;
 	
 	/**
 	 * Creates and intializes a Node Listing
@@ -115,6 +118,36 @@ public class NodeListing extends JPanel {
 			}
 		}
 	}
+	
+	public void refreshList()
+    {
+		// TODO: get Nodes list of hyperweb to refresh the GUI
+//         nodes = main.getHyPeerWeb().getNodes();
+//        listSize = nodes.size();
+//        for (int i = 0; i < MAX_NUMBER_OF_NODES; i++)
+//        {
+//            if (i >= listSize)
+//            {
+//                nodeListModel.set(i,"");
+//            }
+//            else
+//            {
+//                nodeListModel.set(i,Integer.toString(nodes.get(i)));
+//            }
+//        }
+    }
+	
+	public void addNode(int node)
+    {
+        nodes.add(node);
+        increaseListSize();
+    }
+    
+    public void deleteNode(Integer node)
+    {
+        nodes.remove(node);
+        decreaseListSize();
+    }
 	
 	public void increaseListSize(){
 		nodeListModel.set(listSize,Integer.toString(listSize));

@@ -1,10 +1,5 @@
 package model;
 
-import Phase6.Command;
-import Phase6.GlobalObjectId;
-import Phase6.LocalObjectId;
-import Phase6.PeerCommunicator;
-import Phase6.PortNumber;
 import visitor.SendBroadcast;
 import exceptions.HyperWebException;
 import exceptions.VisitorException;
@@ -28,14 +23,13 @@ public class HyperwebFace {
 		
 	}
 
-	public HyperWeb receiveSingleton() {
+	public HyperWeb recieveSingleton() {
 		return HyperWeb.getSingleton();
 	}
 	
 	public static HyperwebFace getSingleton(){
 		
 		return new HyperwebFace();
-		
 	
 	}
 	/**
@@ -69,7 +63,7 @@ public class HyperwebFace {
 	 * 
 	 * @return Node that was added to the Hyperweb or null if there was a problem
 	 */
-	public Node receiveDelete(){
+	public Node recieveDelete(){
 		Node myNode = null;
 
 			myNode = HyperWeb.getSingleton().removeNode();
@@ -82,7 +76,7 @@ public class HyperwebFace {
 	 * 
 	 * @return Node that was added to the Hyperweb or null if there was a problem
 	 */
-	public Node receiveDelete(int i){
+	public Node recieveDelete(int i){
 		Node myNode = null;
 
 			myNode = HyperWeb.getSingleton().removeNode(i);
@@ -90,9 +84,7 @@ public class HyperwebFace {
 		return myNode;
 	}
 	
-	public String receiveSend(GUISender myVisit, int endNode){
-		
-		System.out.println("send is called");
+	public String recieveSend(GUISender myVisit, int endNode){
 		String visitPath;
 		try {
 			myVisit.send(endNode);
@@ -103,31 +95,22 @@ public class HyperwebFace {
 		return visitPath;
 	}
 	
-	public String receiveBroadcast(SendBroadcast myCast, int startNode){
+	public String recieveBroadcast(SendBroadcast myCast, int startNode){
 		String visitPath;
 		try {
 			myCast.send(startNode);
 		} catch (VisitorException e) {
 			return null;
 		}
-		visitPath = (String) myCast.getParameters().get("pathString");
-		visitPath = visitPath + "Broadcast complete.\n";
+		visitPath = (String) myCast.getParameters().get("finalString");
 		return visitPath;
 	}
 	
-	public void receiveClose(){
+	public void recieveClose(){
 		
 	}
-	
-	public void setNext(String ip, String port){
-		GlobalObjectId g = new GlobalObjectId(ip, new PortNumber(Integer.parseInt(port)), new LocalObjectId(-2147483648));
-		HyperWeb.getSingleton().setNext(new HyperwebFaceProxy(g));
-	}
 
-	public Node receiveRandomNode(GlobalObjectId globalObjectId2){
-  	
-		return HyperWeb.getSingleton().getRandomNode(globalObjectId2);
-  }
+	
 
 		
 }

@@ -1,18 +1,11 @@
 package model;
 
-import java.io.Serializable;
-
-import gui.GUISender;
 import Phase6.*;
 
-public class HyperwebFaceProxy extends HyperwebFace implements Serializable
-    
+public class HyperwebFaceProxy
+    extends HyperwebFace
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = -2871968193246559371L;
-	private GlobalObjectId globalObjectId;
+    private GlobalObjectId globalObjectId;
     private static GlobalObjectId staticObjectId;
     
     public HyperwebFaceProxy(GlobalObjectId globalObjectId){
@@ -28,10 +21,10 @@ public class HyperwebFaceProxy extends HyperwebFace implements Serializable
         PeerCommunicator.getSingleton().sendASynchronous(globalObjectId, command);
     }
 
-    public model.HyperWeb receiveSingleton(){
+    public model.HyperWeb recieveSingleton(){
         String[] parameterTypeNames = new String[0];
         Object[] actualParameters = new Object[0];
-        Command command = new Command(globalObjectId.getLocalObjectId(), "model.HyperwebFace", "receiveSingleton", parameterTypeNames, actualParameters, true);
+        Command command = new Command(globalObjectId.getLocalObjectId(), "model.HyperwebFace", "recieveSingleton", parameterTypeNames, actualParameters, true);
         Object result = PeerCommunicator.getSingleton().sendSynchronous(globalObjectId, command);
         return (model.HyperWeb)result;
     }
@@ -58,64 +51,56 @@ public class HyperwebFaceProxy extends HyperwebFace implements Serializable
         String[] parameterTypeNames = new String[0];
         Object[] actualParameters = new Object[0];
         Command command = new Command(globalObjectId.getLocalObjectId(), "model.HyperwebFace", "receiveAdd", parameterTypeNames, actualParameters, true);
-        //PeerCommunicator p = PeerCommunicator.getSingleton();
-        System.out.println(globalObjectId.getMachineAddr() + " " + globalObjectId.getPortNumber());
-
         Object result = PeerCommunicator.getSingleton().sendSynchronous(globalObjectId, command);
         return (model.Node)result;
     }
 
-    public model.Node receiveDelete(int p0){
+    public model.Node recieveDelete(int p0){
         String[] parameterTypeNames = new String[1];
         parameterTypeNames[0] = "int";
         Object[] actualParameters = new Object[1];
         actualParameters[0] = p0;
-        Command command = new Command(globalObjectId.getLocalObjectId(), "model.HyperwebFace", "receiveDelete", parameterTypeNames, actualParameters, true);
+        Command command = new Command(globalObjectId.getLocalObjectId(), "model.HyperwebFace", "recieveDelete", parameterTypeNames, actualParameters, true);
         Object result = PeerCommunicator.getSingleton().sendSynchronous(globalObjectId, command);
         return (model.Node)result;
     }
 
-    public model.Node receiveDelete(){
+    public model.Node recieveDelete(){
         String[] parameterTypeNames = new String[0];
         Object[] actualParameters = new Object[0];
-        Command command = new Command(globalObjectId.getLocalObjectId(), "model.HyperwebFace", "receiveDelete", parameterTypeNames, actualParameters, true);
+        Command command = new Command(globalObjectId.getLocalObjectId(), "model.HyperwebFace", "recieveDelete", parameterTypeNames, actualParameters, true);
         Object result = PeerCommunicator.getSingleton().sendSynchronous(globalObjectId, command);
         return (model.Node)result;
     }
 
-    public String receiveSend(GUISender p0, int p1){
+    public java.lang.String recieveSend(gui.GUISender p0, int p1){
         String[] parameterTypeNames = new String[2];
         parameterTypeNames[0] = "gui.GUISender";
         parameterTypeNames[1] = "int";
         Object[] actualParameters = new Object[2];
         actualParameters[0] = p0;
         actualParameters[1] = p1;
-        System.out.println("before param");
-        System.out.println("paramsss: " + ((GUISender) p0).getParameters().get("message"));
-        System.out.println("target: " + ((GUISender) p0).targetID);
-        
-        Command command = new Command(globalObjectId.getLocalObjectId(), "model.HyperwebFace", "receiveSend", parameterTypeNames, actualParameters, true);
-        System.out.println(globalObjectId.getMachineAddr() + " " + globalObjectId.getPortNumber() + " " + globalObjectId.getLocalObjectId());
+        Command command = new Command(globalObjectId.getLocalObjectId(), "model.HyperwebFace", "recieveSend", parameterTypeNames, actualParameters, true);
         Object result = PeerCommunicator.getSingleton().sendSynchronous(globalObjectId, command);
-        return (String)result;
+        return (java.lang.String)result;
     }
 
-    public java.lang.String receiveBroadcast(visitor.SendBroadcast p0, int p1){
+    public java.lang.String recieveBroadcast(visitor.SendBroadcast p0, int p1){
         String[] parameterTypeNames = new String[2];
         parameterTypeNames[0] = "visitor.SendBroadcast";
         parameterTypeNames[1] = "int";
         Object[] actualParameters = new Object[2];
         actualParameters[0] = p0;
         actualParameters[1] = p1;
-        Command command = new Command(globalObjectId.getLocalObjectId(), "model.HyperwebFace", "receiveBroadcast", parameterTypeNames, actualParameters, true);
+        Command command = new Command(globalObjectId.getLocalObjectId(), "model.HyperwebFace", "recieveBroadcast", parameterTypeNames, actualParameters, true);
         Object result = PeerCommunicator.getSingleton().sendSynchronous(globalObjectId, command);
         return (java.lang.String)result;
     }
 
-    public void receiveClose(){
+    public void recieveClose(){
         String[] parameterTypeNames = new String[0];
         Object[] actualParameters = new Object[0];
-        Command command = new Command(globalObjectId.getLocalObjectId(), "model.HyperwebFace", "receiveClose", parameterTypeNames, actualParameters, false);
+        Command command = new Command(globalObjectId.getLocalObjectId(), "model.HyperwebFace", "recieveClose", parameterTypeNames, actualParameters, false);
         PeerCommunicator.getSingleton().sendASynchronous(globalObjectId, command);
     }
 
@@ -145,17 +130,4 @@ public class HyperwebFaceProxy extends HyperwebFace implements Serializable
         return (Integer)result;
     }
 
-    public Node receiveRandomNode(GlobalObjectId globalObjectId2){
-  	  String[] parameterTypeNames = new String[1];
-  	  
-  	  parameterTypeNames[0] = "Phase6.GlobalObjectId";
-        Object[] actualParameters = new Object[1];
-        actualParameters[0] = globalObjectId2;
-        
-        
-        
-        Command command = new Command(globalObjectId.getLocalObjectId(), "model.HyperwebFace", "receiveRandomNode", parameterTypeNames, actualParameters, true);
-        Object result = PeerCommunicator.getSingleton().sendSynchronous(globalObjectId, command);
-        return (Node)result;
-  }
 }

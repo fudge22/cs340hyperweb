@@ -2,7 +2,6 @@ package model;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
@@ -20,6 +19,7 @@ import Phase6.PortNumber;
 import database.Database;
 import exceptions.DatabaseException;
 import exceptions.WebIDException;
+import gui.GUIObserver;
 import simulation.HyPeerWebInterface;
 import simulation.NodeInterface;
 import states.Deletable;
@@ -48,16 +48,10 @@ public class HyperWeb implements HyPeerWebInterface, Serializable {
 	private  int insertPointInfo = -1;
 	private  int insertedNodeInfo = -1;
 	
-//	private static int portNum = 3000;
-	
-	
-	private HyperwebFaceProxy next;
-
-	
-	
+	private int portNum = 3000;
 	public  StringBuilder operationList = new StringBuilder();
-	public static GlobalObjectId hyperwebSeg = new GlobalObjectId();
-	
+	private LocalObjectId localID;
+	private static GUIObserver observer;
 	
 	public  void initialize(/*GlobalObjectId hyperwebSeg*/) {
 		nodes = new HashMap<WebID, Node>();
@@ -68,6 +62,32 @@ public class HyperWeb implements HyPeerWebInterface, Serializable {
 	public static void changePort(int p){
 		Phase6.PortNumber.setApplicationsPortNumber(new PortNumber(p));
 	}
+	
+	public GlobalObjectId getGlobalObjectId() {
+		try {
+			return new GlobalObjectId(InetAddress.getLocalHost().getHostName(), new PortNumber(portNum), this.localID);
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+    }
+	
+	public void setLocalObjectId(LocalObjectId id) {
+        this.localID = id;
+    }
+	public LocalObjectId getLocalObjectId() {
+        return this.localID;
+    }
+	
+	public void setPort(int portNum) {
+		this.portNum = portNum;
+	}
+	
+	public int getPort() {
+	    return this.portNum;
+	}
+	
 	public HyperWeb(){
 		
 		
@@ -76,10 +96,6 @@ public class HyperWeb implements HyPeerWebInterface, Serializable {
 		
 		
 	
-	}
-	public void setNext(HyperwebFaceProxy nxt){
-		next = nxt;
-		saveDb();
 	}
 	public static HyperWeb getSingleton(){
 		
@@ -92,6 +108,7 @@ public class HyperWeb implements HyPeerWebInterface, Serializable {
 				}
 				else
 				{
+					System.out.println("HyperWeb Loaded.");
 					hw = hwdb;
 				}
 		}
@@ -117,32 +134,18 @@ public class HyperWeb implements HyPeerWebInterface, Serializable {
 	
 	public  Node addNode() {
 		Node returnNode = null;
-		
-		//if you are adding to all empty hws then do the first one
-		
-		Node insertPoint = getRandomNode(null);
-		
-		//get random node
-		//if the random node is 0 than check if it has neighbors, if it has none than add second
-		if (insertPoint == null){
-			
+		if (hw.nodes.size() == 0) {
 			returnNode = HyperWeb.getSingleton().addToEmptyHyperWeb();// base case with no nodes in the
-
+												// hyperweb
+		} else if (hw.nodes.size() == 1) {
+			returnNode = HyperWeb.getSingleton().addSecondNode();// base case with only one node in the
+										// hyperweb
+		} else {
+			returnNode = HyperWeb.getSingleton().addToHyperWeb();
 		}
-		else if (insertPoint.getWebId() >= 0 && insertPoint.getNeighborList().size() > 0)//it is missing the case that 0 is randomly selected, but it isn't the only node
-			returnNode = HyperWeb.getSingleton().addToHyperWeb(insertPoint);
-			
-		else if (insertPoint.getWebId() == 0 && insertPoint.getNeighborList().size() == 0)
-			{
-			
-				returnNode = HyperWeb.getSingleton().addSecondNode(insertPoint);// base case with only one node in the
 
-				
-			}
-			
-		
-		
-
+//		HyperWeb.getSingleton().updateInfoString();
+//		HyperWeb.getSingleton().printHyperWeb();// prints all of the nodes information in the hyperweb
 		saveDb();
 		return returnNode;
 	}
@@ -160,23 +163,23 @@ public class HyperWeb implements HyPeerWebInterface, Serializable {
 
 	
 	public  Node addToEmptyHyperWeb() {
-		WebID temp = new WebID(0);
-		putWrapper(temp, new Node(temp, 0));
+
+		putWrapper(new WebID(0), new Node(new WebID(0), 0));
 		
 		
-		temp.getNode().setUpState(Deletable.getSingleton());//maybe change this to not use hw.nodes
-		saveDb();
-		return temp.getNode();
+		hw.nodes.get(new WebID(0)).setUpState(Deletable.getSingleton());
+		
+		return hw.nodes.get(new WebID(0));
 	}
 
-	public  Node addSecondNode(Node node0) {
-		WebID firstID = node0.getWebID();
+	public  Node addSecondNode() {
+		WebID firstID = new WebID(0);
 		WebID secondID = new WebID(1);
 
 		putWrapper(secondID, new Node(secondID, 0));
 		
-		Node first = node0;
-		Node second = secondID.getNode();
+		Node first = hw.nodes.get(firstID);
+		Node second = hw.nodes.get(secondID);
 		
 		first.addNeighbor(secondID);
 		first.setFoldID(secondID);
@@ -196,13 +199,13 @@ public class HyperWeb implements HyPeerWebInterface, Serializable {
 		second.setFoldState(StableFold.getSingleton());
 		
 		first.setCurrentChild(second.getWebID());
-		saveDb();
+
 		return second;
 
 	}
 	public  Node removeNode() {
-		Node randomStartNode = HyperWeb.getSingleton().getRandomNode(null);
-		Node randomDeleteNode = HyperWeb.getSingleton().getRandomNode(null);
+		Node randomStartNode = HyperWeb.getSingleton().getRandomNode();
+		Node randomDeleteNode = HyperWeb.getSingleton().getRandomNode();
 		
 //		debugInfo("Starting at node " + randomStartNode.getWebId());
 		
@@ -233,8 +236,8 @@ public class HyperWeb implements HyPeerWebInterface, Serializable {
 	}
 
 	public Node removeNode(int StartNode) {
-		Node randomStartNode = HyperWeb.getSingleton().getRandomNode(null);
-		Node randomDeleteNode = new WebID(StartNode).getNode(); //would care about this being wrong, but delete doesn't work...
+		Node randomStartNode = HyperWeb.getSingleton().getRandomNode();
+		Node randomDeleteNode = new WebID(StartNode).getNode();
 		
 //		debugInfo("Starting at node " + randomStartNode.getWebId());
 		
@@ -406,60 +409,24 @@ public class HyperWeb implements HyPeerWebInterface, Serializable {
 			System.out.println(currentPrintState);
 		}
 	}
-	public  Node getRandomNode(GlobalObjectId globalObjectId2) {
+	public  Node getRandomNode() {
 		Random generator = new Random();
 		int randomInsertionPoint = generator.nextInt(2147483647);
 		
 		WebID insertPointID = null;
-		Node insertPoint  = null;
-		if (hw != null && hw.nodes != null && hw.nodes.size() != 0){ //get random node from currentSegment
-			for (WebID id : hw.nodes.keySet()) {
-				insertPointID = id;
-				break;
-			}
-			return insertPointID.getNode();
-			
+		
+		for (WebID id : hw.nodes.keySet()) {
+			insertPointID = id;
+			break;
 		}
 		
-		if (insertPointID == null) { // there are no nodes on this segment
-			if (globalObjectId2 == null){
-				insertPoint = next.receiveRandomNode(new GlobalObjectId());
+		Node insertPoint  = getNearNode(new WebID( randomInsertionPoint, 1),insertPointID).getNode();
+		// function to find closest node
 
-			}
-			else if (!globalObjectId2.onSameMachineAs(new GlobalObjectId())){///maybe works...
-				insertPoint = next.receiveRandomNode(globalObjectId2);
-			}
-			
-		}
-			
-		if (insertPoint == null)
-			return null;
-		else {
-			System.out.println("class: " + insertPoint.getClass());
-			
-			WebID inserting = insertPoint.getWebID();
-			insertPoint = getNearNode( randomInsertionPoint,inserting).getNode();
-			
-		}
-	
-			
-
-
-		
 		
 		return insertPoint;
 	}
-	private static GlobalObjectId getGlobalObjectId() {
-		try {
-			String machineName = InetAddress.getLocalHost().getHostAddress();
-			PortNumber p =new PortNumber(PeerCommunicator.getSingleton().serverSocket.getLocalPort());
-			return new GlobalObjectId(machineName, p, null);
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-	private  WebID getNearNode(int bigNumber, WebID startID){
+	private  WebID getNearNode(WebID bigNumber, WebID startID){
 		WebID start = startID;
 		int highest = start.getNumberBitsInCommon(bigNumber);
 	
@@ -467,7 +434,7 @@ public class HyperWeb implements HyPeerWebInterface, Serializable {
 		while (!reached){
 		HashSet<WebID> relations = new HashSet<WebID>();
 				
-		Node check = start.getNode();
+		Node check = hw.getNode(start);
 		relations.addAll(check.getNeighborList());
 		relations.addAll(check.getSurNeighborList());
 		relations.addAll(check.getInvSurNeighborList());
@@ -491,8 +458,8 @@ public class HyperWeb implements HyPeerWebInterface, Serializable {
 		}
 		return start;
 	}
-	public  Node addToHyperWeb(Node insertPoint) {
-		
+	public  Node addToHyperWeb() {
+		Node insertPoint = getRandomNode();
 		
 		startPointInfo = insertPoint.getWebId();
 		debugInfo("Trying to insert at " + insertPoint.getWebId());
@@ -510,7 +477,7 @@ public class HyperWeb implements HyPeerWebInterface, Serializable {
 			break;
 		}
 		
-		Node insertPoint  = getNearNode( randomInsertionPoint,insertPointID).getNode();
+		Node insertPoint  = getNearNode(new WebID( randomInsertionPoint),insertPointID).getNode();
 		// function to find closest node
 
 		
@@ -529,27 +496,19 @@ public class HyperWeb implements HyPeerWebInterface, Serializable {
 		// TODO Do something when you close the gui for the hyperweb
 		hw = null;
 	}
-	public LocalObjectId getLocalObjectId() {
-		// TODO Auto-generated method stub
-		return this.hyperwebSeg.getLocalObjectId();
-	}
 	public void clear() {
 		hw.nodes.clear();
 		
 	}
 	public void saveDb() {
+		String fileLocation = "Datbase.db";
 		
-		String fileLocation = getGlobalObjectId().getPortNumber().toString() + "/Datbase.db";
-		File f= new File(fileLocation);
 		
-		f.getParentFile().mkdirs();
-		SerializeHelp.makeLiteral1();
-
     	try{
     		ObjectOutputStream oos =
     			new ObjectOutputStream(
     				new BufferedOutputStream(
-    					new FileOutputStream(f)));
+    					new FileOutputStream(fileLocation)));
     		oos.write(LocalObjectId.getNextId());
     		oos.writeObject(hw);
     		oos.flush();
@@ -558,14 +517,12 @@ public class HyperWeb implements HyPeerWebInterface, Serializable {
     		System.err.println("In communicator.ObjectDB::save(String) -- ERROR could not save ObjectDB");
     		e.printStackTrace();
     	}		
-		SerializeHelp.release1();
-
+		
 		
 	}
 	public static HyperWeb loadDb() {
-		String fileLocation = getGlobalObjectId().getPortNumber().toString() + "/Datbase.db";
+		String fileLocation = "Datbase.db";
 		HyperWeb hwdb = null;
-		SerializeHelp.makeLiteral1();
 		try {
     		ObjectInputStream ois =
     			new ObjectInputStream(
@@ -581,9 +538,86 @@ public class HyperWeb implements HyPeerWebInterface, Serializable {
     		e.printStackTrace();
     		hwdb = null;
     	}
-		SerializeHelp.release1();
+		
 		return hwdb;
 	}
+	
+	public static void main(String[] args)
+    {
+        PortNumber portNum = new PortNumber(8080); // default port num
+        String machineName = "127.0.0.1"; // default machine name
+        
+        // parse command line args
+    	if (args.length != 2) {
+    		System.out.println("Using default port and host");
+    	}
+    	else if(args[0].equals("-p")) {
+            try
+            {
+                int inPort = Integer.parseInt(args[1]);
+                portNum = new PortNumber(inPort);
+            }
+            catch(NumberFormatException e)
+            {
+            	System.out.println("valid command line args are: -p (port number)");
+        		System.exit(-1);
+            }
+        }
+        else
+        {
+        	System.out.println("valid command line args are: -p (port number)");
+    		System.exit(-1);
+        }
+        
+        // get local machine name
+        try
+        {
+            machineName = InetAddress.getLocalHost().getHostName();
+        }
+        catch (UnknownHostException e)
+        {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+        
+        HyperWeb web = HyperWeb.getSingleton();
+        
+        observer = GUIObserver.getSingleton();
+        
+        ObjectDB db = ObjectDB.getSingleton();
+        
+        web.setLocalObjectId(new LocalObjectId(-100));
+        
+        // store the web in the ObjectDB
+        db.store(web.getLocalObjectId(), web);
+        
+        // port will be different each run? if so don't need to save it
+        web.setPort(portNum.getValue());
+        
+        // create peer communicator for port
+        PeerCommunicator.createPeerCommunicator(portNum);
+        PeerCommunicator.getSingleton().run();
+    }
+	
+	public void addGUI(GlobalObjectId globalID)
+    {
+        if(globalID != null) {
+            System.out.println("Gui Added: " + globalID);
+        }
+        else {
+            System.out.println("Gui Removed.");
+        }
+        observer.addGUI(globalID);
+        observer.refreshGUI();
+    }
+    
+    public void printMessage(String message) {
+    	observer.printToTracePanel(message);
+    }
+    
+    public void updateGUI() {
+    	observer.refreshGUI();
+    }
 	
 
 }

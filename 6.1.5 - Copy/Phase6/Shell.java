@@ -1,145 +1,30 @@
 package Phase6;
-
+import java.io.IOException;
 
 /**
- * This program enables you to connect to sshd server and get the shell prompt.
- *   $ CLASSPATH=.:../build javac Shell.java 
- *   $ CLASSPATH=.:../build java Shell
- * You will be asked username, hostname and passwd. 
- * If everything works fine, you will get the shell prompt. Output may
- * be ugly because of lacks of terminal-emulation, but you can issue commands.
+ * Not really needed for the example but if you need to execute from within java a command on the command line of
+ * another machine, this shows you how to do it.  You will have to set up ssh so no password is needed.  See
+ * http://www.csua.berkeley.edu/~ranga/notes/ssh_nopass.html
+ * @author Scott
  *
  */
-import com.jcraft.jsch.*;
-
-import java.awt.*;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
-import javax.swing.*;
- 
-public class Shell{
-  public static void main(String[] arg){
-    
-    try{
-      JSch jsch=new JSch();
- 
-     
-      String host ="schizo.cs.byu.edu"; 
-      
-      String user="jvisker";
-     
- 
-      Session session=jsch.getSession(user, host, 22);
- 
-      
-      session.setPassword("jv800970646");
- 
-      UserInfo ui = new MyUserInfo(){
-        public void showMessage(String message){
-//          JOptionPane.showMessageDialog(null, message);
-        }
-        public boolean promptYesNo(String message){
-//          Object[] options={ "yes", "no" };
-//          int foo=JOptionPane.showOptionDialog(null, 
-//                                               message,
-//                                               "Warning", 
-//                                               JOptionPane.DEFAULT_OPTION, 
-//                                               JOptionPane.WARNING_MESSAGE,
-//                                               null, options, options[0]);
-          return true;
-        }
- 
-        // If password is not given before the invocation of Session#connect(),
-        // implement also following methods,
-        //   * UserInfo#getPassword(),
-        //   * UserInfo#promptPassword(String message) and
-        //   * UIKeyboardInteractive#promptKeyboardInteractive()
- 
-      };
-     
-      session.setUserInfo(ui);
- 
-      // It must not be recommended, but if you want to skip host-key check,
-      // invoke following,
-      // session.setConfig("StrictHostKeyChecking", "no");
- 
-      //session.connect();
-      session.connect(30000);   // making a connection with timeout.
- 
-      Channel channel=session.openChannel("shell");
- 
-      // Enable agent-forwarding.
-      //((ChannelShell)channel).setAgentForwarding(true);
- 
- 
- 
- String str =  "cd Documents/workspace6; java -jar hwServer.jar 8080 127.0.0.1 8081; java -jar hwServer.jar 8081 127.0.0.1 8080;"
- 		+ " java -jar hwGUI.jar 3000; java -jar hwGUI.jar 3000";
- 
-	// convert String into InputStream
-	InputStream is = new ByteArrayInputStream(str.getBytes());
-
-	// read it with BufferedReader
-//	BufferedReader br = new BufferedReader(new InputStreamReader(is));
-
-//	String line;
-//	while ((line = br.readLine()) != null) {
-//		System.out.println(line);
-//	}
-
-//	br.close();
- 
- 
-      channel.setInputStream(is);
-      /*
-      // a hack for MS-DOS prompt on Windows.
-      channel.setInputStream(new FilterInputStream(System.in){
-          public int read(byte[] b, int off, int len)throws IOException{
-            return in.read(b, off, (len>1024?1024:len));
-          }
-        });
-       */
- 
-      channel.setOutputStream(System.out);
-
-      /*
-      // Choose the pty-type "vt102".
-      ((ChannelShell)channel).setPtyType("vt102");
-      */
- 
-      /*
-      // Set environment variable "LANG" as "ja_JP.eucJP".
-      ((ChannelShell)channel).setEnv("LANG", "ja_JP.eucJP");
-      */
- 
-      //channel.connect();
-      channel.connect(3*1000);
-    }
-    catch(Exception e){
-      System.out.println(e);
-    }
-  }
- 
-  public static abstract class MyUserInfo
-                          implements UserInfo, UIKeyboardInteractive{
-    public String getPassword(){ return null; }
-    public boolean promptYesNo(String str){ return false; }
-    public String getPassphrase(){ return null; }
-    public boolean promptPassphrase(String message){ return false; }
-    public boolean promptPassword(String message){ return false; }
-    public void showMessage(String message){ }
-    public String[] promptKeyboardInteractive(String destination,
-                                              String name,
-                                              String instruction,
-                                              String[] prompt,
-                                              boolean[] echo){
-      return null;
-    }
-  }
-//shell.executeCommand("ssh -i $HOME/.ssh/id_dsa jvisker@schizo.cs.byu.edu && mkdir jum");
-}
-		
+public class Shell {
+	public Process executeCommand(String command){
+		try {
+			return Runtime.getRuntime().exec(command);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 	
+	public Shell(){}
+	
+	public static void main(String[] args){
+		System.out.println("Begin");
+		Shell shell = new Shell();
+		shell.executeCommand("ssh -i $HOME/.ssh/id_dsa jvisker@schizo.cs.byu.edu");
+		shell.executeCommand("mkdir jumbalya");
+		System.out.println("End");
+	}
+}

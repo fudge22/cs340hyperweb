@@ -73,6 +73,14 @@ public class HyperWebProxy
 //        Object result = PeerCommunicator.getSingleton().sendSynchronous(globalObjectId, command);
 //        return (model.HyperWeb)result;
 //    }
+    
+    public Phase6.GlobalObjectId getGlobalObjectId(){
+        String[] parameterTypeNames = new String[0];
+        Object[] actualParameters = new Object[0];
+        Command command = new Command(globalObjectId.getLocalObjectId(), "model.HyperWeb", "getGlobalObjectId", parameterTypeNames, actualParameters, true);
+        Object result = PeerCommunicator.getSingleton().sendSynchronous(globalObjectId, command);
+        return (Phase6.GlobalObjectId)result;
+    }
 
     public NodeInterface[] getOrderedListOfNodes(){
         String[] parameterTypeNames = new String[0];
@@ -204,6 +212,15 @@ public class HyperWebProxy
         Command command = new Command(globalObjectId.getLocalObjectId(), "java.lang.Object", "hashCode", parameterTypeNames, actualParameters, true);
         Object result = PeerCommunicator.getSingleton().sendSynchronous(globalObjectId, command);
         return (Integer)result;
+    }
+    
+    public void connectGUI(GlobalObjectId guiGlobalID) {
+        final String[] parameterTypeNames = new String[1];
+        parameterTypeNames[0] = "Phase6.GlobalObjectId";
+        final Object[] actualParameters = new Object[1];
+        actualParameters[0] = guiGlobalID;
+        final Command command = new Command(globalObjectId.getLocalObjectId(), "model.HyperWeb", "addGUI", parameterTypeNames, actualParameters, false);
+        PeerCommunicator.getSingleton().sendASynchronous(globalObjectId, command);
     }
 
 }

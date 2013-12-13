@@ -1,4 +1,6 @@
 package Phase6;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
@@ -21,6 +23,15 @@ public class ProxyConstructor {
 		    result += getPublicMethods(javaClass);
 		    result += "}";
 		    System.out.println(result);
+		    PrintWriter out;
+			try {
+				out = new PrintWriter("Proxy.txt");
+				out.print(result);
+			    out.close();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}catch(Error error){
 			System.err.println(error.getMessage());
 		}catch(ClassNotFoundException exception){
@@ -283,6 +294,6 @@ public class ProxyConstructor {
     }
 	
 	public static void main(String[] args){
-		create("model.HyperwebFace");
+		create("model.HyperWeb");
 	}
 }

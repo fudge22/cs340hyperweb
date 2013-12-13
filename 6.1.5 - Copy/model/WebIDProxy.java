@@ -43,20 +43,16 @@ public class WebIDProxy
         Object result = PeerCommunicator.getSingleton().sendSynchronous(globalObjectId, command);
         return (java.lang.String)result;
     }
-//	private Object writeReplace(){
-////		create the proxy that will be returned. Possibly make it conditional
-//			if (SerializeHelp.getLiteral()) // in case sometimes we want the real thing
-//				return this;
-//			else
-//				return new WebIDProxy(gid, id);
-//		}
-		private Object readResolve(){
-//		if the object being deserialized is a proxy, but should reference to something real, than change it to a real object
-			if (SerializeHelp.getLiteral1() ||  ObjectDB.getSingleton().getValue(globalObjectId.getLocalObjectId()) == null)
-				return this;
-			else 
-				return ObjectDB.getSingleton().getValue(globalObjectId.getLocalObjectId());
-		}
+    private Object readResolve(){
+//    	if the object being deserialized is a proxy, but should reference to something real, than change it to a real object
+    		if (ObjectDB.getSingleton().getValue(globalObjectId.getLocalObjectId()) != null){
+    			return ObjectDB.getSingleton().getValue(globalObjectId.getLocalObjectId());
+    		}
+    			
+    		
+    		return this;
+    		
+    	}
 //    public int hashCode(){
 //        String[] parameterTypeNames = new String[0];
 //        Object[] actualParameters = new Object[0];
@@ -131,8 +127,5 @@ public class WebIDProxy
         Object result = PeerCommunicator.getSingleton().sendSynchronous(globalObjectId, command);
         return (Integer)result;
     }
-    
-
-
 
 }

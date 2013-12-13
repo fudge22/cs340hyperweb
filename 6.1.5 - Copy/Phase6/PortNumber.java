@@ -12,7 +12,7 @@ import java.io.Serializable;
  * <b>Class Domain:</b>
  *     DEFAULT_PORT_NUMBER : PortNumber
  *     -- Often there is only one application running on a machine.  It usually listens on this default port number.
- *     -- The current value is 49200.
+ *     -- The current value si 49200.
  *     APPLICATIONS_PORT_NUMBER : PortNumber
  *     -- The actual port number of this application is listening on.
  *     
@@ -155,6 +155,6 @@ public class PortNumber implements Serializable{
 	 * @post result = new PortNumber(49200)
 	 */
 	private static PortNumber generateDefaultPortNumber(){
-		return new PortNumber(49200);
+		return new PortNumber(8080);
 	}
 }

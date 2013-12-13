@@ -1,6 +1,5 @@
 package Phase6;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 /**
  * The IP address of this machine on the internet.<br>
@@ -35,35 +34,13 @@ public class MachineAddress {
 			System.exit(1);
 		}
 	}
-//	public static void setMachineAddress(String machineName){
-//		assert MachineAddress.machineAddress == null;
-//		try{
-//			MachineAddress.machineAddress = InetAddress.getByName(machineName);
-//		}catch(Exception e){
-//			System.err.println("ERROR in MachineAddress::setMachineAddress(String):" +
-//					           "    Machine name is not a valid machineName");
-//			System.exit(1);
-//		}
-//	}
+	
 	/**
 	 * Returns this machines InetAddress.  The return result is null if the machineAddress has not been set yet.
 	 * @pre None
 	 * @result = machineAddress
 	 */
 	public static InetAddress getThisMachinesInetAddress(){
-		
-		if (machineAddress != null){
-			return machineAddress;
-		}
-		else{
-			
-			try {
-				return InetAddress.getLocalHost();
-			} catch (UnknownHostException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		return null;
+		return machineAddress;
 	}
 }

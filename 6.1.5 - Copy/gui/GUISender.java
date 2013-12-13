@@ -1,8 +1,7 @@
 package gui;
 
-import java.io.Serializable;
-
 import exceptions.VisitorException;
+
 import gui.Main.GUI;
 import visitor.Parameters;
 import visitor.SendVisitor;
@@ -18,12 +17,7 @@ import model.Node;
  * 		<b>Domain:</b> <i>None</i>
  * </pre>
  */
-public class GUISender extends SendVisitor implements Serializable {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -1458576380127424123L;
-
+public class GUISender extends SendVisitor {
 	/**
 	 * The default constructor. It does nothing but call the superclass's default constructor.
 	 * 
@@ -37,7 +31,6 @@ public class GUISender extends SendVisitor implements Serializable {
 	
 	public GUISender(int startNode) throws VisitorException {
 		super(startNode);
-		
 	}
 
 	/**
@@ -58,8 +51,6 @@ public class GUISender extends SendVisitor implements Serializable {
 
 	@Override
 	public void send(int endNode)  throws VisitorException{
-		System.out.println("params: " + parameters.get("message"));
-
 		super.send(endNode);
 	}
 	
@@ -74,10 +65,8 @@ public class GUISender extends SendVisitor implements Serializable {
 	 */
 	protected void targetOperation(Node node, Parameters parameters) {
 		//NodeListing nodeListing = main.getHyPeerWebDebugger().getMapper().getNodeListing();
-		System.out.println("trace:");
-		Thread.currentThread().dumpStack();
+		
 		String outputString = "Target Node = " + node.getWebID().getValue() + ", message = '" + parameters.get("message") + "'.\n";
-		System.out.println(parameters);
 		String previous = (String) parameters.get("pathString") + outputString;
 		parameters.set("finalString", previous);
 		//HyperWeb myWeb = HyperWeb.getHyPeerWeb();

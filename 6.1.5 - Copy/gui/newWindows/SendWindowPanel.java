@@ -77,10 +77,8 @@ public class SendWindowPanel
     	try {
 			GUISender myVisit = new GUISender(endNode);
 			myVisit.addParameter("message", message);
-			
 			String output = gui.GUIface.sendSend(myVisit, startNode);
-			System.out.println("Output: " + output);//currently getting null as the answer
-			//HyperWeb myWeb = gui.GUIface.getHyperwebSingleton();
+			HyperWeb myWeb = gui.GUIface.getHyperwebSingleton();
 			GUI myGui = GUI.getSingleton();
 			myGui.printToTracePanel(output);
 		} catch (VisitorException e) {

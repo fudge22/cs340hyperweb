@@ -30,23 +30,17 @@ import model.WebID;
 public class JoinWindowPanel
 	extends JPanel
 {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -2789642773282035956L;
 	protected GUI main;
 	protected JLabel HostLabel;
 	protected JLabel PortLabel;
 	protected JTextField Host;
     protected JTextField Port;
     protected JButton joinButton;
-    protected JoinWindow jw;
-    
-    public JoinWindowPanel(GUI main, JoinWindow joinWindow) {
+
+    public JoinWindowPanel(GUI main) {
         //super(new GridBagLayout());
     	super(new GridLayout(2, 1));
     	this.main = main;
-    	jw = joinWindow;
     	
     	HostLabel = new JLabel("Host");
     	PortLabel = new JLabel("Port");
@@ -92,14 +86,13 @@ public class JoinWindowPanel
     private void sendButtonPressed(){
     
     	String host = this.Host.getText();
-    	int port = Integer.parseInt(this.Port.getText());
+    	int port;
     	//now I need to create the hyperwebFace object to connect the gui to to the other process
     	//GUIface.getSingleton().setHyperwebConnection(host, port);
-    	PortNumber newPort = new PortNumber(port);
-		GlobalObjectId hyperwebID = new GlobalObjectId(host, newPort, new LocalObjectId(-2147483648));
-		
-    	GUI.getSingleton().addHyperWeb(new HyperwebFaceProxy(hyperwebID));
-    	GUIface.getSingleton().setDestination(hyperwebID);
+    	
+//		GlobalObjectId hyperwebID = new GlobalObjectId(host, newPort, new LocalObjectId(-2147483648));
+//		
+//    	GUI.getSingleton().addHyperWeb(new HyperwebFaceProxy(new GlobalObjectId(hyperwebID)));
 //    	GUI.getSingleton().addHyperWeb(HyperwebFace.getSingleton());
   
 //    	NodeListing nodeListing = main.getHyPeerWebDebugger().getMapper().getNodeListing();
@@ -112,7 +105,26 @@ public class JoinWindowPanel
 //			nodeListing.increaseListSize();
 //			
 //		}
-    	 	
-    	jw.dispose();
+    	
+        try {
+            port = Integer.parseInt(this.Port.getText());
+        }
+        catch (Exception e) {
+            port = 3000;
+        }
+        
+        if (host == "")
+        {
+            host = "127.0.0.1";
+        }
+        
+        if (main.getCurrentSegment() == null) {
+        	main.setCurrentSegment(new GlobalObjectId(host,new PortNumber(port),new LocalObjectId(-100)));
+        }
+        
+        main.connectToSegment();
+        
+        main.printToTracePanel("\nConnecting to HyPeerWeb segment.");
+//        main.getHyPeerWebDebugger().getStandardCommands().closeJoinSessionWindow();
     }
 }

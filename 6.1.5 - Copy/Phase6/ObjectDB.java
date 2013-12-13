@@ -1,7 +1,6 @@
 package Phase6;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
@@ -11,9 +10,6 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Random;
-
-import model.HyperWeb;
-import model.SerializeHelp;
 
 /**
  * A persistent list of all identifiable objects in an application.  While this implementation retrieves the
@@ -259,20 +255,15 @@ public class ObjectDB { //A Singleton
         if(destination != null){
              fileLocation = destination;
         }
-        
-		File f = new File(fileLocation);
-		f.getParentFile().mkdirs();
     	try{
-    		SerializeHelp.makeLiteral1();
     		ObjectOutputStream oos =
     			new ObjectOutputStream(
     				new BufferedOutputStream(
-    					new FileOutputStream(f)));
+    					new FileOutputStream(fileLocation)));
     		oos.write(LocalObjectId.getNextId());
     		oos.writeObject(hashTable);
     		oos.flush();
     		oos.close();
-    		SerializeHelp.release1();
     	} catch(Exception e){
     		System.err.println("In communicator.ObjectDB::save(String) -- ERROR could not save ObjectDB");
     	}		
@@ -307,7 +298,6 @@ public class ObjectDB { //A Singleton
              fileLocation = source;
         }
     	try{
-    	SerializeHelp.makeLiteral1();
     		ObjectInputStream ois =
     			new ObjectInputStream(
     				new BufferedInputStream(
@@ -316,7 +306,6 @@ public class ObjectDB { //A Singleton
     		LocalObjectId.setNextId(nextId);
     		hashTable = (Hashtable<LocalObjectId, Object>)ois.readObject();
     		ois.close();
-    		SerializeHelp.release1();
     	} catch(Exception e){
     		LocalObjectId.setNextId(LocalObjectId.INITIAL_ID);
     		hashTable = new Hashtable<LocalObjectId, Object>();

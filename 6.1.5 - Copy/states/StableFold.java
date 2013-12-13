@@ -97,14 +97,14 @@ public class StableFold extends FoldState implements Serializable{
 			Node fold = (Node) d.getFold();
 			Node parent = (Node) d.getParent();
 			
-			if (d.getWebId() == 1)
+			if (d.getWebID().equals(new WebID(1)))
 			{
 			    fold.setFoldID(null);
 			    
 				return;
 			}
 			
-			if (d.getWebId() == 0)
+			if (d.getWebID().equals(new WebID(0)))
 				return;
 			
 			if (parent.getFoldState() instanceof StableFold){

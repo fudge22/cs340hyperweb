@@ -43,7 +43,6 @@ public class ServerThread extends Thread {
 	 */
 	public ServerThread(Socket clientSocket) {
 	    client = clientSocket;
-	    
 	    try {
 	        ois = new ObjectInputStream(client.getInputStream());
 	        oos = new ObjectOutputStream(client.getOutputStream());
@@ -65,16 +64,11 @@ public class ServerThread extends Thread {
 	 * is returned to remote PeerCommunicator.
 	 */
 	public void run() {
-		System.out.println("run");
 	    Command command = null;
 	    try {
 	        command = (Command) ois.readObject();
-	        System.out.println("command");
-	        System.out.println(command);
 	        if(command.isSynchronous()){
-	        	
 	            Object result = command.execute();
-	            System.out.println("synchronous");
 	            oos.writeObject(result);
 	            oos.flush();
 	            oos.close();
@@ -84,11 +78,10 @@ public class ServerThread extends Thread {
 	            oos.close();
 		        ois.close();
 	            client.close();
-	            System.out.println("asynchronous");
 	            command.execute();
 	        }
 	    } catch(Exception e) {
-	    	  e.printStackTrace();
+	    	  
 	    }       
 	}
 }

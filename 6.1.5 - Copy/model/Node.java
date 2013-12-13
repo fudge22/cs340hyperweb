@@ -2,7 +2,6 @@ package model;
 
 
 import java.io.Serializable;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,9 +10,6 @@ import java.util.Random;
 import java.util.Set;
 
 import Phase6.GlobalObjectId;
-import Phase6.LocalObjectId;
-import Phase6.ObjectDB;
-import Phase6.PortNumber;
 import database.Database;
 import simulation.NodeInterface;
 import states.*;
@@ -41,9 +37,9 @@ public class Node implements NodeInterface, Serializable {
 	private WebID foldID;
 	private WebID surrogateFoldID;
 	private WebID invSurrogateFoldID;
-	private ArrayList<WebID> neighbors;
-	private ArrayList<WebID> surNeighbors;
-	private ArrayList<WebID> invSurNeighbors;
+	private List<WebID> neighbors;
+	private List<WebID> surNeighbors;
+	private List<WebID> invSurNeighbors;
 	private FoldState foldState;
 	
 	// state manager variables
@@ -65,8 +61,8 @@ public class Node implements NodeInterface, Serializable {
 	
 	// constructors
 	public Node(WebID webID, int height, WebID foldID, WebID surrogateFoldID,
-				WebID invSurrogateFoldID,ArrayList<WebID> neighbors,ArrayList<WebID> surNeighbors, 
-				ArrayList<WebID> invSurNeighbors, Set<WebID> selfDown, Set<WebID> neighborDown, 
+				WebID invSurrogateFoldID, List<WebID> neighbors, List<WebID> surNeighbors, 
+				List<WebID> invSurNeighbors, Set<WebID> selfDown, Set<WebID> neighborDown, 
 				Set<WebID> doubleNeighborDown, Set<WebID> selfUp, Set<WebID> neighborUp, 
 				Set<WebID> doubleNeighborUp, Set<WebID> lowerNeighbors, Set<WebID> higherNeighbors,
 				WebID currentChild, int foldStateInt, int downStateInt, int upStateInt) {
@@ -199,27 +195,27 @@ public HashSet<WebID> getAllUpRelations(){ // made for validaing up pointers
 		this.invSurrogateFoldID = invSurrogateFoldID;
 	}
 
-	public ArrayList<WebID> getNeighborList() {
+	public List<WebID> getNeighborList() {
 		return neighbors;
 	}
 
-	public void setNeighborList(ArrayList<WebID> neighbors) {
+	public void setNeighborList(List<WebID> neighbors) {
 		this.neighbors = neighbors;
 	}
 
-	public ArrayList<WebID> getSurNeighborList() {
+	public List<WebID> getSurNeighborList() {
 		return surNeighbors;
 	}
 
-	public void setSurNeighborList(ArrayList<WebID> surNeighbors) {
+	public void setSurNeighborList(List<WebID> surNeighbors) {
 		this.surNeighbors = surNeighbors;
 	}
 
-	public ArrayList<WebID> getInvSurNeighborList() {
+	public List<WebID> getInvSurNeighborList() {
 		return invSurNeighbors;
 	}
 
-	public void setInvSurNeighborList(ArrayList<WebID> invSurNeighbors) {
+	public void setInvSurNeighborList(List<WebID> invSurNeighbors) {
 		this.invSurNeighbors = invSurNeighbors;
 	}
 
@@ -565,24 +561,7 @@ public HashSet<WebID> getAllUpRelations(){ // made for validaing up pointers
 		if (this.height == 0) {
 			return null;
 		}
-		
-		//I need to run through the list of neighbors
-		int childid = ((int) Math.pow(2, this.height)) | webID.getValue();
-		
-		
-		//TODO: make sure this is good, I added it to make sure it grabbed a valid webID
-		//update: turns out this is actually creating a new web id... 
-		return new WebID(childid);
-//		for (WebID w:this.getNeighborList()){
-//			
-//			if (w.getValue() == childid){
-//				return w;
-//				
-//			}
-//		}
-		
-		
-		
+		return new WebID(((int) Math.pow(2, this.height)) | webID.getValue());
 	}
 	
 	// assume height has already been decremented/incremented
@@ -592,38 +571,15 @@ public HashSet<WebID> getAllUpRelations(){ // made for validaing up pointers
 			return null;
 		}
 		
-		//TODO: changed to make sure web id's are valid and have gid
-		int childid = ((int) Math.pow(2, this.height-1)) ^ webID.getValue();
-		if (childid == 0) {
+		WebID id = new WebID(((int) Math.pow(2, this.height-1)) ^ webID.getValue());
+		if (id.getValue() == 0) {
 			return null;
 		}
-		for (WebID w:this.getNeighborList()){
-			
-			if (w.getValue() == childid){
-				return w;
-				
-			}
-		}
-		
-		
-		
-		
-		return null;
+		return id;
 	}
 
 	public WebID getParentNodeID() {
-		int childid = this.webID.getValue() ^ Integer.highestOneBit(this.webID.getValue());
-		
-		//TODO: changed to make sure web id's are valid and have gid
-
-		for (WebID w:this.getNeighborList()){
-			
-			if (w.getValue() == childid){
-				return w;
-				
-			}
-		}
-		return null;
+		return new WebID(this.webID.getValue() ^ Integer.highestOneBit(this.webID.getValue()));
 	}
 
 	
@@ -632,23 +588,14 @@ public HashSet<WebID> getAllUpRelations(){ // made for validaing up pointers
 	 * --------------------------------------------------------------
 	 */
 	public void updateAllNeighborTypes() {
-		WebID neighborID = null;
-		WebID surNeighborID = null;
+		WebID neighborID;
+		WebID surNeighborID;
 
 		for (int i = 0; i < this.height; i++) {
 			// flip one bit of the checking node's webID to get a neighborID
-			int neighborInt = this.webID.getValue() ^ ((int) Math.pow(2, i));
-			
-			for (WebID w:this.getNeighborList()){
-				
-				if (w.getValue() == neighborInt){
-					neighborID = w;
-					
-				}
-			}
-			
+			neighborID = new WebID(this.webID.getValue() ^ ((int) Math.pow(2, i)));
 
-			if (neighborID != null && neighborID.getNode() != null) {
+			if (neighborID.getNode() != null) {
 				this.addNeighbor(neighborID);
 			} else {
 				// the parent node neighbor will never be null, so we can get the parents of the
@@ -656,18 +603,8 @@ public HashSet<WebID> getAllUpRelations(){ // made for validaing up pointers
 				// because of the above condition, I'm assuming every neighborID that makes
 				// it to this point will begin with a 1 and have the same number of bits as the
 				// this.webID; therefore XOR the highest bit to cancel it
-//				Node neighbor = new Node(neighborID, this.height);
-				int surNeighborInt = neighborID.getValue() ^ Integer.highestOneBit(this.webID.getValue());
-				
-				for (WebID w:this.getNeighborList()){
-					
-					if (w.getValue() == surNeighborInt){
-						surNeighborID = w;
-						
-					}
-				}
-				
-				
+				Node neighbor = new Node(neighborID, this.height);
+				surNeighborID = neighbor.getParentNodeID();
 				if (surNeighborID.getNode() != null) {
 					this.addSurNeighbor(surNeighborID);
 				}
@@ -678,7 +615,6 @@ public HashSet<WebID> getAllUpRelations(){ // made for validaing up pointers
 	
 	public void updateNeighborHeightRelations() {
 		Node neighbor;
-		System.out.println("update");
 		for (WebID neighborID : this.getNeighborList()) {
 			neighbor = neighborID.getNode();
 			// after increase from add - child will only have equal neighbors and 
@@ -1087,7 +1023,7 @@ public HashSet<WebID> getAllUpRelations(){ // made for validaing up pointers
 	 * @param startNone	the node that we are sending the command from
 	 * @param endNode	the node that will be recieving the command from the start node 
 	 */
-	public Node sendFirstNode(int end) {
+	public Node sendFirstNode(WebID endNode) {
 		//compare the closeness of a neighbor of the start node, and the fold of the node
 		WebID foldID = this.getFoldID();
 		if(foldID == null) {
@@ -1101,8 +1037,8 @@ public HashSet<WebID> getAllUpRelations(){ // made for validaing up pointers
 		}
 		
 		//compare the two webIDs for which one will get us closer to the final node
-		int commonFoldID = foldID.getNumberBitsInCommon(end);
-		int commonNeighborID = neighborID.getNumberBitsInCommon(end);
+		int commonFoldID = foldID.getNumberBitsInCommon(endNode);
+		int commonNeighborID = neighborID.getNumberBitsInCommon(endNode);
 		
 		if(commonNeighborID > commonFoldID) {
 			//go through the neighbors
@@ -1129,10 +1065,10 @@ public HashSet<WebID> getAllUpRelations(){ // made for validaing up pointers
 	 * @param startNode
 	 * @param endNode
 	 */
-	public Node sendNode(int endNode) {
+	public Node sendNode(WebID endNode) {
 		//Check to see if we have arrived at the end node
 		System.out.println("Start node: " + this.getWebId());
-		System.out.println("End node: " + endNode);
+		System.out.println("End node: " + endNode.toString());
 		
 		int closestID = 0;
 		WebID closestWebID = null;
@@ -1190,23 +1126,4 @@ public HashSet<WebID> getAllUpRelations(){ // made for validaing up pointers
 	public void accept(BroadcastVisitor broadcastVisitor) {
 		broadcastVisitor.broadcast(this);
 	}
-	
-	
-	private Object writeReplace(){
-//		create the proxy that will be returned. Possibly make it conditional
-			if (SerializeHelp.getLiteral1()) // in case sometimes we want the real thing
-			{
-				return this;
-			}
-			else{
-				return new NodeProxy(gid);
-			}
-		}
-		private Object readResolve(){
-//		if the object being deserialized is a proxy, but should reference to something real, than change it to a real object
-			if (SerializeHelp.getLiteral1() ||  ObjectDB.getSingleton().getValue(gid.getLocalObjectId()) == null)
-				return this;
-			else 
-				return ObjectDB.getSingleton().getValue(gid.getLocalObjectId());
-		}
 }

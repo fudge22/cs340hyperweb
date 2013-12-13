@@ -1,6 +1,5 @@
 package visitor;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,11 +7,7 @@ import java.util.Map;
  * Parameters includes a map of <String, Integer> that maps from a WebID to a number.
  *
  */
-public class Parameters implements Serializable{
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -9088319845003774588L;
+public class Parameters {
 	Map<String, Object> map;
 	
 	/**

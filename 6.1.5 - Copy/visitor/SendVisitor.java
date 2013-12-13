@@ -1,26 +1,20 @@
 package visitor;
 
-import java.io.Serializable;
-
 import exceptions.VisitorException;
 import exceptions.WebIDException;
 import model.Node;
 import model.WebID;
 
-public class SendVisitor extends Visitor implements Serializable{
+public class SendVisitor extends Visitor{
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -2076072666454135605L;
-	public   int targetID;
+	protected static WebID targetID;
 	protected Parameters parameters;
 	
 	/**
 	 * default constructor, sets the end node to zero
 	 */
 	public SendVisitor(){
-		targetID = 0;
+		targetID = new WebID(0);
 		parameters = new Parameters();
 		parameters.set("targetID", targetID);
 	}
@@ -34,7 +28,7 @@ public class SendVisitor extends Visitor implements Serializable{
 	public SendVisitor(int endID) throws VisitorException {
 		try {
 			parameters = new Parameters();
-			targetID = endID;
+			targetID = new WebID(endID);
 			parameters.set("targetID", targetID);
 		} catch (WebIDException e) {
 			badInputOperation();
@@ -56,15 +50,12 @@ public class SendVisitor extends Visitor implements Serializable{
 			throw new VisitorException();
 		}
 		Node start = startID.getNode();
-//		if (targetID == null)
-//			System.out.println("target id is null...");
-//		if(start == null || targetID.getNode() == null) {
-//			badInputOperation();
-//			throw new VisitorException();
-//		}
+		if(start == null || targetID.getNode() == null) {
+			badInputOperation();
+			throw new VisitorException();
+		}
 		parameters.set("Start", start);
 		visit(start, parameters);
-		
 	}
 	
 	/**
@@ -74,7 +65,7 @@ public class SendVisitor extends Visitor implements Serializable{
 	 * @return 	the parameters that will be sent across the hyPeerWeb
 	 */
 	public Parameters createInitialParameters(int target){
-		targetID = target;
+		targetID = new WebID(target);
 		parameters = new Parameters();
 		parameters.set("TargetID", targetID);
 		return parameters;
@@ -90,7 +81,7 @@ public class SendVisitor extends Visitor implements Serializable{
 	 * @param newParameters = the parameters we want to send across the hypeerweb
 	 */
 	public void visit(Node node, Parameters newParameters)  {
-		if(node.getWebID().getValue() == targetID) {
+		if(node.getWebID().equals(targetID)) {
 			targetOperation(node, this.parameters);
 		} else {
 			intermediateOperation(node, this.parameters);
@@ -100,7 +91,7 @@ public class SendVisitor extends Visitor implements Serializable{
 	}
 	
 	public void secondVisit(Node node) {
-		if(node.getWebID().getValue() ==targetID) {
+		if(node.getWebID().equals(targetID)) {
 			targetOperation(node, this.parameters);
 		} else {
 			intermediateOperation(node, this.parameters);
@@ -126,7 +117,7 @@ public class SendVisitor extends Visitor implements Serializable{
 	 */
 	protected void intermediateOperation(Node node, Parameters parameters){
 		System.out.println("Visiting node " + node.getWebId() + " through vistor pattern and " + 
-				"trying to get to node " + targetID);
+				"trying to get to node " + targetID.toString());
 	}
 	
 	/**

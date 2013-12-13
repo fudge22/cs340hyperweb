@@ -1,7 +1,5 @@
 package model;
 
-import java.util.ArrayList;
-
 import visitor.BroadcastVisitor;
 import visitor.Contents;
 import visitor.Parameters;
@@ -35,18 +33,6 @@ public class NodeProxy
 //        Object result = PeerCommunicator.getSingleton().sendSynchronous(globalObjectId, command);
 //        return (Integer)result;
 //    }
-    private Object readResolve(){
-//		if the object being deserialized is a proxy, but should reference to something real, than change it to a real object
-			if ( ObjectDB.getSingleton().getValue(gid.getLocalObjectId()) == null){
-//				SerializeHelp.release();
-				return this;
-			}
-			else {
-//				SerializeHelp.release();
-				return ObjectDB.getSingleton().getValue(gid.getLocalObjectId());
-			}
-			
-		}
 
     public int compareTo( Node p0){
         String[] parameterTypeNames = new String[1];
@@ -92,12 +78,12 @@ public class NodeProxy
         return (java.util.HashSet)result;
     }
 
-    public  ArrayList<WebID> getInvSurNeighborList(){
+    public  java.util.List getInvSurNeighborList(){
         String[] parameterTypeNames = new String[0];
         Object[] actualParameters = new Object[0];
         Command command = new Command(globalObjectId.getLocalObjectId(), "model.Node", "getInvSurNeighborList", parameterTypeNames, actualParameters, true);
         Object result = PeerCommunicator.getSingleton().sendSynchronous(globalObjectId, command);
-        return (ArrayList<WebID>)result;
+        return (java.util.List)result;
     }
 
     public model.WebID getInvSurrogateFoldID(){
@@ -185,43 +171,43 @@ public class NodeProxy
         PeerCommunicator.getSingleton().sendASynchronous(globalObjectId, command);
     }
 
-    public  ArrayList<WebID> getNeighborList(){
+    public  java.util.List getNeighborList(){
         String[] parameterTypeNames = new String[0];
         Object[] actualParameters = new Object[0];
         Command command = new Command(globalObjectId.getLocalObjectId(), "model.Node", "getNeighborList", parameterTypeNames, actualParameters, true);
         Object result = PeerCommunicator.getSingleton().sendSynchronous(globalObjectId, command);
-        return (ArrayList<WebID>)result;
+        return (java.util.List)result;
     }
 
-    public void setNeighborList( ArrayList<WebID> p0){
+    public void setNeighborList( java.util.List p0){
         String[] parameterTypeNames = new String[1];
-        parameterTypeNames[0] = " java.util.ArrayList";
+        parameterTypeNames[0] = " java.util.List";
         Object[] actualParameters = new Object[1];
         actualParameters[0] = p0;
         Command command = new Command(globalObjectId.getLocalObjectId(), "model.Node", "setNeighborList", parameterTypeNames, actualParameters, false);
         PeerCommunicator.getSingleton().sendASynchronous(globalObjectId, command);
     }
 
-    public  ArrayList<WebID> getSurNeighborList(){
+    public  java.util.List getSurNeighborList(){
         String[] parameterTypeNames = new String[0];
         Object[] actualParameters = new Object[0];
         Command command = new Command(globalObjectId.getLocalObjectId(), "model.Node", "getSurNeighborList", parameterTypeNames, actualParameters, true);
         Object result = PeerCommunicator.getSingleton().sendSynchronous(globalObjectId, command);
-        return (ArrayList<WebID>)result;
+        return (java.util.List)result;
     }
 
-    public void setSurNeighborList( ArrayList<WebID> p0){
+    public void setSurNeighborList( java.util.List p0){
         String[] parameterTypeNames = new String[1];
-        parameterTypeNames[0] = " java.util.ArrayList";
+        parameterTypeNames[0] = " java.util.List";
         Object[] actualParameters = new Object[1];
         actualParameters[0] = p0;
         Command command = new Command(globalObjectId.getLocalObjectId(), "model.Node", "setSurNeighborList", parameterTypeNames, actualParameters, false);
         PeerCommunicator.getSingleton().sendASynchronous(globalObjectId, command);
     }
 
-    public void setInvSurNeighborList( ArrayList<WebID> p0){
+    public void setInvSurNeighborList( java.util.List p0){
         String[] parameterTypeNames = new String[1];
-        parameterTypeNames[0] = " java.util.ArrayList";
+        parameterTypeNames[0] = " java.util.List";
         Object[] actualParameters = new Object[1];
         actualParameters[0] = p0;
         Command command = new Command(globalObjectId.getLocalObjectId(), "model.Node", "setInvSurNeighborList", parameterTypeNames, actualParameters, false);

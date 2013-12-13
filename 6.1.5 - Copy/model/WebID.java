@@ -3,7 +3,6 @@ package model;
 import java.io.Serializable;
 
 import Phase6.GlobalObjectId;
-import Phase6.ObjectDB;
 import exceptions.WebIDException;
 
 public class WebID implements Serializable{
@@ -15,7 +14,6 @@ public class WebID implements Serializable{
 	private GlobalObjectId gid;
 	int id;
 	
-	
 	public WebID(int id) {
 		
 		if (id < 0) {
@@ -24,26 +22,31 @@ public class WebID implements Serializable{
 		this.id = id;
 		gid = new GlobalObjectId();
 	}
-
-	private Object writeReplace(){
-//	create the proxy that will be returned. Possibly make it conditional
-		if (SerializeHelp.getLiteral1()) // in case sometimes we want the real thing
-			return this;
-		else
-			return new WebIDProxy(gid, id);
+	public WebID(int id, int i) {
+		
+		if (id < 0) {
+			throw new WebIDException();
+		}
+		this.id = id;
 	}
-	private Object readResolve(){
-//	if the object being deserialized is a proxy, but should reference to something real, than change it to a real object
-		if (SerializeHelp.getLiteral1() ||  ObjectDB.getSingleton().getValue(gid.getLocalObjectId()) == null)
-			return this;
-		else 
-			return ObjectDB.getSingleton().getValue(gid.getLocalObjectId());
-		
-			
-		
-		
-		
-	}
+//	
+//	private Object writeReplace(){
+////	create the proxy that will be returned. Possibly make it conditional
+//		if (false) // in case sometimes we want the real thing
+//			return this;
+//		else
+//			return new WebIDProxy(gid, id);
+//	}
+//	private Object readResolve(){
+////	if the object being deserialized is a proxy, but should reference to something real, than change it to a real object
+//		if (ObjectDB.getSingleton().getValue(gid.getLocalObjectId()) != null){
+//			return ObjectDB.getSingleton().getValue(gid.getLocalObjectId());
+//		}
+//			
+//		
+//		return this;
+//		
+//	}
 	public static long getSerialversionuid() {
 		return serialVersionUID;
 	}
@@ -101,19 +104,7 @@ public class WebID implements Serializable{
 
 		return count;
 	}
-	public int getNumberBitsInCommon( int w){
-		int a = this.id ^ w;
-		String binString = Integer.toBinaryString(a);
-		String pad = "";
-		for (int x = 0; x< 32 - binString.length(); x++){
-			pad += "0";
-		}
-		String countNum = pad + binString;
-		
-		int count = countNumZero(countNum);
-
-		return count;
-	}
+	
 	public Node getNode()
 	{
 		return HyperWeb.getSingleton().getNode(this);

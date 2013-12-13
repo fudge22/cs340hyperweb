@@ -17,22 +17,12 @@ public class GUIface {
 	private static LocalObjectId localObjectId;
 	private static String HyperwebHostName;
 	private static String HyperwebPortNumber;
-	private GlobalObjectId hyperwebID;
 	
-	private GUIface() {
+	
+	public GUIface() {
 		globalObjectId = new GlobalObjectId();
 		localObjectId = new LocalObjectId();
-//		myHyperwebTest = HyperwebFace.getSingleton();
-		//		myHyperwebTest = HyperwebFace.getSingleton();
-
-//		PortNumber newPort = new PortNumber(8080);
-//		hyperwebID = new GlobalObjectId("128.187.80.130", newPort, new LocalObjectId(-2147483648));
-		
-		
-		
-		myHyperwebTest = new HyperwebFaceProxy(hyperwebID);
-		
-		
+		myHyperwebTest = HyperwebFace.getSingleton();
 	}
 	
 	public static GUIface getSingleton() {
@@ -43,12 +33,6 @@ public class GUIface {
 		return GUIfaceSingleton;
 	}
 	
-	public void setDestination(GlobalObjectId g){
-		hyperwebID = g;
-		myHyperwebTest = new HyperwebFaceProxy(hyperwebID);
-
-		
-	}
 	public static Node sendAdd() {
 		getSingleton();
 		return myHyperwebTest.receiveAdd();
@@ -61,23 +45,22 @@ public class GUIface {
 	
 	public static Node sendDelete() {
 		getSingleton();
-		return myHyperwebTest.receiveDelete();
+		return myHyperwebTest.recieveDelete();
 	}
 	
 	public static Node sendDelete(int i) {
 		getSingleton();
-		return myHyperwebTest.receiveDelete(i);
+		return myHyperwebTest.recieveDelete(i);
 	}
 	
 	public static String sendSend(GUISender myVisit, int endNode) {
 		getSingleton();
-		
-		return myHyperwebTest.receiveSend(myVisit, endNode);
+		return myHyperwebTest.recieveSend(myVisit, endNode);
 	}
 	
 	public static String sendBroadcast(SendBroadcast myCast, int startNode) {
 		getSingleton();
-		return myHyperwebTest.receiveBroadcast(myCast, startNode);
+		return myHyperwebTest.recieveBroadcast(myCast, startNode);
 	}
 	
 	public void sendClose() {
@@ -86,7 +69,7 @@ public class GUIface {
 
 	public static HyperWeb getHyperwebSingleton() {
 		getSingleton();
-		return myHyperwebTest.receiveSingleton();
+		return myHyperwebTest.recieveSingleton();
 	}
 
 	public void setHyperwebConnection(String host, int port) {

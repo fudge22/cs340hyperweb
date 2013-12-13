@@ -190,7 +190,7 @@ public class StandardCommands extends JPanel
 			Node newNode = gui.GUIface.sendAdd();
 //			try {
 //				newNode = main.getHyPeerWeb().addNode();
-//			} catch (HyperWebException e) {f
+//			} catch (HyperWebException e) {
 //				debugger.getStatus().setContent("Probelm adding a node to the hyPeerWeb");
 //				return;
 //			}
@@ -265,6 +265,11 @@ public class StandardCommands extends JPanel
 	public void broadcastButtonPressed() {
 		broadcastWindow = new BroadcastWindow(main, "Broadcast Message");
 	}
+	
+	public void closeJoinSessionWindow()
+    {
+        join.dispose();
+    }
 
 
 }

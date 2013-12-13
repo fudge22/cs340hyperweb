@@ -50,7 +50,7 @@ public class PeerCommunicator
      * before "PeerCommunicator". For instance, if this is in the package x.y.z the parameter "PeerCommunicator" would become "x.y.z.PeerCommunicator".
      * This should be the same package name in all instantiations of PeerCommunicator on any machine.
 	 */
-	private static Command NO_OP = new Command(null, "Phase6.PeerCommunicator", "noop", new String[0], new Object[0], false);
+	private static Command NO_OP = new Command(null, "PeerCommunicator", "noop", new String[0], new Object[0], false);
 
 	/**
 	 * The GlobalObjectId of the PeerCommunicator. The port number of this GlobalObjectId is the port number the PeerCommunicator will listen on.
@@ -61,7 +61,7 @@ public class PeerCommunicator
 	/**
 	 * The socket this PeerCommunicator is listening on.
 	 */
-    public ServerSocket serverSocket;
+    private ServerSocket serverSocket;
     
     /**
      * The variable indicating whether this PeerCommunicator (a long running process) should stop.
@@ -78,7 +78,6 @@ public class PeerCommunicator
     private PeerCommunicator() {
     	try{
     		String myIPAddress = InetAddress.getLocalHost().getHostAddress();
-    		System.out.println("address: " + myIPAddress);
        	    myGlobalObjectId = new GlobalObjectId(myIPAddress, PortNumber.DEFAULT_PORT_NUMBER, null);
     	    serverSocket = new ServerSocket(myGlobalObjectId.getPortNumber().getValue());
         	this.start();
@@ -98,8 +97,6 @@ public class PeerCommunicator
     	try{
     		String myIPAddress = InetAddress.getLocalHost().getHostAddress();
        	    myGlobalObjectId = new GlobalObjectId(myIPAddress, port, null);
-    		System.out.println("address: " + myIPAddress);
-
        	    serverSocket = new ServerSocket(myGlobalObjectId.getPortNumber().getValue());
         	this.start();
     	} catch(Exception e){
@@ -134,7 +131,7 @@ public class PeerCommunicator
      */
     public static void stopConnection(GlobalObjectId globalObjectId){
     	Command command = 
-    		new Command(null, "Phase6.PeerCommunicator", "stopThisConnection", new String[0], new Object[0], false);
+    		new Command(null, "PeerCommunicator", "stopThisConnection", new String[0], new Object[0], false);
     	singleton.sendASynchronous(globalObjectId, command);
     }
     
@@ -163,9 +160,7 @@ public class PeerCommunicator
         while(!stop) {
           try {
            Socket client = serverSocket.accept();
-           System.out.println("client thread" + client.getLocalAddress());
            ServerThread serverThread = new ServerThread(client);
-           System.out.println(1);
            serverThread.start();
           } catch(Exception e) {
         	  System.err.println(e.getMessage());
@@ -230,7 +225,6 @@ public class PeerCommunicator
 	 */
     public Object sendSynchronous(GlobalObjectId globalObjectId, Command command)
     {
-    	System.out.println(command);
         ObjectOutputStream oos = null;
         ObjectInputStream ois = null;
         Object result = null;
@@ -271,7 +265,6 @@ public class PeerCommunicator
 	 * @post The command is executed on the remote object.  No result is returned.
 	 */
     public void sendASynchronous(GlobalObjectId globalObjectId, Command command) {
-    	System.out.println(command);
         ObjectOutputStream oos = null;
         ObjectInputStream ois = null;
         try {

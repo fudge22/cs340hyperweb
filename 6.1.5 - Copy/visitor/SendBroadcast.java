@@ -1,7 +1,5 @@
 package visitor;
 
-import java.io.Serializable;
-
 import exceptions.VisitorException;
 import model.Node;
 import model.WebID;
@@ -10,13 +8,8 @@ import model.WebID;
  * class to add contents to a node
  *
  */
-public class SendBroadcast extends SendVisitor implements Serializable{
+public class SendBroadcast extends SendVisitor{
 	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -1085078077771459991L;
-
 	public SendBroadcast(){
 		super();
 	}

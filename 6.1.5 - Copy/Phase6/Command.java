@@ -1,7 +1,5 @@
 package Phase6;
 
-import gui.GUISender;
-
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
@@ -128,7 +126,6 @@ public class Command
 	public Object execute(){
 		Object result = null;
 		try{
-			System.out.println("class name: " + className);
 			Class<?> targetClass = getClass(className);
 			Class<?>[] parameterTypes = new Class<?>[parameterTypeNames.length];
 			for(int i = 0; i < parameterTypeNames.length; i++){
@@ -138,22 +135,14 @@ public class Command
 			Object target = null;
 			if(localObjectId != null){
 			    target = ObjectDB.getSingleton().getValue(localObjectId);
-			    if (target == null){
-			    	System.out.println("target was null");
-
-			    	ObjectDB.getSingleton().dump();
-			    }
 			}
 			if(isSynchronous){
 				result = method.invoke(target, actualParameters);
-				
-
 			} else {
 				method.invoke(target, actualParameters);
 			}
 		}catch(Throwable t){
 			result = t;
-			t.printStackTrace();
 		}
 		return result;
 	}
