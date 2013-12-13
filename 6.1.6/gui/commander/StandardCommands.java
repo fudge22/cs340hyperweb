@@ -1,0 +1,270 @@
+package gui.commander;
+
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+import exceptions.HyperWebException;
+import model.HyperWeb;
+import model.Node;
+import model.WebID;
+import gui.Main.GUI;
+import gui.Main.HyPeerWebDebugger;
+import gui.mapper.NodeListing;
+import gui.newWindows.BroadcastWindow;
+import gui.newWindows.JoinWindow;
+import gui.newWindows.SendWindow;
+/**
+ * Standard Commands are a basic set of commands that are needed to test a HyPeerWeb.  A open command line is available which may allow for more specific commands as is appropriate.
+ * @author Matthew Smith
+ * 
+ * @domain Buttons - Actions taken on the HyPeerWeb
+ * @domain Command Bar - Use of embedded functions to affect the HyPeerWeb
+ *
+ */
+public class StandardCommands extends JPanel 
+{
+	/* Root of the GUI */
+	private GUI main;
+	
+	/* Container for tha Command Field and Execute Button */
+	private JPanel fieldPanel;
+	
+	/* Command Field for inputed Commands */
+	//private JTextField commandField;
+	
+	/* Button to execute a command in the command Field */
+	//private JButton executeButton;
+	
+	/* Conatainer for all basic command buttons */
+	private JPanel buttonPanel;
+	
+	/* Basic buttons commands */
+	private JButton insertNode, removeNode, sendNode, broadcastNode; 
+	
+	/* List nodes to display as targets */
+	private Object[] nodeList;
+	
+	SendWindow sendWindow = null;
+	BroadcastWindow broadcastWindow = null;
+	JoinWindow join = null;
+	
+	/**
+	 * Creates and intailizes the panel of basic commands as well as gathers a list of nodes
+	 * 
+	 * @param main - root of the GUI
+	 */
+	public StandardCommands(GUI main) {
+		this.main = main;
+		
+		init();
+		
+		updateList();
+	}
+	
+	public SendWindow getSendWindow(){
+		return sendWindow;
+	}
+	
+	public BroadcastWindow getBroadcastWindow(){
+		return broadcastWindow;
+	}
+	
+	public JoinWindow getJoinWindow(){
+		return join;
+	}
+	
+	public void setSendWindowToNull(){
+		sendWindow = null;
+	}
+	
+	public void setBroadcastWindowToNull(){
+		broadcastWindow = null;
+	}
+	
+	public void setJoinWindowToNull() {
+		join = null;
+	}
+	
+	/**
+	 * Initializes and sets up the GUI objects of the Class
+	 */
+	public void init()	{
+		this.setLayout(new BorderLayout());
+		
+		//Build the open command Area
+		fieldPanel = new JPanel(new BorderLayout());
+
+		//Build the Basic Button Area
+		buttonPanel = new JPanel(new GridLayout(1,4));
+		
+		//Build the insert button
+		insertNode = new JButton("(+) Insert Node");
+		insertNode.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				insertButtonPressed();				
+			} });
+		insertNode.setMnemonic(KeyEvent.VK_ADD);
+		buttonPanel.add(insertNode);
+		
+		//Build the remove button
+		removeNode = new JButton("(-) Delete Node");
+		removeNode.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				removeButtonPressed();				
+			} });
+		removeNode.setMnemonic(KeyEvent.VK_SUBTRACT);
+		buttonPanel.add(removeNode);
+		
+		//Build the send button
+		sendNode = new JButton("Send Message");
+		sendNode.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				sendButtonPressed();				
+			} });
+		sendNode.setMnemonic(KeyEvent.VK_S);
+		buttonPanel.add(sendNode);
+		
+		//Build the broadcast button
+		broadcastNode = new JButton("Broadcast");
+		broadcastNode.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				broadcastButtonPressed();				
+			} });
+		broadcastNode.setMnemonic(KeyEvent.VK_B);
+		buttonPanel.add(broadcastNode);
+		
+		add(buttonPanel, BorderLayout.SOUTH);
+//		NodeListing nodeListing = main.getHyPeerWebDebugger().getMapper().getNodeListing();
+//		DefaultListModel listModel = nodeListing.getNodeListModel();
+//
+//		
+//		for (WebID key : HyperWeb.getSingleton().nodes.keySet()) { //added to import
+//			listModel.addElement(key);
+//			nodeListing.increaseListSize();
+//			
+//		}
+	}
+	
+	/**
+	 * Gathers information of the nodes in the HyPeerWeb and stores them in a list of Nodes
+	 */
+	public void updateList()
+	{
+		nodeList = new Object[30];
+		for(int i = 0 ; i <30; i++){
+			nodeList[i]= Integer.toBinaryString(i);
+		}
+	}
+	
+	/**
+	 * Inserts a Node into the HyPeerWeb
+	 */
+	public void insertButtonPressed()	{
+		//TODO Phase 5 -- Add functionality for inserting a node.
+		//I. Get the size of the "nodeListing" component.
+		NodeListing nodeListing = main.getHyPeerWebDebugger().getMapper().getNodeListing();
+		HyPeerWebDebugger debugger = main.getHyPeerWebDebugger();
+		//II. If the size is greater than or equal to the max number of nodes allowed in a NodeListing (see constant in class NodeListing) 
+		if(nodeListing.listSize() >= nodeListing.MAX_NUMBER_OF_NODES){
+			//print an error in the the "debugStatus" component.
+			debugger.getStatus().setContent("ERROR: The hyperweb has reached the max amount of nodes allowed for the GUI.");
+			return;
+		}
+		//III.Otherwise
+	    //		A. Create a new node
+		//		B. Get the id of the startNode from the HyPeerWeb using the selected index of the nodeListing component.
+		//      C. If no node with the webId is found print an error in the "debugStatus" component.
+		//      D. If a node is found it is the start node.  If so then
+		//              1. invoke your "addToHyPeerWeb" command on the startNode passing in the new node created previously.
+		//				2. Increase the nodeListing size (See the NodeListing class for details).
+		else{
+			Node newNode = gui.GUIface.sendAdd();
+//			try {
+//				newNode = main.getHyPeerWeb().addNode();
+//			} catch (HyperWebException e) {f
+//				debugger.getStatus().setContent("Probelm adding a node to the hyPeerWeb");
+//				return;
+//			}
+			if(newNode == null) {
+				debugger.getStatus().setContent("Probelm adding a node to the hyPeerWeb");
+				return;
+			}
+			
+			DefaultListModel listModel = nodeListing.getNodeListModel();
+			
+			
+			
+			listModel.addElement(newNode.getWebId());
+			nodeListing.increaseListSize();
+			
+			
+			
+			
+		}
+	}
+	
+	/**
+	 *  Removes a node from the HyPeerWeb
+	 */
+	public void removeButtonPressed() {
+		//TODO Phase 5 -- Add functionality for removing a node.
+		//I. Get the size of the "nodeListing" component.
+		NodeListing nodeListing = main.getHyPeerWebDebugger().getMapper().getNodeListing();
+		HyPeerWebDebugger debugger = main.getHyPeerWebDebugger();
+		//II. If the size equals 1, print an error in the the "debugStatus" component.
+		if(nodeListing.listSize() == 1) {
+			debugger.getStatus().setContent("ERROR: The hyperweb has reached the min amount of nodes allowed for deletion.");
+			return;
+		} else {
+			//III. Otherwise
+			//		A. Get the id of the startNode from the HyPeerWeb using the selected index of the nodeListing component.
+			//      B. If no node with the id is found, print an error in the "debugStatus" component.
+			//      C. Otherwise:
+			//      	1. invoke your "removeFromHyPeerWeb" command on the node to be deleted.
+			//			2. Decrease the nodeListing size (See the NodeListing class for details).
+			Node deleteNode = null;
+			deleteNode = gui.GUIface.sendDelete();
+			if(deleteNode == null){
+				debugger.getStatus().setContent("Probelm deleting a node to the hyPeerWeb");
+				return;	
+			}
+			
+			
+//			try {
+//				deleteNode = main.getHyPeerWeb().removeNode();
+//			} catch (HyperWebException e) {
+//				debugger.getStatus().setContent("Probelm adding a node to the hyPeerWeb");
+//				return;
+//			}
+			
+			DefaultListModel listModel = nodeListing.getNodeListModel();
+			listModel.removeElement(deleteNode.getWebId());
+			nodeListing.decreaseListSize();
+		}
+	}
+	
+	/**
+	 *  Sends a message through the HyPeerWeb
+	 */
+	public void sendButtonPressed() {
+		sendWindow = new SendWindow(main, "Send Message");
+	}
+	
+	/**
+	 * Broadcasts a message through the HyPeerWeb
+	 */
+	public void broadcastButtonPressed() {
+		broadcastWindow = new BroadcastWindow(main, "Broadcast Message");
+	}
+
+
+}
